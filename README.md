@@ -16,7 +16,7 @@ $ yarn
 Start a local webserver that will pick up most changes without restarting:
 
 ```
-$ inv docs.start
+$ yarn start
 ```
 
 ## Content
@@ -37,29 +37,3 @@ Add a new post to the changelog:
    the header from an existing post and give it a nice title.
 
 2. Place any images needed by thte post in `static/img/blog/`.
-
-## Deployment
-
-We also use Invoke to deploy our documentation.
-
-### Netlify Setup
-
-The first thing you need to do is to login to Netlify in the CLI so that we can
-push the site.
-
-```
-# Login to Netlify (will generate a ~/.netlify/config.json file)
-$ yarn netlify login
-```
-
-### Deploy the docs
-
-This will build and publish the documentation to Netlify.
-
-```
-$ inv docs.publish
-```
-
-> If you don't see it update automatically, you may need to navigate to
-> https://app.netlify.com/sites/memfault-docs/deploys and manually click
-> "Deploy" to actually publish the changes.
