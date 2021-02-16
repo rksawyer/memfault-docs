@@ -46,6 +46,7 @@ $ cd ${YOUR_APP_ROOT_DIRECTORY}
 $ mkdir -p components/memfault_port/config
 $ echo $'COMPONENT_ADD_INCLUDEDIRS := config\n' > components/memfault_port/component.mk
 $ touch components/memfault_port/memfault_port.c
+$ touch components/memfault_port/config/memfault_platform_config.h
 $ touch components/memfault_port/config/memfault_metrics_heartbeat_config.def
 $ touch components/memfault_port/config/memfault_trace_reason_user_config.def
 $ git submodule add https://github.com/memfault/memfault-firmware-sdk.git \
@@ -58,6 +59,7 @@ When done, you should see the following directory structure:
 components/memfault_port/
 ├── component.mk
 ├── config
+│   ├── memfault_platform_config.h
 │   ├── memfault_metrics_heartbeat_config.def
 │   └── memfault_trace_reason_user_config.def
 ├── memfault-firmware-sdk
