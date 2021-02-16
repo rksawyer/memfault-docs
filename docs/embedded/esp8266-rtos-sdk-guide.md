@@ -91,7 +91,7 @@ There are two small updates to make to the ESP8266 RTOS SDK. These can be added
 using git apply:
 
 ```bash
-$ cd ${ESP8266_RTOS_SDK}
+$ cd ${IDF_PATH}
 $ git apply ${MEMFAULT_FIRMWARE_SDK}/ports/esp8266_sdk/esp8266_v33_rtos.patch
 ```
 
