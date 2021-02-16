@@ -34,7 +34,7 @@ your system!
 ## Integration Steps
 
 > :warning: This tutorial assumes you have a working
-> [ESP8266 RTOS SDK environmentt](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html)
+> [ESP8266 RTOS SDK environment](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html)
 > and are able to flash a board supported by the SDK.
 
 ### Add memfault-firmware-sdk and prepare port
