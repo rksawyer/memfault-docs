@@ -41,7 +41,7 @@ where:
   `kMfltRebootReason_Unknown` if there is no additional information to report.
 
 Putting it all together and calling
-[`memfault_reboot_tracking_boot`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/core/include/memfault/core/reboot_tracking.h#L77),
+[`memfault_reboot_tracking_boot`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/reboot_tracking.h#L77),
 we have:
 
 ```c
