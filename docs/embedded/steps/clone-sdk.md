@@ -1,4 +1,4 @@
-The `memfault-firmware-sdk` is a self contained C SDK you will need to include
+The `memfault-firmware-sdk` is a self-contained C SDK you will need to include
 into your project.
 
 Create a folder to hold `memfault-firmware-sdk` as well as the configuration and

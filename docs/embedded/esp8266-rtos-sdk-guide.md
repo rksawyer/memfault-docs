@@ -34,7 +34,7 @@ your system!
 ## Integration Steps
 
 > :warning: This tutorial assumes you have a working
-> [ESP8266 RTOS SDK environmentt](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html)
+> [ESP8266 RTOS SDK environment](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/get-started/index.html)
 > and are able to flash a board supported by the SDK.
 
 ### Add memfault-firmware-sdk and prepare port
@@ -46,6 +46,7 @@ $ cd ${YOUR_APP_ROOT_DIRECTORY}
 $ mkdir -p components/memfault_port/config
 $ echo $'COMPONENT_ADD_INCLUDEDIRS := config\n' > components/memfault_port/component.mk
 $ touch components/memfault_port/memfault_port.c
+$ touch components/memfault_port/config/memfault_platform_config.h
 $ touch components/memfault_port/config/memfault_metrics_heartbeat_config.def
 $ touch components/memfault_port/config/memfault_trace_reason_user_config.def
 $ git submodule add https://github.com/memfault/memfault-firmware-sdk.git \
@@ -58,6 +59,7 @@ When done, you should see the following directory structure:
 components/memfault_port/
 ├── component.mk
 ├── config
+│   ├── memfault_platform_config.h
 │   ├── memfault_metrics_heartbeat_config.def
 │   └── memfault_trace_reason_user_config.def
 ├── memfault-firmware-sdk
@@ -89,7 +91,7 @@ There are two small updates to make to the ESP8266 RTOS SDK. These can be added
 using git apply:
 
 ```bash
-$ cd ${ESP8266_RTOS_SDK}
+$ cd ${IDF_PATH}
 $ git apply ${MEMFAULT_FIRMWARE_SDK}/ports/esp8266_sdk/esp8266_v33_rtos.patch
 ```
 
