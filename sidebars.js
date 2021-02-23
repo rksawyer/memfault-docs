@@ -15,6 +15,8 @@ module.exports = {
             "embedded/uploading-software-versions",
             "platform/jira-integration",
             "platform/fleet-wide-metrics",
+            /* Mentions features to be released: "platform/sso", */
+            /* Mentions features to be released: "platform/api-keys", */
             /* Draft: "platform/releasing-firmware", */
             /* Note: releasing-firmware is linked from centegix impl readme */
         ],
