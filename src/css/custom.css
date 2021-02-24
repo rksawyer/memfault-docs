@@ -55,3 +55,15 @@ section.features_src-pages- {
     padding-right: 5px;
 }
 /* end of rules to hide dark mode flippper */
+
+.embed-mode .navbar,
+.embed-mode .footer,
+.embed-mode .pagination-nav,
+.embed-mode [class^="docSidebarContainer"] {
+    display: none;
+}
+
+.embed-mode main .container {
+    margin: 0;
+    max-width: 100%;
+}
