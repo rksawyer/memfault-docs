@@ -5,8 +5,33 @@ admin_path:
 webhook_url: 
 sections:
 - type: directory
-  path: docs
-  label: Docs
+  path: blog
+  label: Changelog
+  create: all
+  match: "**/*"
+- type: directory
+  path: docs/troubleshooting
+  label: Troubleshooting
+  create: all
+  match: "**/*"
+- type: directory
+  path: docs/platform
+  label: Platform
+  create: all
+  match: "**/*"
+- type: directory
+  path: docs/ci
+  label: CI
+  create: all
+  match: "**/*"
+- type: directory
+  path: docs/embedded
+  label: Embedded
+  create: all
+  match: "**/*"
+- type: directory
+  path: docs/android
+  label: Android
   create: all
   match: "**/*"
 upload_dir: static/binary-assets
