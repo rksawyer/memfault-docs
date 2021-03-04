@@ -77,9 +77,17 @@ include vendor/memfault/bort/BoardConfig.mk
 
 **You must set your project API key in the Bort app**. This is set in
 `MemfaultPackages/bort.properties`; the app will not compile without this
-property. We also recommend updating the other properties as necessary, for
+property.
+
+We also recommend updating the other properties as necessary, for
 example, updating the SDK levels to match the API level of your OS and updating
 the build tools version to what is available in your environment.
+
+If your devices will have [Google Mobile Services (GMS)](https://www.android.com/intl/en_ca/gms/)
+and must run the [Compatibility Test Suite (CTS)](https://source.android.com/compatibility/cts),
+you may need to **update the Bort target SDK version** to match the API level of your OS.
+This can be done by updating the `TARGET_SDK_VERSION` property in
+`MemfaultPackages/bort.properties`.
 
 Additional settings can be configured via the Bort SDK over-the-air
 [SDK settings](android-bort.md#features-and-configuration) system.
