@@ -34,7 +34,7 @@ sections:
   label: Android
   create: all
   match: "**/*"
-upload_dir: static/img
+upload_dir: static/binary-assets
 public_path: "/binary-assets"
 front_matter_path: ''
 use_front_matter_path: false
