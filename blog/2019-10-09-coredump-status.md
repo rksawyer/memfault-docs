@@ -1,7 +1,7 @@
 ---
 title: Status Updates
----
 
+---
 ## Coredump Processing Status
 
 Easily know which coredumps were recently uploaded, if they experienced any
@@ -13,5 +13,4 @@ errors, and which Issue they were attached to.
 
 ## Last Seen Updated Fixes
 
-Memfault will now set the "Last Seen" field when it receives a coredump from a
-device.
+Memfault will now set the "Last Seen" field when it receives a coredump from a device. Previously this was only updated when metrics and events were received.
