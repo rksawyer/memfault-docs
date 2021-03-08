@@ -66,5 +66,7 @@ Uploaded bug reports are _always_ scrubbed server-side, filtering traces and
 scrubbing logs based on the configured rules described above.
 
 The same rules are fetched by the Bort SDK (v3.4.0 or newer) and used to filter
-Caliper traces and scrubs logs on-device. The data scrubbing rules are fetched
-by Bort periodically (by default, once every 24h).
+Caliper traces and scrubs logs on-device. The rules are synchronized to the
+devices using the
+[Over the Air Settings system](https://docs.memfault.com/docs/android/android-bort#features-and-configuration),
+so they can be updated at any time using the Memfault dashboard.
