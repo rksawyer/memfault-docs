@@ -186,6 +186,7 @@ INFO: out/dist/path-to-ota-user.zip: uploaded!
 INFO: You can view in the UI here:
     <Link to Release in UI>
 ```
+
 :::
 
 ### Deploy Release
