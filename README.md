@@ -1,5 +1,7 @@
 # Memfault Docusaurus
 
+*Docs are auto-deployed when you commit to master (merge a PR!)* If the deploy fails, netlify will roll back to the previous version
+
 ![static/img/memfault-docusaurus.png](static/img/memfault-docusaurus.png)
 
 Our docs are built using [Docusaurus 2](https://v2.docusaurus.io/), a static
