@@ -24,6 +24,14 @@ Start a local webserver that will pick up most changes without restarting:
 $ yarn start
 ```
 
+## Linter
+
+Code is linted with prettier. To fix up files to match format, run:
+
+```
+$ ./node_modules/.bin/prettier --write path/to/file.mdx
+```
+
 ## Content
 
 Add a new page to the docs:
