@@ -189,9 +189,17 @@ module.exports = {
         [
             "@docusaurus/plugin-content-blog",
             {
-                id: "embed",
-                routeBasePath: "embed",
-                path: "./embed",
+                id: "embed-android",
+                routeBasePath: "embed/android",
+                path: "./embed/android",
+            },
+        ],
+        [
+            "@docusaurus/plugin-content-blog",
+            {
+                id: "embed-embedded",
+                routeBasePath: "embed/embedded",
+                path: "./embed/embedded",
             },
         ],
     ],
