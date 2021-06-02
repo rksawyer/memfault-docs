@@ -15,10 +15,11 @@ module.exports = {
     onBrokenMarkdownLinks: "throw",
     projectName: "memfault-firmware-sdk", // Usually your repo name.
     themeConfig: {
-        algolia: {
-            apiKey: "0ef3936beda1a4d57af35bd5917462b2",
-            indexName: "memfault",
-        },
+        // WIP: configuring the crawler
+        // algolia: {
+        // apiKey: "0ef3936beda1a4d57af35bd5917462b2",
+        // indexName: "memfault",
+        // },
         gtag: {
             trackingID: "G-R5JYJ06TDJ",
             anonymizeIP: true,
