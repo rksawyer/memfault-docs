@@ -38,9 +38,9 @@ module.exports = {
                     position: "left",
                 },
                 {
-                    to: "docs/embedded/introduction",
-                    activeBasePath: "docs/embedded",
-                    label: "Embedded",
+                    to: "docs/mcu/introduction",
+                    activeBasePath: "docs/mcu",
+                    label: "MCU",
                     position: "left",
                 },
                 {
@@ -198,9 +198,9 @@ module.exports = {
         [
             "@docusaurus/plugin-content-blog",
             {
-                id: "embed-embedded",
-                routeBasePath: "embed/embedded",
-                path: "./embed/embedded",
+                id: "embed-mcu",
+                routeBasePath: "embed/mcu",
+                path: "./embed/mcu",
             },
         ],
     ],
