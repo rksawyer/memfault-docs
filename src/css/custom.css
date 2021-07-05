@@ -25,7 +25,7 @@
         Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont,
         "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji",
         "Segoe UI Emoji", "Segoe UI Symbol";
-    --ifm-color-primary: #25c8d4;
+    --ifm-color-primary: #49b4a7;
     --ifm-color-primary-dark: rgb(33, 175, 144);
     --ifm-color-primary-darker: rgb(31, 165, 136);
     --ifm-color-primary-darkest: rgb(26, 136, 112);
@@ -36,20 +36,60 @@
 }
 
 .docusaurus-highlight-code-line {
-    background-color: rgb(72, 77, 91);
-    display: block;
+    /* A translucent white background on top of the background works with any background */
+    background-color: rgba(255, 255, 255, 0.07);
+    /* Make the line highlight reach the end of the container */
     margin: 0 calc(-1 * var(--ifm-pre-padding));
     padding: 0 var(--ifm-pre-padding);
 }
 
-.hero
-    .button.button--secondary.button--outline:not(.button--active):not(:hover) {
-    color: var(--ifm-hero-text-color);
+html[data-theme="dark"] .hero--primary {
+    background-color: var(--ifm-background-color);
+    color: #ffffff;
 }
 
-.footer.footer--dark {
-    background-color: #011246;
-    color: #677190;
+html[data-theme="light"]
+    .button.hero__get-started-button:not(.button--active):not(:hover) {
+    color: #ffffff;
+}
+
+html[data-theme="light"] .DocSearch {
+    --docsearch-primary-color: var(--ifm-color-primary);
+    --docsearch-text-color: var(--ifm-font-color-base);
+    --docsearch-muted-color: var(--ifm-color-secondary-darkest);
+    --docsearch-container-background: rgba(94, 100, 112, 0.7); /* Modal */
+    --docsearch-modal-background: var(
+        --ifm-color-secondary-lighter
+    ); /* Search box */
+    --docsearch-searchbox-background: var(--ifm-color-secondary);
+    --docsearch-searchbox-focus-background: var(--ifm-color-white); /* Hit */
+    --docsearch-hit-color: var(--ifm-font-color-base);
+    --docsearch-hit-active-color: var(--ifm-color-white);
+    --docsearch-hit-background: var(--ifm-color-white); /* Footer */
+    --docsearch-footer-background: var(--ifm-color-white);
+}
+
+html[data-theme="dark"] .DocSearch {
+    --docsearch-text-color: var(--ifm-font-color-base);
+    --docsearch-muted-color: var(--ifm-color-secondary-darkest);
+    --docsearch-container-background: rgba(47, 55, 69, 0.7); /* Modal */
+    --docsearch-modal-background: var(--ifm-background-color); /* Search box */
+    --docsearch-searchbox-background: var(--ifm-background-color);
+    --docsearch-searchbox-focus-background: var(--ifm-color-black); /* Hit */
+    --docsearch-hit-color: var(--ifm-font-color-base);
+    --docsearch-hit-active-color: var(--ifm-color-white);
+    --docsearch-hit-background: var(--ifm-color-emphasis-100); /* Footer */
+    --docsearch-footer-background: var(--ifm-background-surface-color);
+    --docsearch-key-gradient: linear-gradient(
+        -26.5deg,
+        var(--ifm-color-emphasis-200) 0%,
+        var(--ifm-color-emphasis-100) 100%
+    );
+}
+
+.admonition code {
+    color: var(--ifm-alert-color);
+    background-color: rgba(0, 0, 0, 0.25);
 }
 
 /* TODO remove this margin when the home page images are inserted */
@@ -57,18 +97,7 @@ section.features_src-pages- {
     margin-top: 20px;
 }
 
-/* TODO these rules hide the dark mode flipper.  remove them when styling
-   of the /api pages is fixed for dark mode. */
-.navbar .react-toggle-track,
-.navbar .react-toggle-thumb,
-.navbar .input {
-    display: none;
-}
-.navbar .navbar__items--right .navbar__link {
-    padding-right: 5px;
-}
-/* end of rules to hide dark mode flippper */
-
+/* Begin embed mode rules: hide stuff that doesn't need to be in iframes */
 .embed-mode .navbar,
 .embed-mode .footer,
 .embed-mode .pagination-nav,
@@ -86,8 +115,4 @@ section.features_src-pages- {
     margin: 0;
     max-width: 100%;
 }
-
-.admonition code {
-    color: var(--ifm-alert-color);
-    background-color: rgba(0, 0, 0, 0.25);
-}
+/* End embed mode rules */
