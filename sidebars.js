@@ -27,6 +27,7 @@ module.exports = {
                 items: [
                     "mcu/arm-cortex-m-guide",
                     "mcu/nrf-connect-sdk-guide",
+                    "mcu/pinnacle-100-guide",
                     "mcu/esp32-guide",
                     "mcu/esp8266-rtos-sdk-guide",
                 ],
