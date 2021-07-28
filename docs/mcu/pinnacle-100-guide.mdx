@@ -46,12 +46,12 @@ your system!
 This tutorial assumes you have a working environment for building the
 [Pinnacle 100 Firmware](https://github.com/LairdCP/Pinnacle-100-Firmware-Manifest)
 (such as an an application based on the
-[AWS Out-of-Box (OOB) Demo](https://github.com/LairdCP/Pinnacle-100-Firmware/blob/main/docs/readme_ltem_aws.md#building-the-firmware)).
+[AWS Out-of-Box Demo](https://github.com/LairdCP/Pinnacle-100-Firmware/blob/main/docs/readme_ltem_aws.md#building-the-firmware)).
 
 ## Create a Memfault Account
 
 The integration requires a Memfault cloud account to process data collected by
-the memfault-firmware-sdk. You can create one
+the Memfault Firmware SDK. You can create one
 [for free from here](https://goto.memfault.com/create-key/pinnacle-100)!
 
 ## Update Kconfig selections in prj.con {#kconfig-section}
@@ -70,7 +70,7 @@ CONFIG_MEMFAULT_NCS_FW_TYPE="pinnacle-fw"
 
 ### HTTPS
 
-The integration will automatically push data to Memfault over HTTPS when a LTE
+The integration will automatically push data to Memfault over HTTPS when an LTE
 connection becomes available prior to connecting to AWS IoT allowing one to
 immediately get information about unexpected resets as well as debug any
 connectivity issues with AWS IoT.
@@ -85,9 +85,9 @@ prod/<board>/<device_id>/memfault/<memfault_project_key>/chunk
 ```
 
 Forwarding data to Memfault from AWS IoT is very easy! You just need to
-configure an AWS IoT Rule for the topic and connect it to a AWS Lambda function.
-This can either be done manually in the AWS console or programmatically using
-CloudFormation.
+configure an AWS IoT Rule for the topic and connect it to an AWS Lambda
+function. This can either be done manually in the AWS console or
+programmatically using CloudFormation.
 
 <ProjectAwareTabs
   defaultValueFn={details => "cloudformation" }
@@ -173,13 +173,14 @@ Resources:
 
           exports.handler = (event, context, callback) => {
             const data = Buffer.from(event.data, 'base64');
+            // Topic Format: prod/<board>/<device_id>/memfault/<memfault_project_key>/chunk
             const topicParams = event.topic.split('/')
-            let device_serial = topicParams[2]
+            const deviceSerial = topicParams[2]
 
             const options = {
               hostname: 'chunks.memfault.com',
               port: 443,
-              path: `/api/v0/chunks/${device_serial}`,
+              path: `/api/v0/chunks/${deviceSerial}`,
               method: 'POST',
               headers: {
                 'Content-Type': 'application/octet-stream',
@@ -257,13 +258,14 @@ exports.https = https;
 
 exports.handler = (event, context, callback) => {
   const data = Buffer.from(event.data, "base64");
+  // Topic Format: prod/<board>/<device_id>/memfault/<memfault_project_key>/chunk
   const topicParams = event.topic.split("/");
-  let device_serial = topicParams[2];
+  const deviceSerial = topicParams[2];
 
   const options = {
     hostname: "chunks.memfault.com",
     port: 443,
-    path: `/api/v0/chunks/${device_serial}`,
+    path: `/api/v0/chunks/${deviceSerial}`,
     method: "POST",
     headers: {
       "Content-Type": "application/octet-stream",
@@ -297,8 +299,9 @@ Next you will need to create a new
 SELECT encode(*, 'base64') AS data, topic() AS topic FROM 'prod/+/+/memfault/#'
 ```
 
-Finally, as part of the setup you will need to connect the Lambda you just
-created to it so data is forwarded appropriately!
+Finally, as part of the setup you will need to attach the Lambda you just
+created to the AWS IoT rule so that the lambda gets triggered each time new data
+arrives.
 
    </TabItem>
    </ProjectAwareTabs>
