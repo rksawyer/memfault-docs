@@ -37,6 +37,7 @@ module.exports = {
                 label: "Subsystem Guides",
                 items: [
                     "mcu/coredumps",
+                    "mcu/compact-logs",
                     "mcu/reboot-reason-tracking",
                     "mcu/metrics-api",
                     "mcu/trace-events",

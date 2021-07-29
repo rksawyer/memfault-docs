@@ -1,0 +1,114 @@
+---
+id: compact-logs
+title: Enable Compact Logs
+sidebar_label: Compact Logs
+---
+
+This tutorial will cover how to enable the compact log feature in the
+[Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk). When
+Compact logging is enabled, format strings will be replaced with an integer id
+at compile time. When the log is captured only the arguments and integer id will
+be serialized and sent to the Memfault cloud where the full format string will
+be recovered.
+
+This has several key benefits:
+
+- Reduces storage for logs on device
+- Reduces required bandwidth to send logs to Memfault cloud
+- Reduces CPU overhead for storing logs by offloading printf
+
+## Example
+
+Today, once enabled, compact logs will be used when capturing
+[trace events](/docs/mcu/trace-events) with logs.
+
+Let's take a look at a quick example:
+
+```c
+MEMFAULT_TRACE_EVENT_WITH_LOG("QSPI Flash Erase Failure: error code: 0x%x", 0x5);
+```
+
+With a formatted string we need to encode the string length as well as the
+entire string in our binary message taking up 41 bytes
+
+```
+00000000: 5153 5049 2046 6c61 7368 2045 7261 7365  QSPI Flash Erase
+00000010: 2046 6169 6c75 7265 3a20 6572 726f 7220   Failure: error
+00000020: 636f 6465 3a20 3078 35                   code: 0x5
+```
+
+where as with a compact log we need to encode a integer id and the arguments to
+be serialized which in this example takes a total of 5 bytes
+
+```
+00000000: 8218 8805                                ....
+```
+
+So in this example we are able to reduce the storage occupied by 88%!
+
+## Integration Steps
+
+### 1. Enable `MEMFAULT_COMPACT_LOG_ENABLE`
+
+Add the following to your projects `memfault_platform_config.h`:
+
+```c
+//! @file memfault_platform_config.h
+
+#define MEMFAULT_COMPACT_LOG_ENABLE 1
+```
+
+### 2. Add a log fmt section to your linker script
+
+Locate the linker script for your project (usually ends with `.ld`) and add the
+following to your linker script
+
+```
+    log_fmt 0xF0000000 (INFO):
+    {
+       KEEP(*(*.log_fmt_hdr))
+       KEEP(*(log_fmt))
+    }
+
+```
+
+## FAQ
+
+### How do I fix "## operator not supported" compiler error?
+
+Once enabled, if you see the following compiler error:
+
+```
+memfault/core/compiler_gcc.h:73:45: error: static assertion failed: "## operator not supported, enable gnu extensions on your compiler"
+ #  define MEMFAULT_STATIC_ASSERT(cond, msg) _Static_assert(cond, msg)
+```
+
+Compact logging uses a
+[GNU Compiler extension](https://gcc.gnu.org/onlinedocs/gcc/Variadic-Macros.html#Variadic-Macros)
+which will remove the leading comma in `, ## __VA_ARGS__` if `__VA_ARGS__` is
+empty. This particular extension has been implemented in most other modern
+compilers including ARM Compiler 5, Clang & iccarm. All you need to do is make
+sure you have enabled gnu extensions for your compiler of choice.
+
+For GCC, this can be accomplished by adding `-std=gnu11` as an argument to your
+compiler flag list
+
+### I'm seeing an incorrect pointer value when trying to use the %p formatter.
+
+When the `%p` format is used _and_ the argument is typed as a `char *` or
+`char []`, it must be cast to a `void *`. If it is not cast, a string will be
+serialized instead and an incorrect pointer value will be displayed in the
+Memfault UI.
+
+Here's an example of correct usage:
+
+```c
+// No cast necessary for pointer types that are not strings
+int i = 0;
+uint32_t *int_ptr =  &i;
+MEMFAULT_TRACE_EVENT_WITH_LOG("String Pointer: %p", int_ptr);
+
+// Cast necessary when pointer type is a string
+const char *str = "hello world";
+MEMFAULT_TRACE_EVENT_WITH_LOG("String Pointer: %p", (void *)str);
+```
