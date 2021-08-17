@@ -3,7 +3,7 @@
 
 # Memfault Docusaurus
 
-_Docs are auto-deployed when you commit to master (merge a PR!)_ If the deploy fails, netlify will roll back to the previous version
+_Docs are auto-deployed when you commit to `main` (merge a PR!)_ If the deploy fails, netlify will roll back to the previous version.
 
 ![static/img/memfault-docusaurus.png](static/img/memfault-docusaurus.png)
 
