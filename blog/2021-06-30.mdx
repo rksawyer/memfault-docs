@@ -1,0 +1,87 @@
+---
+title: June 2021
+---
+
+## Nordic nRF Connect SDK Memfault Integration
+
+Nordic Semiconductor's nRF Connect SDK now has Memfault's SDK built-in, allowing
+for customers and users of Nordic's chips and tools to integrate and use
+Memfault in minutes.
+
+<p align="center">
+  <img width="600" src="/img/blog/2021-06-30-nordic-partnership.png" />
+</p>
+
+Check out our
+[press release](https://memfault.com/news/monitoring-debugging-and-updating-nordic-powered-iot-products-made-easy-with-device-observability-platform-partnership/)
+for more information!
+
+As for new Memfault features, we made improvements to symbol-file uploading and
+downloading, added favorite projects, and sped everything up a bit.
+
+<!-- truncate -->
+
+## General
+
+- Memfault can now surface which Devices are staged (will receive an update) in
+  a staged rollout. To determine which of your Devices are staged, navigate to
+  **Fleet -> Deployments** and click on **Devices** on a staged rollout
+  Deployment.
+
+  <p align="center">
+    <img width="500" src="/img/blog/2021-06-30-staged-devices.gif" />
+  </p>
+
+- You can now upload missing symbol files directly from the "_Unprocessed
+  Traces_" dialog. If the Software Version is a development version and the
+  alert can be ignored, you can also click **Archive** to archive the version
+  directly.
+
+  <p align="center">
+    <img width="500" src="/img/blog/2021-06-30-upload-archive-symbols.gif" />
+  </p>
+
+- Improve handling around Issue timestamps to prevent historical or future dates
+  from being set as attributes of the Issue. This could happen when a device's
+  clock was set to January 1970 or the year 2099!
+- Symbol files and coredumps can now be downloaded directly from the Issue page,
+  which means no more having to bounce between the Software and Issue pages.
+
+  <p align="center">
+    <img width="300" src="/img/blog/2021-06-30-download-elf-issues.gif" />
+  </p>
+
+- For customers with 5+ projects, you can now set a project as a "Favorite" and
+  it will be automatically loaded when you go to app.memfault.com.
+
+  <p align="center">
+    <img width="300" src="/img/blog/2021-06-30-favorite-projects.png" />
+  </p>
+
+- Improved the performance when paging between "next" and "previous" Traces on
+  an Issue.
+- Improved the performance of the Reboot and Metrics charts.
+
+## MCU
+
+- Trace Events that were created by Software Versions which has been archived,
+  will now be hidden.
+- When there is an active interrupt on a Trace, the backtrace is automatically
+  expanded for discoverability.
+- Reduced code space utilized by metric subsystem by transitioning from a string
+  representation of metric names to an enum representation.
+- Removed "DST Root CA X3" from the required Memfault root certificate list as
+  there is no infrastructure that relies on it anymore.
+- Fixed an issue where MCU logs could fail if a timestamp was included.
+- For more details on the changes to the Firmware SDK that didn't make the
+  changelog, check out the
+  [Memfault Firmware SDK changelog](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md).
+
+## Android
+
+- Initial support for Android 11 was added to the Bort SDK.
+- Fixed a problem where BatteryStat-based system metrics stop being collected if
+  the battery was fully charged and still plugged.
+- For more details on the changes to the Android Bort SDK that didn't make the
+  changelog, check out the
+  [Memfault Bort SDK changelog](https://github.com/memfault/bort/blob/master/CHANGELOG.md).

@@ -1,0 +1,142 @@
+---
+title: July 2021
+---
+
+## Compact Logs in Memfault's Firmware SDK
+
+Memfault's Firmware SDK now includes support for what we are calling "Compact
+Logs". It is similar to Zephyr's
+[dictionary-based-logging](https://docs.zephyrproject.org/latest/reference/logging/index.html#dictionary-based-logging)
+and a few other implementations in other RTOS's, but we think we've hit the
+perfect balance of performance, features, ease-of-use, and size compression.
+
+Let's walk through a quick example of what compact logs are. Here is a log line
+that a user of the Memfault SDK could write:
+
+```
+MEMFAULT_TRACE_EVENT_WITH_LOG("QSPI Flash Erase Failure: error code: 0x%x", 0x5);
+```
+
+With a generic formatted string implementation such as `printf`, we would need
+to include the entire string contents in our log buffer or storage. In total,
+this requires 41 bytes.
+
+```
+00000000: 5153 5049 2046 6c61 7368 2045 7261 7365  QSPI Flash Erase
+00000010: 2046 6169 6c75 7265 3a20 6572 726f 7220   Failure: error
+00000020: 636f 6465 3a20 3078 35                   code: 0x5
+```
+
+Once developers run out of firmware code space, a common pattern is to start
+shortening log lines or removing them entirely. We believe this is a bad
+practice! We should be able to keep our useful log lines and make the messages
+as long as necessary!
+
+This is why we created compact logs. With compact logs, every log "string" is
+placed in a special section in the ELF file and we just need to reference each
+log line with an index, or ID.
+
+For a compact log, we just need to encode an integer ID for the string portion
+and the arguments to be serialized. In this example, this information requires
+just 5 bytes.
+
+```
+00000000: 8218 8805                                ....
+```
+
+In this example, we can reduce the storage occupied by 88%! For a firmware that
+contains 100-1000 log lines, these savings are dramatic.
+
+[Check out our documentation](https://mflt.io/compact-logs) for more information
+on how to enable compact logs in your firmware.
+
+Along with compact logs, we've been busy adding more ways to filter and slice
+the data in our application and building up some exciting features related to
+Custom Events and State. More news to come next month.
+
+<!-- truncate -->
+
+## Improved Handling of Build ID's
+
+The best way to match a firmware binary to a unique symbol file is using a
+[Build ID](https://interrupt.memfault.com/blog/gnu-build-id-for-firmware), which
+is essentially a hash or signature of the binary. Memfault's Firmware SDK has
+had support for embedded a Build ID into the binary, but we never used it to
+match symbol files. Until now!
+
+On new projects that have properly embedded a Build ID into symbol files, we'll
+use this system to start pairing Issues and Traces to symbol files instead of
+the Software Version, which was brittle when developers would re-use versions
+during development.
+
+[Check out our documentation](https://mflt.io/symbol-file-build-ids) to learn
+more and start using Build ID's.
+
+## General
+
+- Memfault is frequently used within customer support teams to answer quick
+  questions about a support request, such as if and when a device last made
+  contact with the outside world. It is now possible to filter by when devices
+  last made contact with Memfault's service, making these queries trivial.
+
+  <p align="center">
+    <img
+      width="500"
+      src="/img/blog/2021-07-31-device-filtering-last-seen.png"
+    />
+  </p>
+
+- Users can now filter by "First Seen" and "Last Seen" on the Issues page. This
+  could make it easy to narrow down which Issues were created in a certain month
+  or to determine if an Issue is still present in deployed firmware.
+
+  <p align="center">
+    <img width="600" src="/img/blog/2021-07-31-first-last-seen-issues.png" />
+  </p>
+
+- During a rapid development cycle, many versions may be incidentally created in
+  Memfault. It is now possible to bulk archive both Software Types and Versions
+  by clicking on the checkboxes on the left of each list page.
+
+  <p align="center">
+    <img width="500" src="/img/blog/2021-07-31-bulk-archive-software.gif" />
+  </p>
+
+- It is now possible to merge an Issue with ones that are closed. When merging
+  an Issue, those that are closed are denoted by having "(Closed)" in their
+  title.
+
+  <p align="center">
+    <img width="500" src="/img/blog/2021-07-31-closed-issues-merge-modal.png" />
+  </p>
+
+- The number of devices in the Cohort list page is now a hyperlink that will
+  direct you to the Devices list page. This should save you a few extra clicks.
+- Within a particular Issue's Trace list, you can now filter Traces by Cohort.
+- Many of the runtime configurations of the Timeline view are now persisted in
+  the URL string, which means you can now easily share "views" with teammates
+  and bookmark them!
+
+## MCU
+
+- Support for Dialog DA1469x chip family (Huge thanks to
+  [@iandmorris](https://github.com/iandmorris) for the help here!)
+- Added a simple utility to track heap allocations, which can be automatically
+  and easily enabled on FreeRTOS! Check out
+  [`memfault/core/heap_stats.h`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/heap_stats.h)
+  for more information.
+- Added a new macro, `MEMFAULT_SOFTWARE_WATCHDOG`, which will make the issue
+  appear in Memfault with the "Watchdog" reason.
+- Use `MEMFAULT_SOFTWARE_WATCHDOG` in the Memfault Zephyr port.
+- For more details on the changes to the Firmware SDK that didn't make the
+  changelog, check out the
+  [Memfault Firmware SDK changelog](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md).
+
+## Android
+
+- Structured Logging (introduced in 3.5.0) has been renamed to Custom Events.
+- Added new metrics and Custom Events reporting the behavior and impact of the
+  Bort SDK to enable Memfault to track down any issues that may arise with Bort.
+- For more details on the changes to the Android Bort SDK that didn't make the
+  changelog, check out the
+  [Memfault Bort SDK changelog](https://github.com/memfault/bort/blob/master/CHANGELOG.md).

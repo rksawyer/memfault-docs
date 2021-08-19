@@ -1,0 +1,102 @@
+---
+title: May 2021
+---
+
+## Heartbeat Metric Improvements
+
+One of Memfault's most capable features is Metrics. With Metrics, you can
+determine how specific metrics on a single device correlate with each other to
+root cause performance and power regressions, or aggregate them on a fleet level
+and determine whether the health of your fleet of devices is improving over
+time!
+
+We're announcing new features today which should help make our metrics feature
+more usable.
+
+First, users can now view all the Metric names that have been received from
+heartbeat events in the **Settings -> Metrics** page. This allows for easy
+auditing of metric names and configrations.
+
+<p align="center">
+  <img width="600" src="/img/blog/2021-05-31-editable-metrics-2.png" />
+</p>
+
+If you find any that are stale or shouldn't be tracked anymore, you can archive
+them.
+
+When **Edit** is clicked, users can configure the valid ranges for the metric,
+which will improve the displayed charts by normalizing the Y-axis to possible
+values. An example of where this could be useful is battery life, where the min
+and max values are 0-100.
+
+Users can also specify a single value for Memfault to ignore, such as
+`0xffffffff`, which can represent the absence of a value.
+
+<p align="center">
+  <img width="400" src="/img/blog/2021-05-31-editable-metrics-1.png" />
+</p>
+
+These new features will enable developers and customer support representatives
+to more easily dig into the health of a single device and the entire fleet.
+
+That's not all though! We've made more improvements to symbol file uploading,
+bugreport filtering, and the archiving of software versions.
+
+<!-- truncate -->
+
+## General
+
+- Add a progress bar to OTA & Symbol File upload pages.
+
+  <p align="center">
+    <img width="400" src="/img/blog/2021-05-31-upload-progress.gif" />
+  </p>
+
+- Users can now click on sections within the **Software Versions** chart to
+  filter to specific devices.
+
+  <p align="center">
+    <img width="600" src="/img/blog/2021-05-31-pie-chart-device-click.gif" />
+  </p>
+
+- Improved the Software and Releases pages by adding "Archive" buttons and
+  filtering.
+
+  <p align="center">
+    <img width="600" src="/img/blog/2021-05-31-filtering-software.png" />
+  </p>
+
+- The Memfault Project Key is displayed prominently in the Settings panel and
+  can be copied with a single button click.
+- Pagination settings are remembered between pages and reloads.
+
+## MCU
+
+- Added support for collecting additional register information when a Hardfault
+  takes place when using the Zephyr port. This information will be decoded and
+  displayed in the Memfault UI in the "Exceptions" tab.
+- Support for Dialog DA145xx chip family (Huge thanks to
+  [@iandmorris](https://github.com/iandmorris) for the help here!)
+- The GNU or Memfault Build ID is now passed with each coredump captured. This
+  should allow for more reliable symbolication and easier symbol file uploads.
+- Memfault Coredumps can now be optionally saved into the OTA slot for ESP32.
+- Fixed a bug in `memfault_log_save_preformatted` which could have caused a
+  buffer overflow.
+- Fixed ESP32 backtrace when only active stack RAM is collected.
+- Hardened `memfault_http_parse_response()` utility to parse HTTP responses with
+  headers that exceed a length of 128 bytes.
+- For more details on the changes to the Firmware SDK that didn't make the
+  changelog, check out the
+  [Memfault Firmware SDK changelog](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md).
+
+## Android
+
+- Enabled filtering bugreports by the Request ID that was passed in on capture.
+
+  <p align="center">
+    <img width="600" src="/img/blog/2021-05-31-bugreport-request-id.png" />
+  </p>
+
+- For more details on the changes to the Android Bort SDK that didn't make the
+  changelog, check out the
+  [Memfault Bort SDK changelog](https://github.com/memfault/bort/blob/master/CHANGELOG.md).
