@@ -116,3 +116,14 @@ section.features_src-pages- {
     max-width: 100%;
 }
 /* End embed mode rules */
+
+/*
+ * Fix Hubspot colliding with mobile menu in the bottom right corner.
+ * https://community.hubspot.com/t5/HubSpot-Ideas/More-Chat-Widget-Styling-Options/idi-p/13806/page/5#comments
+ */
+@media (max-width: 996px) {
+    div#hubspot-messages-iframe-container {
+        bottom: 80px !important;
+        max-height: calc(100% - 80px) !important;
+    }
+}
