@@ -81,6 +81,10 @@ module.exports = {
             "android/android-releases-integration-guide",
             "android/android-data-scrubbing",
         ],
+        "Embedded Linux Guides": [
+            "linux/introduction",
+            "linux/linux-releases-integration-guide",
+        ],
         "Automation, CI & CD": [
             "ci/authentication",
             "ci/install-memfault-cli",

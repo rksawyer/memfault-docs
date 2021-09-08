@@ -1,11 +1,17 @@
 ---
-id: releases-integration-guide
-title: Releases Integration Guide
-sidebar_label: Release Management
+id: linux-releases-integration-guide
+title: Embedded Linux OTA Integration Guide
+sidebar_label: OTA / Release Management
 ---
 
-This tutorial covers how to manage your firmware over-the-air update flow with
-Memfault!
+import LinuxOtaOptionsTabs, {
+  OtaSwupdateTab,
+  OtaCustomTab,
+} from "@site/src/components/LinuxOtaOptionsTabs";
+import TabItem from "@theme/TabItem";
+
+This tutorial covers how to manage your embedded Linux over-the-air update flow
+with Memfault!
 
 ## Terminology Overview
 
@@ -59,34 +65,19 @@ change._
 
 ### Identifying Software
 
-- `Symbol File` - This is the ELF file output by an invocation of your
-  toolchain's linker. It will typically have one of the following file
-  extensions: `.elf`, `.out`, or `.axf`.
 - `Software Type` / `software_type` - A shorthand name representing a software
-  package running on your device. There is one matching "software_type" for
-  every unique "Symbol File" generated as part of your build process. For
-  example, `wifi-fw` and `main-fw`). Note for situations where a different
-  symbol file is produced per "hardware_version", you will need to name the
-  "software_types" differently. For example, if a new sensor was added between
-  `evt` and `dvt` and now the `main-fw` between the two differ, "software_type"s
-  like `main-fw-evt` & `main-fw-dvt` could be used.
+  package running on your device.
 - `Software Version` / `software_version` - Each build of a "software_type" is
-  expected to be uniquely identified by its "software_version" (i.e "1.0.0").
-  Together the "software_type" and "software_version" uniquely identify a
-  "Symbol File".
-- `Build Id` - An automatically generated identifier that is based on the
-  contents of the ELF file. See
-  [this section for more information](/docs/mcu/symbol-file-build-ids).
+  uniquely identified by its "software_version".
 
-### Identifying OTA Payload Binaries
+For more information, see our
+[Software Version](platform/software-version-hardware-version.mdx)
+documentation.
 
-- `OTA Payload` - This is the binary that you deliver to your device when
-  performing an over-the-air update. Unlike a "Symbol File", the binary may
-  contain code or assets for multiple "Software Types". For example if you have
-  an MCU for Wifi (`wifi-fw`) and another MCU for general orchestration
-  (`main-fw`), the "OTA Payload" could include updates for both bundled
-  together. In this situation your firmware would then un-package the "OTA
-  Payload" and perform the update for both MCUs.
+### Identifying Firmware Binaries
+
+- `OTA Payload` - This is the file that you deliver to your device when
+  performing an over-the-air update.
 - `Release` - For each "Release" a unique "OTA Payload" can be deployed per
   "hardware_version". A set of "hardware_version" / "OTA Payload" pairs makes up
   a "Release".
@@ -135,11 +126,28 @@ page in the Memfault UI and copy/paste the token in the "Project Key" section.
 
 ## Managing Your First Release
 
+### Create an OTA Payload
+
+<LinuxOtaOptionsTabs>
+  <TabItem value="swupdate">
+
+SWUpdate expects OTA Payloads in its own `.swu` format. Read [documentation on
+SWUpdate][3] to learn how to create `.swu` files for yor project.
+
+  </TabItem>
+  <TabItem value="custom">
+
+Any type of OTA Payload is supported by Memfault. It is the duty of your
+firmware to install the OTA Payload on the device.
+
+  </TabItem>
+</LinuxOtaOptionsTabs>
+
 ### Create Release
 
 In the commands below, please replace `${YOUR_SOFTWARE_TYPE}` with the Software
-Type this Release contains. For example, in case of an STM32 MCU we may give a
-Software Type of `stm32-fw`.
+Type this Release contains. For example, in case of a BeagleBone Black we may
+give a Software Type of `bbb-fw`.
 
 Replace `${YOUR_HARDWARE_VERSION}` with the Hardware Version that this Release
 targets. For example, when targeting the "Mass Production" hardware build, we
@@ -147,7 +155,7 @@ might use a Hardware Version of `mp`.
 
 Likewise, replace `${YOUR_SOFTWARE_VERSION}` with the Software Version that this
 Release contains. For example, in case we're releasing our first cut of our
-1.0.0 build, we might use `1.0.0-alpha` as Software Version.
+0.0.1 build, we might use `0.0.1-alpha` as Software Version.
 
 ```bash
 $ cd /dev/smartfridge/
@@ -158,12 +166,16 @@ $ memfault --org-token ${YOUR_ORG_TOKEN} \
   --hardware-version ${YOUR_HARDWARE_VERSION} \
   --software-type ${YOUR_SOFTWARE_TYPE} \
   --software-version ${YOUR_SOFTWARE_VERSION} \
-  build/stm32-fw.bin
+  build/bbb-fw.swu
 
-INFO: build/stm32-fw.bin: uploaded!
+INFO: build/bbb-fw.swu: uploaded!
 INFO: You can view in the UI here:
     <Link to Release in UI>
 ```
+
+We've uploaded `build/bbb-fw.swu` as the OTA Payload. In this example, we're
+using a SWUpdate update image (`.swu`), but Memfault supports any type of OTA
+Payload.
 
 :::note Tip
 
@@ -185,9 +197,9 @@ $ memfault upload-ota-payload \
   --hardware-version ${YOUR_HARDWARE_VERSION} \
   --software-type ${YOUR_SOFTWARE_TYPE} \
   --software-version ${YOUR_SOFTWARE_VERSION} \
-  build/stm32-fw.bin
+  build/bbb-fw.swu
 
-INFO: build/stm32-fw.bin: uploaded!
+INFO: build/bbb-fw.swu: uploaded!
 INFO: You can view in the UI here:
     <Link to Release in UI>
 ```
@@ -196,7 +208,7 @@ INFO: You can view in the UI here:
 
 ### Deploy Release
 
-Now let's deploy our `1.0.0-alpha` release to the `default` cohort.
+Now let's deploy the release to the `default` cohort.
 
 :::note
 
@@ -207,13 +219,122 @@ specific cohort check out our [api-docs](https://api-docs.memfault.com/).
 :::
 
 In the UI navigate to "Fleet" -> "Cohorts". Click on the picker under next to
-the `default` cohort under "Target Release", select `1.0.0-alpha` and you will
-be prompted with options that can be performed for the release.
+the `default` cohort under "Target Release", select the Release to deploy and
+you will be prompted with options that can be performed for the release.
 
 ### Query for OTA Payload
 
 Now that we have a release uploaded and published let's walk through the steps
 to download the release on a device!
+
+<LinuxOtaOptionsTabs>
+  <TabItem value="swupdate">
+
+Memfault supports [SWUpdate][3] as a way to update the software on an Embedded
+Linux device using its [Suricatta][4] daemon in [general-purpose HTTP server
+mode][5].
+
+Suricatta is a daemon mode of SWUpdate that runs on a device and polls a remote
+server for updates, downloads them, and installs them. It then reboots the
+system with updated software.
+
+#### Building SWUpdate to include Suricatta in general-purpose HTTP server mode
+
+Find the following options, either via `menuconfig` or by modifying `defconfig`:
+
+- `CONFIG_SURICATTA=y`: configures SWUpdate to include the Suricatta daemon in
+  the build.
+- `CONFIG_SURICATTA_GENERAL=y`: configures Suricatta to use general-purpose HTTP
+  server mode.
+- Unset `CONFIG_SURICATTA_HAWKBIT`: SWUpdate works either in general-purpose
+  HTTP server mode or in Hawkbit mode. Disable Hawkbit support.
+
+#### Configuring the Suricatta on-device daemon to use Memfault
+
+Three sections are required in the configuration file:
+
+- `globals`: contains general settings for SWUpdate that are required for the
+  daemon to start. In the example below, we've configured SWUpdate to output
+  plenty of logs. You may want to tone this down for a production build.
+- `gservice`: through which Suricatta's general-purpose HTTP server mode is
+  configured.
+- `identify`: is used to uniquely identify the device in Memfault servers, and
+  to decide whether the device is eligible for an update.
+
+The following configuration can be used as a starter. Save it in `swupdate.cfg`
+and remember to replace all the placeholders with valid values for your project
+and device:
+
+```libconfig
+globals:
+{
+        verbose = true;
+        loglevel = 6;
+        syslog = true;
+}
+
+gservice =
+{
+        url = "https://device.memfault.com/api/v0/swupdate/update";
+        logurl = "https://device.memfault.com/api/v0/swupdate/logs?mpk=$YOUR_PROJECT_KEY&id=$DEVICE_SERIAL&v=$SOFTWARE_VERSION&st=$SOFTWARE_TYPE&hw=$HARDWARE_VERSION";
+        logevent: (
+                {event = "check"; format="#1,date,fw"},
+                {event = "started"; format="#2,date,fw"},
+                {event = "success"; format="#3,date,fw"},
+                {event = "fail"; format="#4,date,fw"}
+        );
+}
+
+identify : (
+        { name = "mpk"; value = "$YOUR_PROJECT_KEY" },
+        { name = "id"; value = "$DEVICE_SERIAL" },
+        { name = "v"; value = "$SOFTWARE_VERSION" },
+        { name = "st"; value = "$SOFTWARE_TYPE" },
+        { name = "hw"; value = "$HARDWARE_VERSION" }
+);
+```
+
+:::note
+
+When SWUpdate downloads and applies your update, it will _not_ automatically
+update the `$SOFTWARE_VERSION` in this file. It is the responsibility of your
+setup to do this.
+
+:::
+
+#### Example SWUpdate invocation
+
+`swupdate -f /etc/swupdate.cfg -u "--polldelay $(shuf --input-range=14400-21600 --head-count=1)"`
+
+Assuming you've stored `swupdate.cfg` in `/etc/swupdate.cfg`, this command will
+start SWUpdate in Suricatta daemon mode and configure the daemon to poll
+Memfault servers every periodically at a random interval of between 14400 and
+21600 seconds (4 to 6 hours).
+
+#### Integration with Yocto
+
+The [`meta-memfault-swupdate-example`][6] Yocto layer is based on [SWUpdate
+documentation on building with Yocto][7] and should serve as an example of
+building your own Linux image that contains SWUpdate preconfigured to work with
+Memfault.
+
+We have prepared [a `Dockerfile`][8] that serves as an example of using
+`meta-memfault-swupdate-example` as part of a Poky build. Read more about
+`meta-memfault-swupdate-example` in [the project `README`][6].
+
+[1]: https://github.com/sbabic/meta-swupdate-boards
+[2]: https://www.yoctoproject.org/
+[3]: https://sbabic.github.io/swupdate
+[4]: https://sbabic.github.io/swupdate/suricatta.html
+[5]:
+  https://sbabic.github.io/swupdate/suricatta.html?highlight=general#support-for-general-purpose-http-server
+[6]:
+  https://github.com/memfault/memfault-yocto/tree/main/meta-memfault-swupdate-example
+[7]: https://sbabic.github.io/swupdate/building-with-yocto.html
+[8]: https://github.com/memfault/memfault-yocto/blob/main/Dockerfile.swupdate
+
+  </TabItem>
+  <TabItem value="custom">
 
 To receive an OTA Payload, a device will need to pass these REST API query
 parameters:
@@ -231,61 +352,17 @@ We can test this out from our computer to see the exact response a device will
 see. Let's assume we have the following test device:
 
 - `hardware_version`: mp
-- `software_type`: stm32fw
+- `software_type`: bbb-fw
 - `current_version`: 0.0.1
 - `device_serial`: DEMOSERIAL
 
 #### Example Response when Newer OTA Payload Available
 
-To simplify integration with deeply embedded devices that may not have a json
-parser you can use the `api/v0/releases/latest/url` endpoint to receive the url
-as a text response.
-
-```bash
-
-$ export MEMFAULT_LATEST_URL_API_ROUTE=https://device.memfault.com/api/v0/releases/latest/url
-$ curl -i -X GET \
-"${MEMFAULT_LATEST_URL_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=stm32-fw&current_version=0.0.1" \
-  --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
-
-
-HTTP/1.1 200 OK
-content-type: text/plain; charset=utf-8
-[...]
-
-https://url/to/ota/payload
-```
-
-When a new firmware has been found, you will get a HTTP response with a 200
-status code.
-
-If there are no updates available (such as when the device is already on the
-newest firmware) you will see a 204 (No Content) http status code in the
-response. We can try it out by retrying the query with `1.0.0-alpha` as the
-value for `current_version`:
-
-#### Example Response when Device is Up To Date
-
-```bash
-$ curl -i -X GET  \
-  "${MEMFAULT_LATEST_URL_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=stm32-fw&current_version=0.0.1" \
-  --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
-
-HTTP/1.1 204 NO CONTENT
-memfault-reason: latest
-[...]
-```
-
-#### Verbose Release Information
-
-To query for all the information pertaining to a release you can use the
-`releases/latest` route instead of `releases/latest/url`. In this situation
-information about the release will be returned in a JSON blob:
-
 ```bash
 $ export MEMFAULT_LATEST_API_ROUTE=https://device.memfault.com/api/v0/releases/latest
-$ curl -i -X GET  \
-  "${MEMFAULT_LATEST_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=stm32-fw&current_version=0.0.1" \
+$ export SOFTWARE_VERSION=0.0.1
+$ curl -i -X GET \
+  "${MEMFAULT_LATEST_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=bbb-fw&current_version=${SOFTWARE_VERSION}" \
   --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
 
 HTTP/1.1 200 OK
@@ -300,42 +377,35 @@ content-type: application/json
     }
   ],
 }
+
 ```
+
+When a new payload has been found, you will get a HTTP response with a 200
+status code.
+
+If there are no updates available (such as when the device is already on the
+newest firmware) you will see a 204 (No Content) http status code in the
+response. We can try it out by retrying the query with `0.0.1` as the value for
+`current_version`:
+
+#### Example Response when Device is Up To Date
+
+```bash
+$ export SOFTWARE_VERSION=0.0.1
+$ curl -i -X GET  \
+  "${MEMFAULT_LATEST_URL_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=bbb-fw&current_version=0.0.1" \
+  --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
+
+HTTP/1.1 204 NO CONTENT
+memfault-reason: latest
+[...]
+```
+
+  </TabItem>
+</LinuxOtaOptionsTabs>
 
 ### Rollback Release
 
 Aborting or Rolling back from a Release which has a firmware regression is easy
 to do from the UI. Simply navigate to "Fleet" -> "Cohorts", click on the picker
 under "Options" and select the "Abort Rollout" option.
-
-## Firmware Integration Checklist
-
-When querying the Memfault Latest Endpoint directly from firmware, there are a
-few common items you will want to confirm are setup correctly.:
-
-### Include Root Certs to Communicate with Memfault cloud
-
-In order to build the chain of trust as part of establishing a TLS session with
-Memfault cloud, you will need to make sure your embedded stack includes the
-appropriate root certificates. You can find the exact list exposed in both PEM &
-DER format within the memfault-firmware-sdk at
-[`memfault/http/root_certs.h`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/http/root_certs.h#L146).
-
-### Enable Server Name Indication (SNI) in TLS stack
-
-Server Name Indication (SNI) is an extension that was added in 2003 to the TLS
-1.0 Specification in [RFC 3546](https://tools.ietf.org/rfc/rfc3546.txt). It's
-supported by effectively every modern day browser and network stack available.
-
-Occasionally in an embedded stack the feature may not be enabled by default. If
-the feature is not enabled you will see a TLS/SSL handshake failure with Alert
-Code 80 trying to establish a TLS connection with the Memfault cloud.
-
-To fix the issue, you just need to enable the SNI feature in your TLS stack. For
-example, here's what to check for some common TLS stacks used in embedded
-devices:
-
-- `mbedTLS` - Make sure `MBEDTLS_SSL_SERVER_NAME_INDICATION` is set as a config
-  option.
-- `OpenSSL` - Make sure to call `SSL_set_tlsext_host_name(ssl, <host_name>)`
-  prior to calling `SSL_connect()`.

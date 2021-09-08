@@ -46,6 +46,12 @@ module.exports = {
                     position: "left",
                 },
                 {
+                    to: "docs/linux/introduction",
+                    activeBasePath: "docs/linux",
+                    label: "Embedded Linux",
+                    position: "left",
+                },
+                {
                     to: "docs/android/introduction",
                     activeBasePath: "docs/android",
                     label: "Android",
