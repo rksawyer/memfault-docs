@@ -1,0 +1,157 @@
+---
+id: data-source-async-access
+title: Async Data Source Mode
+---
+
+Occasionally, you may want to read data from one of the data sources the
+packetizer is accessing in an asynchronous / event driven fashion. For example,
+this may be desirable if a bare metal environment is being used and coredumps
+are being saved to a storage medium which can be slow to access (such as
+external flash).
+
+There are several properties of the SDK packetizer that are helpful for
+achieving this behavior:
+
+1. The packetizer guarantees individual data sources (i.e platform coredump
+   storage) will be read sequentially.
+2. Each call to `memfault_packetizer_get_chunk()` will result in exactly _one_
+   read to the data source which is active. The size of the read will be less
+   than or equal to the size of the chunk requested.
+3. The Memfault SDK allows for different APIs to be used when saving data and
+   when reading back data via the packetizer. For the "coredump" feature,
+   [`memfault_coredump_read()`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/panics/platform/coredump.h#L106-L118)
+   is the routine which is called when reading data from the packetizer.
+
+These features are all verified on each release as part of the Memfault Firmware
+SDK
+[unit test suite](https://github.com/memfault/memfault-firmware-sdk/tree/master/tests).
+
+Using these features, we can easily load data from a slower storage in an
+asynchronous fashion. Once the data has been preloaded, we can then call
+Memfault packetizer APIs. Let's walk some example code for how asynchronous
+reads to coredump storage could be achieved.
+
+#### Example Code
+
+:::note
+
+In order to operate in asychronous operation mode, RLE data source compression
+must be disabled. This is because RLE Compression requires several passes over
+the underlying data. The feature can be disabled by either removing
+`memfault_data_source_rle.c` from your build system or by adding the define
+`MEMFAULT_DATA_SOURCE_RLE_ENABLED=0` to your compilation flags.
+
+:::
+
+```c
+#include "memfault/core/data_packetizer.h"
+
+bool try_send_memfault_data(void) {
+  uint8_t buffer[USER_CHUNK_SIZE];
+
+  bool async_call_dispatched = memfault_platform_coredump_prepare_async(USER_CHUNK_SIZE);
+  if (async_call_dispatched) {
+    // we need to wait for the call to complete before we can load new data
+    // via memfault_packetizer_get_chunk()
+    return false;
+  }
+
+  size_t read_size = sizeof(buffer);
+  bool data_available = memfault_packetizer_get_chunk(buffer, &read_size);
+  if (!data_available) {
+    return false;
+  }
+
+  //! this is a call to the system specific function which sends the data
+  send_ble_gatt_packet(buffer, read_size);
+  return true;
+}
+```
+
+and then in the platform coredump code,
+`memfault_platform_coredump_prepare_async()` would look something like:
+
+```c
+//! Structure used to track data which has been preloaded prior to making
+//! calls to `memfault_packetizer_get_chunk()`
+typedef struct {
+  // buffer to hold pre-loaded data
+  // Size just needs to be >= the chunk size that will be read
+  uint8_t buf[128];
+  // the amount of data which has been loaded
+  uint32_t bytes_loaded;
+  // the address the buffer starts at. So, for example, if the buffer holds bytes from offset 200-240
+  // of coredump storage, this value would be 200
+  uint32_t start_addr;
+  // the offset within 'buf' that last call to memfault_coredump_read() ended at
+  uint32_t last_read_offset;
+} sMfltCoredumpAsyncReadBuf;
+
+static sMfltCoredumpAsyncReadBuf s_read_buf;
+
+//! Checks to see if more coredump data needs to be loaded from slow storage prior to invoking the
+//! next `memfault_packetizer_get_chunk()` call
+//!
+//! @return true if an asynchronous read operation was dispatched, else true if
+//! `memfault_packetizer_get_chunk()` can be called immediately
+bool memfault_platform_coredump_prepare_async(size_t next_chunk_size) {
+  const size_t bytes_remaining = s_read_buf.bytes_loaded - s_read_buf.last_read_offset;
+  if (bytes_remaining > next_chunk_size) {
+    // we have enough data pre-loaded for the next memfault_packetizer_get_chunk()
+    // call to succeed
+    return false;
+  }
+
+  sMfltCoredumpStorageInfo info;
+  memfault_platform_coredump_storage_get_info(&info);
+  const size_t start_addr = s_read_buf.start_addr + s_read_buf.last_read_offset;
+  const size_t bytes_to_read = MEMFAULT_MIN(sizeof(s_read_buf.buf), info.size - start_addr);
+
+  s_read_buf.start_addr = start_addr;
+  s_read_buf.last_read_offset = start_addr;
+  s_read_buf.bytes_loaded = bytes_to_read;
+
+  // Call async read routine for flash storage and let caller know we will have to wait for a result
+  user_coredump_storage_read_async(start_addr, &s_read_buf.buf, bytes_to_read);
+  return true;
+}
+```
+
+Then `memfault_coredump_read()` can just access data from the `s_read_buf` we
+populated asynchronously.
+
+```c
+bool memfault_coredump_read(uint32_t offset, void *data, size_t read_len) {
+  if (offset < s_read_buf.start_addr ||
+      ((offset + read_len) > (s_read_buf.start_addr + s_read_buf.bytes_loaded))) {
+    // This means memfault_platform_coredump_prepare_async() was not
+    // run prior to calling `memfault_packetizer_get_chunk()` and should never happen
+    return false;
+  }
+
+  const size_t read_offset = offset - s_read_buf.start_addr;
+  const uint8_t *read_ptr = &s_read_buf.buf[read_offset];
+  memcpy(data, read_ptr, read_len);
+  s_read_buf.last_read_offset = read_offset + read_len;
+  return true;
+}
+```
+
+Finally, when the data is cleared at the end of reading the data source, we
+reset the ram buffer so it looks empty and dispatch an erase to the backing
+storage.
+
+```c
+void memfault_platform_coredump_storage_clear(void) {
+  // reset pre-loaded storage to offset zero and "erase" the data by
+  // populating the buffer with all zeros
+  s_read_buf = (sMfltCoredumpAsyncReadBuf) {
+    .bytes_loaded = sizeof(s_read_buf.buf),
+    .start_addr = 0,
+    .last_read_offset = 0,
+  };
+
+  // erase backing flash storage as well
+  user_coredump_storage_erase_async();
+}
+```
