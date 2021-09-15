@@ -41,16 +41,23 @@ necessary. We suggest appending `bort` to your
 [reverse domain name](https://en.wikipedia.org/wiki/Reverse_domain_name_notation).
 For example, `com.mycorp.bort`.
 
+The OTA application ID must also be set, if using the
+[OTA Update Client](android-ota-update-client.mdx). For example,
+`com.mycorp.bort.ota`.
+
 Patch the default application ID with your own:
 
 ```
 vendor/memfault/bort/bort_cli.py patch-bort \
   --bort-app-id <YOUR_BORT_APPLICATION_ID> \
+  --bort-ota-app-id <YOUR_BORT_OTA_APPLICATION_ID> \
   <AOSP_ROOT>/vendor/memfault/bort/MemfaultPackages
 ```
 
-This command will patch `bort.properties`, setting the `BORT_APPLICATION_ID`
-property to `<YOUR_BORT_APPLICATION_ID>`.
+This command will patch `bort.properties`, setting the
+`BORT_APPLICATION_ID`/`BORT_OTA_APPLICATION_ID` properties to
+`<YOUR_BORT_APPLICATION_ID>`. The `--bort-ota-app-id`/`BORT_OTA_APPLICATION_ID`
+is not required, if not using the OTA Update Client.
 
 ### Add the SDK Components to your build
 
@@ -145,6 +152,21 @@ storeFile=myKeystore.jks
 storePassword=mySecretStorePassword
 ```
 
+### Create a keystore for the OTA Update Client app
+
+**This step is only required if using the
+[OTA Update Client](android-ota-update-client.mdx)**
+
+If using the OTA Update Client, a separate keystore should be created, following
+the same steps as for the Bort app.
+
+Once you have a keystore, set up a `ota_keystore.properties` file and provide
+the path to it via the `bort.properties` file:
+
+```
+BORT_OTA_KEYSTORE_PROPERTIES_PATH=ota_keystore.properties
+```
+
 ### Build the Bort APK
 
 The `MemfaultBort` app is built using gradle. Building the release APK will
@@ -156,8 +178,22 @@ cd MemfaultPackages && ./gradlew :bort:assembleRelease # Or gradlew :bort:assemb
 ```
 
 This will create a signed `MemfaultBort.apk` and `MemfaultBort.x509.pem` file.
-The `pem` file is a public certificate used by the system to when enforcing the
-SE policy.
+The `pem` file is a public certificate used by the system when enforcing the SE
+policy.
+
+### Build the OTA Update Client APK
+
+The `MemfaultBortOta` app is built using gradle. Building the release APK will
+automatically invoke a task to copy the resulting APK and place it in the root
+directory where it will be picked up by the AOSP build system.
+
+```
+cd MemfaultPackages && ./gradlew :bort-ota:assembleRelease # Or gradlew :bort-ota:assembleRelease on Windows
+```
+
+This will create a signed `MemfaultBortOta.apk` and `MemfaultBortOta.x509.pem`
+file. The `pem` file is a public certificate used by the system when enforcing
+the SE policy.
 
 ### Build the UsageReporter APK
 

@@ -79,6 +79,7 @@ module.exports = {
             "android/custom-events",
             "android/android-eventlog-metrics",
             "android/android-releases-integration-guide",
+            "android/android-ota-update-client",
             "android/android-data-scrubbing",
         ],
         "Embedded Linux Guides": [
