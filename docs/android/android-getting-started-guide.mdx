@@ -240,6 +240,15 @@ enabled via ADB using the CLI tool:
 ./bort_cli.py enable-bort --bort-app-id your.app.id
 ```
 
+The `enable-bort` command runs this ADB command under the hood:
+
+```bash
+adb shell am broadcast --receiver-include-background \
+  -a com.memfault.intent.action.BORT_ENABLE \
+  -n your.app.id/com.memfault.bort.receivers.ShellControlReceiver \
+  --ez com.memfault.intent.extra.BORT_ENABLED true
+```
+
 ## Upload a bug report
 
 Once the SDK has been enabled, you can manually trigger a bug report to be
