@@ -1,0 +1,306 @@
+---
+id: da1469x-sdk-guide
+title: DA1469x SDK Integration Guide
+sidebar_label: Dialog DA1469x
+---
+
+import SendingDataOverUdp from "@site/src/pages/_partials/_sending-data-over-udp.mdx";
+
+import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+import UploadSymbolFile from "@site/src/pages/_partials/_steps/_upload-symbol-file.mdx";
+import DataTransferTroubleshooting from "@site/src/pages/_partials/_steps/_data-transfer-troubleshooting.mdx";
+import PostChunksLocally from "@site/src/pages/_partials/_steps/_post-chunks-locally.mdx";
+import PublishDataToCloud from "@site/src/pages/_partials/_steps/_publish-data-to-cloud.mdx";
+import DefineFirstTraceEvent from "@site/src/pages/_partials/_steps/_define-first-trace-event.mdx";
+import DefineFirstHeartbeat from "@site/src/pages/_partials/_steps/_define-first-heartbeat.mdx";
+import AddCliTestCommands from "@site/src/pages/_partials/_steps/_add-cli-test-commands.mdx";
+import FwSdkFeatures from "@site/src/pages/_partials/_steps/_sdk-features.mdx";
+import MetricTimerDependency from "@site/src/pages/_partials/_steps/_metric-timer-dependency.mdx";
+import RebootTrackingDependency from "@site/src/pages/_partials/_steps/_reboot-tracking-dependency.mdx";
+
+## Overview
+
+In this guide we will walk through the steps for integrating the
+[Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
+a project using Dialog's
+[DA1469x product family](https://www.dialog-semiconductor.com/products/bluetooth-low-energy/da1469x).
+The integration has been tested against the "DA1469x SDK10.0.10.118" release.
+
+Upon completion of the integration, the following subcomponents will be added to
+your system!
+
+- [Reboot Reason Tracking](/docs/mcu/reboot-reason-tracking)
+
+![](/img/docs/mcu/reboot-reason-chart.png)
+
+- [Error Tracking with Trace Events](/docs/mcu/trace-events)
+
+![](/img/docs/mcu/trace-reason-example.png)
+
+- [RAM-backed stack dump Collection](/docs/mcu/coredumps)
+
+![](/img/docs/mcu/logs-with-coredump.png)
+
+## Integration Steps
+
+:::important
+
+This tutorial assumes you have a working
+[DA1469x](https://www.dialog-semiconductor.com/products/bluetooth-low-energy/da1469x#tab-field_tab_content_resources)
+environment and are able to flash a board supported by the SDK.
+
+:::
+
+<ProjectAwareCreateAProject />
+
+### Clone memfault-firmware-sdk into middleware
+
+```bash
+cd ${DA1469X_SDK_ROOT}/sdk/middleware
+mkdir -p memfault
+git clone https://github.com/memfault/memfault-firmware-sdk.git
+```
+
+### Apply patches to DA1469x SDK
+
+There are a few small patches that need to be applied to the Dialog SDK.
+
+```bash
+cd ${DA1469X_SDK_ROOT}
+patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x/gnu-build-id.patch
+patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x/freertos-config.patch
+patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x/fault-handlers.patch
+```
+
+### Create Memfault configuration files
+
+You will need to create Memfault configuration files. These will be used later
+to customize the Memfault SDK.
+
+```bash
+# Navigate to same directory with other configs, i.e custom_config_qspi.h
+cd ${YOUR_PROJECT_ROOT}/config/
+touch memfault_platform_config.h
+touch memfault_trace_reason_user_config.def
+touch memfault_metrics_heartbeat_config.def
+```
+
+### Add memfault-firmware-sdk to build
+
+The memfault-firmware-sdk includes a script for easily adding all sources,
+includes, and necessary compiler flags to a project.
+
+```bash
+python ./sdk/middleware/memfault/memfault-firmware-sdk/scripts/eclipse_helper.py -p ${YOUR_PROJECT_ROOT} -m sdk/middleware/memfault/memfault-firmware-sdk --target-port dialog/da1469x
+```
+
+:::caution
+
+After running the script, be sure to right click on the project in SmartSnippets
+Studio and select "Refresh" to pick up the changes.
+
+:::
+
+### Update Dialog custom_config setup
+
+Navigate to the custom config you are using for your project (i.e
+"custom_config_qspi.h") and update the following settings
+
+```c
+//! @file custom_config_*.h
+#define dg_configUSE_MEMFAULT                   (1)
+#define dg_configDISABLE_BACKGROUND_FLASH_OPS   (1)
+#define dg_configRETAINED_UNINIT_SECTION_SIZE   (192)
+```
+
+### Update Memfault Platform Config
+
+```c
+#pragma once
+//! @file memfault_platform_config.h
+
+#define MEMFAULT_PLATFORM_COREDUMP_STORAGE_USE_FLASH    1
+
+// Note: The default location coredumps are saved is NVMS log storage.
+// This size can be adjusted depending on the amount of RAM regions collected
+// in memfault_platform_coredump_get_regions()
+#define MEMFAULT_PLATFORM_COREDUMP_STORAGE_MAX_SIZE_BYTES (32 * 1024)
+
+#define MEMFAULT_USE_GNU_BUILD_ID 1
+
+// TODO: Navigate to "Project" -> "Settings" in the Memfault cloud UI (https://app.memfault.com/)
+// and copy the "Project Key" here!
+#define MEMFAULT_PROJECT_KEY ""
+```
+
+### Implement memfault_platform_get_device_info
+
+Implement the following function in your project. When an issue or metric is
+captured, this is the metadata that Memfault will collect alongside it and
+display in the UI.
+
+```c
+#include "memfault/components.h"
+
+void memfault_platform_get_device_info(sMemfaultDeviceInfo *info) {
+  // !FIXME: Populate with platform device information
+
+  // IMPORTANT: All strings returned in info must be constant
+  // or static as they will be used _after_ the function returns
+
+  // See https://mflt.io/version-nomenclature for more context
+  *info = (sMemfaultDeviceInfo) {
+    // An ID that uniquely identifies the device in your fleet
+    // (i.e serial number, mac addr, chip id, etc)
+    // Regular expression defining valid device serials: ^[-a-zA-Z0-9_]+$
+    .device_serial = "DEMOSERIAL",
+     // A name to represent the firmware running on the MCU.
+    // (i.e "ble-fw", "main-fw", or a codename for your project)
+    .software_type = "app-fw",
+    // The version of the "software_type" currently running.
+    .software_version = "1.0.0",
+    // The revision of hardware for the device. This value must remain
+    // the same for a unique device.
+    // (i.e evt, dvt, pvt, or rev1, rev2, etc)
+    // Regular expression defining valid hardware versions: ^[-a-zA-Z0-9_\.\+]+$
+    .hardware_version = "dvt1",
+  };
+}
+```
+
+### Initialize Memfault
+
+On bootup, make a call to `memfault_platform_boot()` to start the Memfault
+subsystem. We recommend doing this from `system_init()`
+
+```c
+#include "memfault/components.h"
+
+static void system_init( void *pvParameters )
+{
+// ...
+#if defined CONFIG_RETARGET
+        retarget_init();
+#endif
+        // Note: initialize Memfault after retarget_init() so logs will be displayed
+        memfault_platform_boot();
+// ...
+}
+```
+
+### Confirm Project builds
+
+:::info
+
+If your project is based on a template from the Dialog SDK, you also need to
+remove the `vApplicationStackOverflowHook` implementation. The Memfault SDK
+implements this function and will automatically capture a coredump with full
+stack traces when a stack overflow takes place.
+
+:::
+
+At this point your project should compile and be able to boot. On startup, if
+you have logging enabled, you should see some messages like the following print
+when `memfault_platform_boot()` is called:
+
+```
+[I] MFLT: GNU Build ID: 6e6843f5f7410e0a51a0e62ce991fdd0d519eca7
+[I] MFLT: S/N: DEMOSERIAL
+[I] MFLT: SW type: da1469x-demo-app
+[I] MFLT: SW version: 1.0.0
+[I] MFLT: HW version: DA14695
+```
+
+## Data Transport
+
+With data collection in place, the final step is to push data to the Memfault
+cloud for analysis.
+
+Extensive details about how data from the Memfault SDK makes it to the cloud can
+be found [here](data-from-firmware-to-cloud.mdx). In short, all data is
+published via the same "chunk" REST
+[endpoint](https://api-docs.memfault.com/?version=latest#66b0e390-2c3e-4c0d-b6c2-836a287b9e5f).
+
+When sending data over Bluetooth Low Energy, the Memfault Diagnostic GATT
+Service (MDS) can be used.
+
+### Initialize Memfault Diagnostic GATT Service
+
+For the DA1469x, a port for the MDS is provided with the memfault-firmware-sdk.
+To add the service to your project, simply add a call to `mds_boot()` from the
+area of your code which is responsible for registering GATT services, i.e
+
+```c
+#include "memfault/ports/ble/mds.h"
+
+void your_ble_task(void) {
+   ble_peripheral_start();
+   // ...
+   mds_boot();
+}
+```
+
+## Verification & Tuning Steps
+
+With Memfault compiling into your build and a Bluetooth Low Energy transport set
+up, it's now time to add some initial instrumentation, and test the integration!
+
+### Define First Trace Event
+
+<DefineFirstTraceEvent />
+
+### Define First Heartbeat Metric
+
+<DefineFirstHeartbeat />
+
+### Add Test Commands to CLI
+
+<AddCliTestCommands />
+
+### Post Data to Cloud via Web Bluetooth
+
+Data can be extracted over Bluetooth by implementing a MDS GATT Client in your
+gateway.
+
+Memfault chunks can also easily be forwarded using
+[Web Bluetooth](https://web.dev/bluetooth/).
+
+:::tip
+
+For Web Bluetooth support on some versions of Linux and Windows, you need to
+navigate to
+[chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-feature)
+and enable "Experimental Web Platform Features". More details can be found
+[here](https://www.chromestatus.com/feature/5264933985976320).
+
+:::
+
+To try it out, simply:
+
+- Open or install a recent version of the
+  [Google Chrome Browser](https://www.google.com/chrome/)
+- Make sure your BLE device is advertising
+- Navigate to the Memfault Diagnostic Web Bluetooth App at
+  [https://mflt.io/mds](https://mflt.io/mds), click "Connect", and select your
+  device.
+- Upon connection any data already collected by the memfault-firmware-sdk will
+  be immediately sent and forwarded to Memfault for analysis. While connected,
+  new data will be periodically flushed to Memfault. The default interval data
+  is checked for is every 60 seconds and can be adjusted by adding
+  `MDS_POLL_INTERVAL_MS` to your `memfault_platform_config.h`.
+
+For development purposes, data can also be extracted and posted via a CLI or GDB
+connection. More details can be found below.
+
+<details>
+  <summary> Post Chunks via Local Debug Setup </summary>
+  <br />
+  <PostChunksLocally />
+</details>
+
+### Upload Symbol File
+
+<UploadSymbolFile />
