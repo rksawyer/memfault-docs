@@ -16,6 +16,7 @@ module.exports = {
             "platform/fleet-wide-metrics",
             "platform/user-management",
             "platform/organization-auth-tokens",
+            "platform/device-attributes",
             /* "platform/bulk-device-upload", */
             /* Mentions features to be released: "platform/sso", */
         ],
