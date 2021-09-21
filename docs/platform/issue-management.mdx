@@ -1,0 +1,64 @@
+---
+id: issue-management
+title: Issue Management
+sidebar_label: Issue Management
+---
+
+## What is an Issue?
+
+When devices in your fleet upload diagnostics data to Memfault, the data is
+analyzed by Memfault. Any detected problems are converted into Traces. Similar
+Traces are logically grouped together into an Issue, based on the signature of
+the Trace.
+
+In other words, a Trace is a single occurrence of a problem and an Issue is a
+group of Traces manifesting the same problem.
+
+## Issue states
+
+An Issue can be in one of these states:
+
+| State      | Description                                                                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unresolved | The Issue has not yet been fixed                                                                                                                                             |
+| Resolved   | The Issue has been (considered to be) fixed                                                                                                                                  |
+| Merged     | The Issue has been merged into another Issue                                                                                                                                 |
+| Muted      | The Issue has not been fixed, but you want to hide it from the list of Unresolved Issues, you do not want to be alerted about it and it should not be automatically reopened |
+
+## Manually changing Issue state
+
+The state of an Issue can be viewed an changed manually from the Issue's detail
+page. Navigate to Issues, optionally change the filter criteria. Then click the
+title to navigate to the Issue detail page.
+
+Below the title of the Issue, you will find a button to change the state:
+
+![](/img/docs/platform/issue-mgmt-resolving-ui.gif)
+
+When the Issue is Unresolved, the button will say "Resolve" and clicking it will
+change the state to Resolved.
+
+When the Issue is Resolved or Muted, the button will say "Reopen". When it is
+Muted, the button will also have a red outline. Clicking it will change the
+state to Unresolved.
+
+To Mute an Issue, click the caret on the right side of the button and click
+"Mute".
+
+## Automatic Issue reopening upon regression
+
+When Memfault receives a Trace from a greater Software Version compared to the
+last Software Version when the Issue was Resolved, it will automatically be
+changed to Unresolved and subscribed users will automatically be notified.
+
+You can also "Mute" an issue if you never want it to reopen and keep it Resolved
+indefinitely or until you manually reopen it again.
+
+:::note Example
+
+Issue A is seen on Software Versions 1.0, 1.1, and 1.2. You close Issue A when
+1.2 was the greatest Software Version it was seen on. In the future, when a new
+Trace is received from Software Version 1.3 for the same Issue, Memfault
+automatically reopens it and changes the Issue to Unresolved.
+
+:::
