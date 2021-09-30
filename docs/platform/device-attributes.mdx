@@ -42,17 +42,41 @@ device you're currently looking at.
 There are three ways to write an attribute.
 
 1. using the [Metrics API](/docs/mcu/metrics-api),
-2. using the
-   [REST API](https://api-docs.memfault.com/#f4e2584a-36f2-4184-82ec-3b9d0108588c),
-   or
+2. using the REST API
 3. using the web application.
 
-:::caution
+:::note
 
-Because devices can update attributes, anyone who holds your non-secret
-**Project Key** can write or overwrite these attributes.
+Because devices can update attributes, anyone who holds your **Project Key** can
+write or overwrite these attributes.
 
 :::
+
+### Using the REST API
+
+Below is an example of how attributes can be set using the Project Key and the
+REST API:
+
+:::note
+
+Be sure to replace `${DEVICE_SERIAL}` and `${MEMFAULT_PROJECT_KEY}` below with
+the device you want to update and your
+[Project Key](/docs/ci/authentication#project-key), respectively.
+
+:::
+
+```bash
+curl --location --request PATCH \
+"https://device.memfault.com/api/v0/attributes?device_serial=${DEVICE_SERIAL}" \
+--header "Content-Type: application/json" \
+--header "Memfault-Project-Key: ${MEMFAULT_PROJECT_KEY}" \
+--data-raw '
+[
+  {"string_key": "ProductName", "value": "SmartWatch"},
+  {"string_key": "ModelColor", "value": "Blue"}
+]
+'
+```
 
 ### Using the Web Application
 
