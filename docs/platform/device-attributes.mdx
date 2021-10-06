@@ -7,10 +7,11 @@ You can store custom attributes for each of your devices.
 :::info Attributes and Metrics
 
 Any metric that a device reports through the Metric SDK automatically populates
-a device attribute with its latest reading. For example, sending `battery_pct`
-as a metric will populate a `battery_pct` attribute on the device with the last
-known battery level read from the device. As such, you can configure both
-metrics and attributes via the Metrics section of the Project Settings page.
+an updatable device attribute with its latest reading. For example, sending
+`battery_pct` as a metric will populate a `battery_pct` attribute on the device
+with the last known battery level read from the device. As such, you can
+configure both metrics and attributes via the Metrics section of the Project
+Settings page.
 
 :::
 
@@ -98,7 +99,7 @@ You can search by multiple attributes using the _plus icon_.
 :::note Searching by Attribute vs Metric Readings
 
 If you select a **During** time frame, devices will be searched by their metric
-readings during that time frame, not by their device attributes (the most latest
+readings during that time frame, not by their device attributes (the latest
 reported metric).
 
 :::
