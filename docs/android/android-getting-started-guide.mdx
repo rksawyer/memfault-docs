@@ -7,7 +7,8 @@ sidebar_label: Getting Started
 import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
 
 This tutorial will cover integrating the [Bort SDK](android-bort.mdx) into a
-system running Android 10.
+system running Android 10. For other versions, simply change the input to the
+`patch-aosp` below to the correct version.
 
 ## Integration Steps
 
@@ -27,7 +28,8 @@ manifest).
 ### Patch the SDK
 
 Apply [AOSP patches](https://github.com/memfault/bort/tree/master/patches) using
-the `bort_cli.py` tool (requires Python 3.6+).
+the `bort_cli.py` tool (requires Python 3.6+). Be sure to call this using the
+correct Android OS version (`--android-release`) for your build.
 
 ```
 vendor/memfault/bort/bort_cli.py patch-aosp \
