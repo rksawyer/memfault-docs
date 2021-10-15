@@ -40,8 +40,8 @@ export default function ProjectAwareCreateAProject() {
             </p>
             <p>
                 Once you've created your project, you'll be automatically taken
-                to an integration guide which includes your project key. Copy it
-                to follow the rest of the guide.
+                to an integration guide which includes your project key. Copy
+                the key and follow the rest of the guide.
             </p>
         </>
     );

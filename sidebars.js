@@ -32,6 +32,7 @@ module.exports = {
                     "mcu/pinnacle-100-guide",
                     "mcu/esp32-guide",
                     "mcu/esp8266-rtos-sdk-guide",
+                    "mcu/da1469x-sdk-guide",
                 ],
             },
             {

@@ -61,6 +61,7 @@ environment and are able to flash a board supported by the SDK.
 ```bash
 cd ${DA1469X_SDK_ROOT}/sdk/middleware
 mkdir -p memfault
+cd memfault
 git clone https://github.com/memfault/memfault-firmware-sdk.git
 ```
 
@@ -74,6 +75,17 @@ patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x
 patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x/freertos-config.patch
 patch -p1 < ./sdk/middleware/memfault/memfault-firmware-sdk/ports/dialog/da1469x/fault-handlers.patch
 ```
+
+:::note
+
+When running the `patch` command in Windows environments you may see warning
+messages like the following which can be safely ignored:
+
+> (Stripping trailing CRs from patch; use --binary to disable.)
+
+> patch unexpectedly ends in middle of line
+
+:::
 
 ### Create Memfault configuration files
 
@@ -94,7 +106,7 @@ The memfault-firmware-sdk includes a script for easily adding all sources,
 includes, and necessary compiler flags to a project.
 
 ```bash
-python ./sdk/middleware/memfault/memfault-firmware-sdk/scripts/eclipse_helper.py -p ${YOUR_PROJECT_ROOT} -m sdk/middleware/memfault/memfault-firmware-sdk --target-port dialog/da1469x
+python ./sdk/middleware/memfault/memfault-firmware-sdk/scripts/eclipse_patch.py -p ${YOUR_PROJECT_ROOT} -m sdk/middleware/memfault/memfault-firmware-sdk --target-port dialog/da1469x
 ```
 
 :::caution
@@ -114,6 +126,14 @@ Navigate to the custom config you are using for your project (i.e
 #define dg_configUSE_MEMFAULT                   (1)
 #define dg_configDISABLE_BACKGROUND_FLASH_OPS   (1)
 #define dg_configRETAINED_UNINIT_SECTION_SIZE   (192)
+
+// Note: configTIMER_TASK_STACK_DEPTH must be >= 256.
+// TODO: Check if you already have a definition in your project.
+// Otherwise, add the line below
+#define configTIMER_TASK_STACK_DEPTH 256
+
+// Optional: To make use of Dialog debug console logging add:
+#define CONFIG_RETARGET  (1)
 ```
 
 ### Update Memfault Platform Config
