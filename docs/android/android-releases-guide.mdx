@@ -77,8 +77,7 @@ change._
   uniquely identified by its "software_version".
 
 For more information, see our
-[Software Version](platform/software-version-hardware-version.mdx)
-documentation.
+[Software Version](https://mflt.io/android-software-versions) documentation.
 
 ### Identifying Firmware Binaries
 
@@ -189,6 +188,46 @@ INFO: out/dist/path-to-ota-user.zip: uploaded!
 INFO: You can view in the UI here:
     <Link to Release in UI>
 ```
+
+### Versioning
+
+Android versioning configuration is set when creating your project. See the
+project settings page to find the `Software Version Source` for a project.
+
+See more information on
+[Android software versioning](https://mflt.io/android-software-versions).
+
+**Build Fingerprint Only**
+
+The fingerprint (see above) is the only versioning property. The example above
+describes this:
+
+```bash
+--software-version $(< out/target/product/smartfridge/build_fingerprint.txt) \
+```
+
+**Build Fingerprint and System Property**
+
+A system property is used in combination with the build fingerprint. Modify the
+`--software-version` argument to include the build property value e.g.
+
+```bash
+--software-version $(< out/target/product/smartfridge/build_fingerprint.txt)::123456789 \
+```
+
+where `123456789` is the value of the selected system property. You can find the
+value of system properties in the build output folder:
+`out/target/product/**/product/build.prop`.
+
+**System Property Only (not recommended)**
+
+```bash
+--software-version 123456789 \
+```
+
+where `123456789` is the value of the selected system property. You can find the
+value of system properties in the build output folder:
+`out/target/product/**/product/build.prop`.
 
 :::note Tip
 
