@@ -66,7 +66,7 @@ HTTP API is the only integration work which needs to be done to get the data
 
 ### Basic Operation Mode
 
-In this mode a call to `memfault_packetizer_get_next` always returns a complete
+In this mode a call to `memfault_packetizer_get_chunk` always returns a complete
 "chunk". The size of the "chunk" is completely up to you (just needs to be ≥9
 bytes). It is your responsibility to get the "chunk" reliably to the Memfault
 cloud. Typically, the size of the chunk will align with the MTU size of the
