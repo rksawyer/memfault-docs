@@ -1,0 +1,70 @@
+---
+title: Rate Limiting
+---
+
+import Link from "@docusaurus/Link";
+
+Here's a list of different events that may be rate-limited:
+
+<table>
+  <thead>
+    <tr>
+      <th>Rate Limit</th>
+      <th>Scope</th>
+      <th>Platform</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id="custom-reports">
+      <td>Ingestion of Custom Reports</td>
+      <td>Device</td>
+      <td>All</td>
+      <td>
+        Custom Reports are a primitive data type from which{" "}
+        <Link to="/docs/platform/metrics">Metrics</Link> (both Timeseries and
+        Attributes) are created.
+      </td>
+    </tr>
+    <tr id="latest-release">
+      <td>Calls to the Latest Release endpoint</td>
+      <td>Device</td>
+      <td>All</td>
+      <td>
+        The{" "}
+        <a href="https://api-docs.memfault.com/#89d8dfa4-10d7-41d3-9c20-7cc356030c4b">
+          Latest Release endpoint
+        </a>{" "}
+        returns the latest Release that should be installed for a given device.
+      </td>
+    </tr>
+    <tr id="bug-reports">
+      <td>Ingestion of Bug Reports</td>
+      <td>Device</td>
+      <td>Android</td>
+      <td>
+        <Link to="/docs/android/uploading-android-bugreports">Bug Reports</Link>{" "}
+        are Android-specific files.
+      </td>
+    </tr>
+    <tr id="trace-events">
+      <td>Ingestion of Trace Events</td>
+      <td>Device</td>
+      <td>MCU</td>
+      <td>
+        <Link to="/docs/mcu/trace-events/">Trace Events</Link> are a
+        MCU-specific feature allowing the capturing of an issue without sending
+        a full Coredump.
+      </td>
+    </tr>
+    <tr id="coredumps">
+      <td>Ingestion of Coredumps</td>
+      <td>Device</td>
+      <td>MCU</td>
+      <td>
+        <Link to="/docs/mcu/coredumps/">Coredumps</Link> are a source of Issues
+        for MCU Projects.
+      </td>
+    </tr>
+  </tbody>
+</table>

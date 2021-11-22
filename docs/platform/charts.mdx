@@ -1,8 +1,43 @@
 ---
-id: fleet-wide-metrics
-title: Fleet-Wide Metrics
-sidebar_label: Fleet-Wide Metrics
+id: charts
+title: Charts
+sidebar_label: Charts
 ---
+
+Memfault charts allow you to proactively monitor any smart device, anywhere.
+Monitor your releases and view data-driven device and fleet-level metrics, like
+battery health, connectivity, and more in real-time dashboards.
+
+## Overview Dashboard
+
+The Overview Dashboard offers a selection of charts that provide an outlook of
+the state of your fleet at a glance. To open it, go to **Dashboards ->
+Overview**.
+
+![Active Devices and Software Versions of your fleet in the Memfault Overview Dashboard](/img/docs/platform/overview-dashboard-top.png)
+_Active Devices and Software Versions of your fleet in the Memfault Overview
+Dashboard._
+
+You can filter the data in the Overview Dashboard by Cohort by selecting one in
+the drop-down menu in the top-right corner of the page. You can also toggle the
+scope of the data between Weekly and Daily on the top-right corner of each
+chart.
+
+### Drilldown
+
+Overview Dashboard charts that have a **Drilldown** badge on them can be clicked
+on sections of the chart (and sometimes also on labels) to go to a filtered-down
+list of Devices that make up the data for that interval.
+
+![The drilldown feature of some Memfault Overview Dashboard charts](/img/docs/platform/overview-dashboard-drilldown.png)
+_Clicking on this section will give you a list of devices that rebooted on
+November 12th due to a user reset._
+
+![The drilldown feature of some Memfault Overview Dashboard charts](/img/docs/platform/overview-dashboard-drilldown-label.png)
+_Clicking on the label will give you a list of devices that rebooted on November
+12th for any reason._
+
+## Metric Charts
 
 Memfault indexes and aggregates the metrics collected by your devices to provide
 you not only with insights of how individual devices are performing, but also
@@ -12,7 +47,9 @@ You can add charts to visualize these aggregated, fleet-wide metrics by
 navigating to the sidebar and selecting **Dashboards** and then **Metrics**.
 
 Creating a new chart is as simple as clicking `Create Chart`, selecting your
-metric of interest, and choosing the desired aggregation type.
+metric of interest, and choosing the desired aggregation type. Note that only
+metrics [configured as Timeseries](/docs/platform/metrics#timeseries) can be
+used in Metric Charts.
 
 <p align="center">
   <img
@@ -36,14 +73,14 @@ For more information about adding metrics to your devices:
 - Android: update to the 3.0+ version of the
   [Bort SDK](https://mflt.io/android-bort-sdk)
 
-## Filtering Metric Charts
+### Filtering Metric Charts
 
 You can filter the values visible in the charts by selecting from the available
 filters on the top-right area of the page:
 
 ![](/binary-assets/fleet-wide-metrics-filter.png)
 
-## Metric Chart Comparison Mode
+### Metric Chart Comparison Mode
 
 To compare the values of different sets of Devices, you can click the `Compare`
 button next to the filters section on the top-right area of the page to add a

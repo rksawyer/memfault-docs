@@ -30,6 +30,14 @@ graphs in the Timeline:
 When Memfault receives a bug report containing those custom events, they will be
 displayed in that Bug Report's timeline under `EventLog`.
 
+:::note Rate Limiting
+
+Ingestion of Metrics may be
+[rate-limited](/docs/platform/rate-limiting#custom-reports). Avoid sending data
+more than once per hour per device.
+
+:::
+
 ## Logging custom metrics using EventLog
 
 The Android SDK contains an API called

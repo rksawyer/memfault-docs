@@ -1,0 +1,288 @@
+---
+title: Metrics and Attributes
+---
+
+import ProjectSettingsMetricsPath from "@site/src/components/ProjectSettingsMetricsPath";
+
+Metrics are a way to proactively monitor any smart device. They power parts of
+our Device view such as Device Attributes and the Timeline. You can use them to
+monitor your releases and view data-driven device and fleet-level Metrics, like
+battery health, connectivity, and more using Memfault's Metrics features:
+[Metric Charts](/docs/platform/charts#metric-charts) and
+[Alerts](/docs/platform/alerts).
+
+Metrics can be marked as Timeseries as well as Attributes, and each option
+enables a different set of features in the Memfault app.
+
+## Defining a Metric
+
+Metrics [can be added manually](#from-the-memfault-app) but are also created
+automatically when devices report them from the field. Here are some useful
+links if you're looking to enable Metrics collection from your devices using our
+SDKs:
+
+- for MCU: [Collecting Device Metrics using our MCU SDK](/docs/mcu/metrics-api)
+- for Android:
+  [Collecting Device Metrics using our Android SDK](/docs/android/android-eventlog-metrics).
+
+### From the Memfault app
+
+You can view all defined Metrics by going to <ProjectSettingsMetricsPath />.
+
+![The Metrics view under Project Settings](/img/docs/platform/project-settings-metrics.png)
+_The Metrics view under Project Settings_
+
+Metric can have a few properties:
+
+- a `string_key` which devices and APIs can use to identify the Metric
+- whether the data type is an `INT` (default), `FLOAT`, `BOOL`, or `STRING`
+- whether it is a `favorite` Metric, which will cause it to appear more
+  prominently in a few places in the web app
+- the value `range` which informs charts and other components
+- a set of `ignored_values` (like `-1`) which should be ignored.
+
+## Timeseries
+
+By marking a Metric as a Timeseries you'll be able to use it in
+[Metric Charts](/docs/platform/charts) and [Alerts](/docs/platform/alerts).
+You'll also be able to use them to
+[search for devices](#searching-devices-by-attributes-and-timeseries) with a
+time constraint (e.g. `battery_level > 90 anytime last week`).
+
+To mark a Metric as a Timeseries, go to <ProjectSettingsMetricsPath /> and click
+**Edit** on the Metric you're interested in. Then check the **Timeseries**
+checkbox.
+
+## Attributes
+
+You can store custom Attributes for each of your devices to build a device
+registry or to manage inventory.
+
+By marking a Metric as an Attribute it will be shown in the Attributes tab on
+device pages. You'll also be able to
+[search for devices](#searching-devices-by-attributes-and-timeseries) by
+Attributes on the device list page.
+
+### Defining an Attribute
+
+In <ProjectSettingsMetricsPath /> you'll be able to mark specific Metrics as
+Attributes. Metrics reported by devices are automatically marked as
+Attributes[<sup>\*</sup>](#quotas). You can configure this by clicking **Edit**
+on a Metric you're interested in, or by creating a new Metric with the Attribute
+feature enabled.
+
+#### Device Write Policy
+
+Attributes have a `device_write_policy` property that controls under which
+condition a device can change its value. This does not affect the ability to set
+a value manually on the device page.
+
+<table>
+  <tbody>
+    <tr>
+      <td>Writable</td>
+      <td>
+        <ul style={{ margin: 0 }}>
+          <li>
+            Devices are always allowed to change the value of this Attribute.
+            This is the default.
+          </li>
+          <li>
+            Example: Location of a mobile device that changes occasionally.
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style={{ width: "120px" }}>If not set</td>
+      <td>
+        <ul style={{ margin: 0 }}>
+          <li>
+            Devices can only set the value of this Attribute if it's currently
+            unset.
+          </li>
+          <li>
+            Useful to collect static device information the device has access
+            to.
+          </li>
+          <li>Example: MAC addresses.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Never</td>
+      <td>
+        <ul style={{ margin: 0 }}>
+          <li>Devices cannot set the value of this Attribute.</li>
+          <li>
+            Useful for Attributes that should only be managed manually or
+            external systems.
+          </li>
+          <li>
+            Examples: Installation sites, service-level agreement, RMA status.
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Viewing an Attribute
+
+There are two ways to view Attributes for a device:
+
+1. using the web application
+2. using the REST API.
+
+#### Using the web application
+
+Find the device you want to view the Attributes for (for example by browsing
+your devices on the **Devices** page) and select the **Attributes** tab. You'll
+see all the properties known for this project and the respective value for the
+device you're currently looking at.
+
+![Device detail page and its Attributes tab](/img/docs/platform/device-detail-attributes.png)
+_The device detail page and its Attributes tab_
+
+#### Using the REST API
+
+Below is an example of how Attributes can be read using the Project Key and the
+REST API:
+
+:::note
+
+Be sure to replace `${MEMFAULT_ORG_TOKEN}` with an
+[Organization Auth Token](/docs/ci/authentication#organization-auth-token) and
+`${ORG_SLUG}` / `${PROJECT_SLUG}` / `${DEVICE_SERIAL}` if re-using the example
+below.
+
+:::
+
+```bash
+curl --user ":${MEMFAULT_ORG_TOKEN}" --location --request GET \
+'https://api.memfault.com/api/v0/organizations/${ORG_SLUG}/projects/${PROJECT_SLUG}/devices/${DEVICE_SERIAL}/attributes'
+```
+
+The response will be JSON-encoded data, example below:
+
+```json
+{
+  "data": [
+    {
+      "custom_metric": {
+        "data_type": "INT",
+        "description": "",
+        "display_name": "",
+        "favorite": false,
+        "id": "5e8b5af5-c686-43a7-8ba4-7878f7f9105e",
+        "ignored_values": [],
+        "range": {
+          "max": null,
+          "min": null
+        },
+        "string_key": "TimerTaskCpuUsage",
+        "device_write_policy": "writable"
+      },
+      "state": {
+        "created_date": "2021-09-20T13:25:37.517191+00:00",
+        "time": "2021-09-20T14:15:17.586209+00:00",
+        "updated_date": "2021-09-20T14:15:17.611765+00:00",
+        "value": 679
+      }
+    },
+    ...
+  ]
+}
+```
+
+You can select individual Metric values by appending a URL query parameter:
+
+```bash
+https://api.memfault.com/api/v0/organizations/${ORG_SLUG}/projects/${PROJECT_SLUG}/devices/${DEVICE_SERIAL}/attributes?q=TimerTaskCpuUsage`
+```
+
+Only Metrics with matching `string_key` will be returned (wildcard `*`
+supported).
+
+### Setting an Attribute
+
+There are three ways to write an Attribute:
+
+1. using the [Metrics API](/docs/mcu/metrics-api)
+2. using the REST API
+3. using the web application.
+
+:::note
+
+Because devices can update Attributes, anyone who holds your **Project Key** can
+write or overwrite these Attributes.
+
+:::
+
+#### Using the REST API
+
+Below is an example of how Attributes can be set using the Project Key and the
+REST API:
+
+:::note
+
+Be sure to replace `${DEVICE_SERIAL}` and `${YOUR_PROJECT_KEY}` below with the
+device you want to update and your
+[Project Key](/docs/ci/authentication#project-key), respectively.
+
+:::
+
+```bash
+curl --location --request PATCH \
+"https://device.memfault.com/api/v0/attributes?device_serial=${DEVICE_SERIAL}" \
+--header "Content-Type: application/json" \
+--header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}" \
+--data-raw '
+[
+  {"string_key": "ProductName", "value": "SmartWatch"},
+  {"string_key": "ModelColor", "value": "Blue"}
+]
+'
+```
+
+#### Using the Web Application
+
+Visit the respective device page as described in
+[Viewing an Attribute](#viewing-an-attribute). Click on the _pencil icon_ next
+to the value, enter the new value, and finally **Save** it.
+
+![Editing an Attribute via the web application](/img/docs/platform/device-detail-attribute-edit.png)
+_Editing an Attribute via the web application_
+
+## Searching Devices by Attributes and Timeseries
+
+You can search devices by Attributes and Timeseries. Visiting the **Devices**
+page, open the **Filter** panel and under **Reported** select the Metric you
+want to search by.
+
+If you select a **During** time frame, devices will be searched by their
+Timeseries Metrics during that time frame. If you do not select a **During**
+time frame, devices will be searched by their Device Attributes.
+
+You can search by multiple Attributes and Timeseries using the _plus icon_.
+
+![Device search by Attribute](/img/docs/platform/device-search-by-attribute.png)
+_Searching devices by Attribute_
+
+![Device search by Timeseries](/img/docs/platform/device-search-by-timeseries.png)
+_Searching devices by Timeseries_
+
+## Quotas
+
+You're only allowed to use a limited amount of Device Attributes or Timeseries.
+If you exceed the quota, you need to turn off the respective aspect for a
+different Metric.
+
+To see your quota usage, open your Project's settings page and click on the
+Quotas tab.
+
+![Memfault Metric quotas](/img/docs/platform/metric-quotas.png)
+
+Apart from being limited by quotas, the ingestion of Metrics may be
+[rate-limited](/docs/platform/rate-limiting#custom-reports). Avoid sending data
+more than once per hour per device.

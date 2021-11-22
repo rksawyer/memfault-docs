@@ -8,28 +8,35 @@ The Alerts feature will send a team an alert when heartbeat events satisfy a
 given threshold for a specific set of filters. To find the feature, click the
 **Alerts** item in the sidebar.
 
-## Example
+## Fleet-threshold Alerts
 
-Let's create an alert when the **battery_pct** (battery percentage) is below 5%,
-for devices with serial numbers starting with **MFLT.**
+Fleet-threshold Alerts operate on aggregate Metrics conditions. For example, you
+could configure a Fleet-threshold Alert that triggers when your `production`
+Cohort surpasses a mean count of 5 connection failures in a time window of one
+hour.
 
-- Click **Alerts** in the sidebar
-- Click **New Alert** in the top right
+Only [Metrics marked as Timeseries](/docs/platform/metrics#timeseries) can be
+used as a condition for Fleet-threshold Alerts.
+
+## Device-threshold Alerts
+
+Device-threshold Alerts trigger when any Device reports a certain value or range
+of values for a Metric.
+
+Let's create an alert when the `battery_perc` (battery percentage) is below 5%,
+for devices with serial numbers starting with `MFLT`.
+
+- Click **Alerts** in the sidebar.
+- Click **New Alert** in the top right.
 - Provide a **Title** and optional **Description** (but highly advised)!
-- Next, the **Threshold** value is the _metric_ _name_ within a heartbeat
-- We set the threshold value to **is less than** **5**.
+- Next, the **Condition** value is the Metric string key within a heartbeat.
+- We set the condition value to **is less than** **5**.
 - We also wanted to make sure that the **Device Serial** values start with
-  _MFLT_.
+  `MFLT`.
 - To do this we click **Add**, and specify these values. To add multiple
-  filters, click **Add** and repeat the process
+  filters, click **add "and" condition** and repeat the process.
 
-<p align="center">
-  <img
-    width="500"
-    src="/img/docs/platform/alerts-edit.png"
-    alt="/img/docs/platform/alerts-edit.png"
-  />
-</p>
+![Creating an Alert in the Memfault app](/img/docs/platform/alerts-create.png)
 
 - Above, we have created our Alert! Click **OK**
 

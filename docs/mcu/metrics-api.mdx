@@ -42,6 +42,14 @@ walk through how get started with the component.
 
 <IntegrationCompletePrerequisite />
 
+:::note Rate Limiting
+
+Ingestion of Metrics may be
+[rate-limited](/docs/platform/rate-limiting#custom-reports). Avoid sending data
+more than once per hour per device.
+
+:::
+
 ### Defining Custom Metrics
 
 All custom metrics can be defined with the `MEMFAULT_METRICS_KEY_DEFINE` macro

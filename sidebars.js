@@ -11,13 +11,14 @@ module.exports = {
             "platform/memfault-terminology",
             "platform/create-new-project",
             "platform/software-version-hardware-version",
-            "platform/alerts",
             "platform/jira-integration",
-            "platform/fleet-wide-metrics",
             "platform/user-management",
             "platform/organization-auth-tokens",
             "platform/issue-management",
-            "platform/device-attributes",
+            "platform/metrics",
+            "platform/charts",
+            "platform/alerts",
+            "platform/rate-limiting",
             /* "platform/bulk-device-upload", */
             /* Mentions features to be released: "platform/sso", */
         ],

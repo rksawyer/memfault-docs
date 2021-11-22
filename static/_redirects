@@ -11,3 +11,7 @@
 
 # Android Structured Logs to Custom Events
 /docs/android/structured-logs /docs/android/custom-events
+
+# Specific doc renames
+/docs/platform/fleet-wide-metrics /docs/platform/charts
+/docs/platform/device-attributes /docs/platform/metrics#device-attributes
