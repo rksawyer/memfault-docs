@@ -153,7 +153,7 @@ module.exports = {
                         },
                         {
                             label: "Twitter",
-                            href: "https://twitter.com/memfaulthq",
+                            href: "https://twitter.com/Memfault",
                         },
                         {
                             label: "YouTube",
