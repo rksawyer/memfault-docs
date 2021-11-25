@@ -1,0 +1,46 @@
+---
+id: inspecting-a-device
+title: Inspecting a Device
+sidebar_label: Inspecting a Device
+---
+
+Individual **Devices** can be accessed through many parts of the web
+application, for example by clicking on a Device's serial number on the
+_Devices_ search page.
+
+## Device details
+
+Most of the metadata describing the Device lives in the _Details_ section. You
+can view the
+[hardware version and last reported software version](./software-version-hardware-version.mdx),
+as well as when the device first and last contacted Memfault. You can also
+define some metadata yourself, namely the _Nickname_ and _Notes_ for the Device.
+This can be useful, for example, to record your notes from a debugging session.
+
+![Image showing the entire Device details page](/img/docs/platform/device-details-page.png)
+
+### Linked Devices
+
+:::note
+
+This feature is not automatically enabled, please contact us to discuss how it
+can be enabled for your Project.
+
+:::
+
+In many situations a Device does not operate in a vacuum. When debugging
+wireless earbuds, for example, the left and right bud is intimately linked, and
+misbehavior in one can cause a crash in the other. Memfault enables your Devices
+to report which other Devices they are in some way linked to, whatever "linked"
+means in your particular case.
+
+![Animation showing the mouse hovering over a linked Device tag in the Device details page](/img/docs/platform/linked-devices-hover.gif)
+
+## Tabs for debugging
+
+Below the Device details is a rich set of data reported by the Device, suitable
+for both debugging and general observability. This view contains slightly
+different information depending on your device, please see the pages for
+[MCU devices](../mcu/introduction.mdx),
+[Android devices](../android/introduction.mdx) and
+[Linux devices](../linux/introduction.mdx) for more details.

@@ -9,7 +9,8 @@ module.exports = {
     docs: {
         Platform: [
             "platform/memfault-terminology",
-            "platform/create-new-project",
+            "platform/projects-and-fleets",
+            "platform/inspecting-a-device",
             "platform/software-version-hardware-version",
             "platform/jira-integration",
             "platform/user-management",

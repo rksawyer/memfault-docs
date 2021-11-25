@@ -1,0 +1,133 @@
+---
+id: projects-and-fleets
+title: Projects and Fleets
+sidebar_label: Projects and Fleets
+---
+
+## What is a Project, and what is a Fleet?
+
+A **Project** is the umbrella under which Memfault organizes all the data
+related to a particular hardware product. Individual **Devices** check in
+periodically to the Project via the Memfault API, and the set of all checked-in
+Devices is called the **Fleet**.
+
+A Fleet often consists of homogeneous devices, like a certain model of an AC
+unit or a games console. Fleets may also consist of different but related
+devices, for example left and right wireless earbuds. We recommend keeping
+different revisions of the same hardware in the same Project, so that revisions
+can be easily compared later.
+
+Within each Memfault Project you can:
+
+- [Monitor Fleet-wide metrics](./charts.mdx)
+- [Inspect and debug individual Devices](./inspecting-a-device.mdx)
+- Deploy new firmware/software updates to parts of your
+  [Android](../android/android-releases-guide.mdx) or
+  [MCU](../mcu/releases-guide.mdx) Fleet
+
+### Creating a new Project
+
+You can create a new project in Memfault by navigating to the project selector
+in the sidebar. You can find an option to **Create Project** below your list of
+existing projects.
+
+![/binary-assets/create-new-project.gif](/binary-assets/create-new-project.gif)
+
+<!--
+TODO: more handholding on the project creation flow, maybe with MCU/Android/Linux tabs.
+Probably best to document the "Settings" page (which is basically Project Settings) and
+refer to that in the project creation docs, instead of duplicating it.
+-->
+
+## Organizing your Fleet
+
+### Cohorts
+
+You can slice your Fleet into mutually exclusive **Cohorts**, for example a
+`beta` Cohort and a `production` Cohort. Cohorts are perfect for releasing new
+firmware versions to a small test group, before pushing it out to customers.
+Cohorts also lend themselves to things like light A/B testing, or deploying
+slight variations of the firmware to different Device revisions within a
+Project.
+
+:::note
+
+As you may have noticed already, Cohorts are meant to help you deploy the right
+software to the right Devices at the right time. Devices can only belong to one
+cohort at a time.
+
+:::
+
+<!-- TODO: how does one create cohorts, how do devices end up in them? -->
+
+<!--
+### Device Sets
+
+It is often useful to search for devices that fulfill certain criteria and to
+keep track of the number of matches over time. Examples of this could be
+searching for devices that:
+
+1. have not communicated with Memfault within the last N days,
+2. are running a deprecated software version, or
+3. are reporting a metric over a critical threshold
+
+This kind of follow-up can easily be done by defining a **Device Set**, which
+will do a daily tally of a search query of your choice, and present it to you in
+a graph:
+
+![](/img/docs/platform/device-set-page.png)
+
+As soon as the Device Set is defined, Memfault starts collecting daily tallies.
+We store daily tallies for up to 14 days.
+
+Device Sets are not just pretty graphs, you can also get a listing of the
+Devices belonging to the Device Set, for further analysis.
+
+:::note
+
+Device Sets are great for getting concrete answers to fleet-wide questions. As
+with Cohorts, they are also a great way of categorizing your Fleet, albeit with
+more flexibility: a Device can be a member of any number of Device Sets.
+
+:::
+
+#### Creating a Device Set
+
+Device Sets are created from the _Devices_ page. Perform a search, click on the
+_Save as Device Set_ button, give the Device Set a name (and optional
+description) and you are done! You can view your newly created Device Set on the
+_Device Sets_ page.
+
+:::note
+
+Depending on the query, it may take up to a day for the first data to trickle
+in.
+
+:::
+
+#### Editing/deleting a Device Set
+
+You can edit the name and the description of the Device Set by clicking the edit
+button in the Device Set page. Editing the search query itself is disabled to
+preserve comparability with historical data, if you need to change the query,
+create a new Device Set.
+
+You can of course also delete a Device Set that no longer interests you.
+
+#### Viewing the Devices currently in a Device Set
+
+Clicking the latest count for a Set in the Device Sets page will take you to the
+_Devices_ page, with the appropriate search terms filled in.
+
+#### Interpreting Device Set data
+
+The daily tally corresponds to running the same search query on the Devices page
+once per day, at roughly the same time. This provides an excellent large-scale
+overview of whatever properties of your fleet you may be interested in, but you
+shouldn't rely on the exact number, since the tallying time may vary slightly
+from day to day.
+-->
+
+<!--
+TODO: Hardware Versions, Software Versions etc are also "organizational units", just in another dimension.
+-->
