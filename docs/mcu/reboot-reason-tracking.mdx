@@ -30,6 +30,13 @@ about reboots across resets.
   will be derived from the MCU reset reason register that was part of your
   initial port.
 
+:::note Rate Limiting
+
+Ingestion of Reboots Events may be
+[rate-limited](/docs/platform/rate-limiting#reboot-events).
+
+:::
+
 ### Tracking custom reset reasons
 
 Sometimes resets take place due to software initiated behavior (i.e firmware

@@ -70,6 +70,14 @@ may require this.
 | Maximum Payload Size per Log | 4KB                                                      | 4KB                                                               |
 | Backing Storage              | Disk                                                     | RAM, lost upon reboot (Disk is optional)                          |
 
+:::note Rate Limiting
+
+Ingestion of Custom Events may be
+[rate-limited](/docs/platform/rate-limiting#custom-events). Avoid sending more
+than 1000 custom events per hour per device.
+
+:::
+
 ## Adding Custom Custom Events
 
 Tapping into the Custom Events feature, boils down to these steps:

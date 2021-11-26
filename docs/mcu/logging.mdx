@@ -203,6 +203,14 @@ void your_collect_logs(void) {
 
 ```
 
+:::note Rate Limiting
+
+Ingestion of Log Files may be
+[rate-limited](/docs/platform/rate-limiting#log-files). Avoid calling
+`memfault_log_trigger_collection()` more than once per hour per device.
+
+:::
+
 ### 6. [Optional] Collect Logs as Part of Coredump
 
 :::caution

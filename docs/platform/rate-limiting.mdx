@@ -23,7 +23,9 @@ Here's a list of different events that may be rate-limited:
       <td>
         Custom Reports are a primitive data type from which{" "}
         <Link to="/docs/platform/metrics">Metrics</Link> (both Timeseries and
-        Attributes) are created.
+        Attributes) are created.{" "}
+        <Link to="/docs/platform/memfault-terminology/">Heartbeats</Link> are
+        built on top of Custom Reports.
       </td>
     </tr>
     <tr id="latest-release">
@@ -38,6 +40,34 @@ Here's a list of different events that may be rate-limited:
         returns the latest Release that should be installed for a given device.
       </td>
     </tr>
+    <tr id="log-files">
+      <td>Ingestion of Log Files</td>
+      <td>Device</td>
+      <td>All</td>
+      <td>
+        Log Files uploaded by Bort through the{" "}
+        <Link to="/docs/android/android-bort/#memfault-caliper">Caliper</Link>{" "}
+        system (Android) or using the{" "}
+        <Link to="/docs/mcu/logging/#5-optional-collect-logs-after-events-of-interest">
+          <code>memfault_log_trigger_collection()</code> API
+        </Link>{" "}
+        (MCU).
+      </td>
+    </tr>{" "}
+    <tr id="reboot-events">
+      <td>Ingestion of Reboot Events</td>
+      <td>Device</td>
+      <td>All</td>
+      <td>
+        Reboot Events uploaded by Bort through the{" "}
+        <Link to="/docs/android/android-bort/#memfault-caliper">Caliper</Link>{" "}
+        system (Android) or using the{" "}
+        <Link to="/docs/mcu/reboot-reason-tracking/">
+          Reboot Reason Tracking subsystem
+        </Link>{" "}
+        (MCU).
+      </td>
+    </tr>{" "}
     <tr id="bug-reports">
       <td>Ingestion of Bug Reports</td>
       <td>Device</td>
@@ -45,6 +75,41 @@ Here's a list of different events that may be rate-limited:
       <td>
         <Link to="/docs/android/uploading-android-bugreports">Bug Reports</Link>{" "}
         are Android-specific files.
+      </td>
+    </tr>
+    <tr id="drop-box">
+      <td>Ingestion of Drop Box Manager Entries</td>
+      <td>Device</td>
+      <td>Android</td>
+      <td>
+        <Link to="https://developer.android.com/reference/android/os/DropBoxManager">
+          Drop Box Manager Entries
+        </Link>{" "}
+        uploaded by Bort through the{" "}
+        <Link to="/docs/android/android-bort/#memfault-caliper">Caliper</Link>{" "}
+        system are produced by Android and can contain Java Exceptions, ANRs and
+        Tombstones.
+      </td>
+    </tr>
+    <tr id="batterystats">
+      <td>Ingestion of Batterystats Files</td>
+      <td>Device</td>
+      <td>Android</td>
+      <td>
+        The output of Android's Batterystats subsystem is periodically polled
+        and uploaded by Bort through the{" "}
+        <Link to="/docs/android/android-bort/#memfault-caliper">Caliper</Link>{" "}
+        system.
+      </td>
+    </tr>
+    <tr id="custom-events">
+      <td>Ingestion of Custom Events</td>
+      <td>Device</td>
+      <td>Android</td>
+      <td>
+        <Link to="/docs/android/custom-events">Custom Events</Link> are
+        batch-uploaded by Bort periodically and also when the number of pending
+        events reaches a threshold (by default, 1000 events).
       </td>
     </tr>
     <tr id="trace-events">
