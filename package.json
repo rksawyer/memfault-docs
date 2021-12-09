@@ -8,6 +8,7 @@
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",
         "serve": "docusaurus serve",
+        "optimize-images": "node ./optimize-images.js",
         "lint:prettier:base": "prettier '**/*.{js,jsx,ts,tsx,md,mdx}' --ignore-path=.gitignore",
         "lint:prettier:fix": "yarn lint:prettier:base --write",
         "lint:prettier": "yarn lint:prettier:base --check"
@@ -36,7 +37,10 @@
         ]
     },
     "devDependencies": {
+        "filesize": "^8.0.6",
+        "glob": "^7.2.0",
         "netlify-cli": "^2.30.0",
-        "prettier": "^2.2.1"
+        "prettier": "^2.2.1",
+        "sharp": "^0.29.3"
     }
 }
