@@ -1,0 +1,265 @@
+---
+id: ota
+title: Over-the-Air Updates (OTA)
+sidebar_label: Over-the-Air Updates (OTA)
+---
+
+import CheckSquareTwoTone from "@site/src/components/icons/CheckSquareTwoTone";
+import StyledPercentageOutlined from "@site/src/components/icons/StyledPercentageOutlined";
+import TargetVersionFilled from "@site/src/components/icons/TargetVersionFilled";
+
+import DEPLOYMENT_MATRIX_FIGURE_STYLES from "./deploymentMatrixFigureStyles";
+
+# Over-the-Air Updates (OTA)
+
+Memfault provides secure and scalable updates for all IoT devices
+([MCU][platform-mcu], [Android][platform-android], [Linux][platform-linux], or a
+combination of them). With [real-time monitoring](/docs/platform/charts) and
+controlled releases, you can debug and ship new releases confidently.
+
+## Introduction and Concepts
+
+To deliver OTA Updates:
+
+- Memfault users have different ways to configure which OTA payloads to
+  distribute to which devices.
+- Each device polls Memfault's [Latest Release endpoint][endpoint].
+- Memfault uses [various inputs](#updating-behavior), predominantly the current
+  Software Version of the device, to decide what to return.
+- Each device may receive information about a new available payload.
+- Ultimately, this process is meant to replace or update the software running on
+  a device.
+
+Read more about integrating with Memfault's OTA Updates system on each supported
+platform:
+
+- [OTA Updates for MCU devices][platform-mcu],
+- [OTA Updates for Android (AOSP)][platform-android],
+- [OTA Updates for Embedded Linux][platform-linux].
+
+Memfault provides two Release entities to solve the challenges of over-the-air
+updates: Full Releases and Delta Releases.
+
+### Full Releases
+
+Full Releases provide a way to upgrade device Software Versions regardless of
+the version the device is currently on.
+
+If we define the version of the most current Release as `2.0` and every version
+lower than `2.0` as `*`, we can describe the behavior of a Full Release as:
+`[*→2.0]`.
+
+See the [updating behavior](#updating-behavior) section for more details.
+
+#### Must-pass-through Full Releases
+
+Full Releases can be marked as _must-pass-through_, or MPT for short. When a MPT
+Release is activated, a device on a lower version will be forced to "pass
+through" this Release before an update is allowed to a Full Release with a
+version greater than that of the MPT Release. Typically this setting is not
+needed.
+
+### Delta Releases
+
+A Delta Release describes a transition from exactly one From Version to exactly
+one To Version. The behavior can be described as: `[1.0→2.0]`.
+
+Note that Delta Releases are referred to as ["incremental updates" in Android
+documentation][incremental], or "differential updates" in other places.
+
+A Delta Release is only applied when the device’s current version matches the
+Release’s From Version.
+
+Delta Releases allow for more fine-grained control over the update paths of
+devices. Additionally, Delta Releases generally contain smaller payloads,
+reducing required bandwidth and costs associated with rolling out updates.
+
+See the [updating behavior](#updating-behavior) section for more details.
+
+### Activating a Release
+
+You can activate a Release for a Cohort of your choice. While Releases are
+shared between all Cohorts, activating them happens on a per-Cohort basis.
+
+When activating a Release for a Cohort, you can choose between two behaviors:
+
+#### Normal Activation of a Release
+
+Releases activated _normally_ are available immediately to all devices in a
+Cohort.
+
+#### Staged Rollout of a Release
+
+Staged-rollout deployments can be used to make a Release available to a Cohort
+incrementally.
+
+When a staged-rollout deployment is created for a Cohort, a random subset of its
+devices (amounting to the selected rollout percentage) will be marked as
+_staged_ in this Cohort. Staged-rollout deployments are only applicable to
+devices that are _staged_ in the Cohort.
+
+### Best Practices When Activating Releases
+
+Memfault enables risk mitigation through different mechanisms.
+
+#### Monitoring the effect of Releases
+
+As part of your OTA management workflow, make sure to set up
+[Metric and Issue Charts](/docs/platform/charts#metric-charts) to monitor the
+health of your fleet. You can use
+[Comparison Mode](/docs/platform/charts#comparison-mode) to see how devices in a
+different Cohort or in a newer Software Version are doing relative to other
+devices.
+
+#### Activating Releases in a test Cohort first
+
+Since Releases are shared among all Cohorts, you can use the Release activation
+mechanism to test a Release in (for example) a `beta` Cohort before activating
+the same Release in a `production` Cohort. Once you've gained confidence through
+[monitoring](#monitoring-the-effect-of-releases) that the software in a new
+Release is working as expected, you can activate the Release for a bigger
+Cohort.
+
+#### Using staged-rollout Releases
+
+Releases activated using a [staged rollout](#staged-rollout-of-a-release) can be
+used to limit the amount of devices that will download a specific Release,
+reducing the risk of shipping bugs to a greater portion of the fleet. Once
+you've gained confidence through
+[monitoring](#monitoring-the-effect-of-releases) that the software in a new
+staged-rollout Release is working as expected, you can increase its rollout
+percentage.
+
+## Updating Behavior
+
+When a device queries the [Latest Release endpoint][endpoint], the Memfault
+platform needs to decide which OTA payload to send it. This section covers the
+behavior of our backend when receiving one such query.
+
+:::info
+
+If you wish to better understand Memfault's behavior from the point of view of a
+specific device, you can use the
+"[Inspect details](#debugging-your-configuration)" feature in the **device
+details** view.
+
+:::
+
+### Applicability of an OTA Release
+
+Along with the query to the Latest Release endpoint, a device sends:
+
+- the Device ID (device serial) to determine its Cohort,
+- the [Software Type][terminology] to determine the set of Releases against
+  which to apply these rules,
+- its current [Software Version][terminology],
+- device-specific attributes such as [Hardware Version][terminology].
+
+A Release must be [active](#activating-a-release) for the Cohort a device is in
+to be applicable.
+
+To determine if an active Release is applicable to a device, its payload
+attributes are tested against the parameters sent by the device. If they don’t
+match, a Release is considered to be incompatible and treated as if it did not
+exist.
+
+An Release activated as a [staged-rollout](#staged-rollout-of-a-release) will
+only be applicable to the _staged_ portion of the Cohort it targets. In other
+words, if the device is not _staged_ in its Cohort, such Releases will not be
+applicable.
+
+### Choosing Among Multiple Applicable OTA Releases
+
+If a device has multiple possible update paths, the following rules of
+precedence apply to determine which release is selected.
+
+The following rules apply to all active Releases (Releases that have an active
+Deployment) per Cohort:
+
+1. Use a Delta Release whose From Version matches the current version of the
+   device.
+2. Otherwise, use a must-pass-through (MPT) Release with the lowest Target
+   Version that’s greater than the current version of the device.
+3. Otherwise, use a Full Release with the highest To Version greater than the
+   current version of the device.
+
+In short, the precedence can be summarized like so: **Delta Release** > **MPT
+Release** > **Full Release**.
+
+## Managing OTA Updates with Memfault
+
+The Memfault application contains OTA-related features in several of its views.
+
+### OTA Releases
+
+The **OTA Releases** section of the Memfault application can be accessed from
+the main menu on the left side. In it, you’ll be able to access a list view of
+all Full Releases and the equivalent list view for Delta Releases by selecting
+one of the tabs under the title of the page.
+
+Let's take a look at how to create Releases using the Memfault application.
+
+:::important
+
+Please note that the Release version you choose is expected to match the
+Software Version a device will report once it has installed the OTA payload for
+this Release.
+
+:::
+
+#### Creating a Full Release
+
+To create a Full Release, click on the _Create Release_ button on the top-right
+area of the **OTA Releases** view. Among other information, you'll be prompted
+for a version and whether the Release is a must-pass-through (MPT) Release.
+
+#### Creating a Delta Release
+
+To create a Delta Release, click on the drop-down icon next to the _Create
+Release_ button on the top-right area of the **OTA Releases** view, and select
+_Create Delta Release_. Among other information, you'll be prompted for a From
+Version and a To Version.
+
+#### Adding an OTA payload to a Release
+
+Once you've created a Release, you'll be redirected to the **Release detail**
+view. To add an OTA payload, click on the _Add OTA payload to Release_ button on
+the top-right corner of the _OTA payloads_ card.
+
+Alongside the actual payload file, you'll be prompted for different inputs that
+a device querying the [Latest Release endpoint][endpoint] must match for this
+Release to be applicable to it.
+
+See the [updating behavior](#updating-behavior) section for more details.
+
+### Cohorts View
+
+In the **Cohorts** list view, accessible from the main menu on the left side of
+the application, some OTA-related information is available for each Cohort:
+
+- Whether a Release is active for the Cohort (under the _Deployment_ column).
+- A software distribution widget (under the _Software Distribution_ column).
+
+The distribution of Software Versions in this Cohort is shown in different
+sections of the software distribution widget, with the Software Version
+representing the ongoing active Release highlighted and placed at the start.
+
+### Debugging Your Configuration
+
+If a device in your fleet is not downloading the OTA payload you anticipated
+from our description of [update behavior](#update-behavior), you can use the
+**device details view** to find out about the Software Version history of each
+particular device, and to inspect the result of it calling the [Latest Release
+endpoint][endpoint].
+
+![Inspecting device Software Version history details](/img/docs/platform/ota/device-details-inspect-min.png)
+The _Inspect details_ feature allows you to see the result of calling the Latest
+Release endpoint as this device.
+
+[endpoint]: https://api-docs.memfault.com/#89d8dfa4-10d7-41d3-9c20-7cc356030c4b
+[incremental]:
+  https://source.android.com/devices/tech/ota/tools#incremental-updates
+[terminology]: /docs/platform/memfault-terminology
+[platform-mcu]: /docs/mcu/releases-integration-guide
+[platform-android]: /docs/android/android-releases-integration-guide
+[platform-linux]: /docs/linux/linux-releases-integration-guide

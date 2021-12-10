@@ -16,6 +16,7 @@ module.exports = {
             "platform/user-management",
             "platform/organization-auth-tokens",
             "platform/issue-management",
+            "platform/ota",
             "platform/metrics",
             "platform/charts",
             "platform/alerts",
