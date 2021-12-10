@@ -73,23 +73,37 @@ For more information about adding metrics to your devices:
 - Android: update to the 3.0+ version of the
   [Bort SDK](https://mflt.io/android-bort-sdk)
 
-### Filtering Metric Charts
+### Issue Charts
+
+Issue Charts show an aggregation of a selection of Issues of your choice and
+their occurrence over time. They share some of the features of Metric Charts,
+including [Comparison Mode](#comparison-mode).
+
+You can use Issue Charts to group together Issues that have something in common,
+or represent a class of bugs, in order to track changes in their occurrence over
+time.
+
+To create an Issue Chart, click on **Create Chart** and select **Issue Chart**.
+Search and select the Issues you're intrerested in and **Add** them. You can
+update the selected Issues later as well.
+
+### Filtering Charts
 
 You can filter the values visible in the charts by selecting from the available
 filters on the top-right area of the page:
 
 ![](/binary-assets/fleet-wide-metrics-filter-min.png)
 
-### Metric Chart Comparison Mode
+### Comparison Mode
 
-To compare the values of different sets of Devices, you can click the `Compare`
+To compare the data from different sets of Devices, you can click the `Compare`
 button next to the filters section on the top-right area of the page to add a
 new colorized selection to the filters as well as the charts:
 
 ![](/binary-assets/fleet-wide-metrics-compare-min.png)
 
-When comparing Metric Charts, bear in mind that the aggregations `Count` and
-`Sum` lead to absolute values that are a function of the number of Devices
-reporting the given value. When visualizing absolute values for different sets
-of Devices, the resulting chart could be misleading as the underlying number of
-Devices per set may vary.
+When comparing Metric and Issue Charts, bear in mind that the aggregations
+`Count` and `Sum` lead to absolute values that are a function of the number of
+Devices reporting the given value. When visualizing absolute values for
+different sets of Devices, the resulting chart could be misleading as the
+underlying number of Devices per set may vary.
