@@ -1,0 +1,107 @@
+---
+title: November 2021
+---
+
+## Comparison Mode for Metric Charts
+
+Since the introduction of [Custom Metrics](/docs/platform/metrics), Memfault
+provided various ways to define charts for plotting fleet-wide aggregations
+(sum, count, min, max, mean). These charts are often used to visualize trends
+over time (e.g. "hours between recharge") or to detect anomalies (e.g. "attempt
+until successful connect") for a subset of the fleet. The controls in the
+top-right corner allow for ad-hoc filtering by cohort and/or software version.
+
+![Chart Comparison Mode for Metrics](/img/blog/2021-11-30-fleet-wide-metrics-compare.png)
+
+With the advent of the
+[Chart Comparison Mode](/docs/platform/charts#comparison-mode), users can now
+apply up to 4 such filters simultaneously to plot the resulting data series
+side-by-side inside each custom chart.
+
+Use this feature to visually compare your beta cohort against the production
+fleet or to see at a glance if there are any regressions for key metrics between
+the last software versions.
+
+## Linked Devices
+
+Sometimes, products span across multiple devices: Each pair of wireless earplugs
+has a left and right version, for each smart home installation there may be
+multiple components in a network, or some related device information lives
+outside of Memfault, and your workflow benefits from quick navigation to another
+software system.
+
+![Dynamic links for quick navigation between related devices](/img/blog/2021-11-30-linked-devices-hover.gif)
+
+Memfault's Linked Devices provide convenient navigation in these scenarios. It
+builds these connections by looking at Device Attributes that can be edited in
+the UI, updated via API, or sent from devices at any time.
+
+## MCU Heap Visualization
+
+Memfault can now
+[track and visualize heap allocations with any coredump](/docs/mcu/heap-stats)
+on a growing number of MCU Architectures starting with ARM Cortex-M, nRF Connect
+SDK, ESP32 ESP-IDF, ESP8266, and Dialog DA1469x.
+
+![Interactive Heap Visualization for MCU](/img/blog/2021-11-30-mcu-heap-visualization.gif)
+
+This optional debugging feature tags all heap allocations with their respective
+size, address, and location of code that allocated it. Use it to understand
+memory distribution, heap fragmentation, or to find memory leaks in an
+out-of-memory situation in the field.
+
+## Managing Rate Limits
+
+Memfault's frontend is now more upfront with the visualization of
+[quotas and rate limits](/docs/platform/rate-limiting) that may affect large
+projects.
+
+![Quota page on project settings](/img/blog/2021-11-30-settings-quota-page.png)
+
+When managing
+[Timeseries Metrics and Device Attributes](/docs/platform/metrics), Memfault
+informs about the number of remaining metrics for fleet-wide analytics. The
+dedicated page at Settings→Quotas presents an overview.
+
+## General
+
+- Various UI improvements: Creating new elements in the UI follow a similar flow
+  throughout Memfault, places that enumerate software versions consistently use
+  their human-readable form, and unexpected errors no longer prevent
+  interactions in the frontend.
+- The Qualcomm QCC51xx support has received further compatibility improvements
+  when processing coredumps (`.xed`/`.xcd`).
+- There is now detailed documentation on
+  [how Memfault handles ordering of version numbers](/docs/platform/software-version-hardware-version#ordering)
+  and [on Metrics and Device Attributes](/docs/platform/metrics).
+
+## MCU SDK
+
+In November, two SDK versions
+[0.27.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0272-and-sdk-0271---nov-5-2021)
+and
+[0.27.3](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0273-and-sdk-0272---nov-22-2021)
+were released. Here are some highlights:
+
+- The Mynewt integration now supports the Memfault demo shell
+  via `mflt_shell_init()`, see
+  the [Mynewt port README.md](https://github.com/memfault/memfault-firmware-sdk/blob/master/ports/mynewt/README.md) for
+  details. Huge thanks to [@t3zeng](https://github.com/t3zeng) for providing
+  this implementation!
+- Add support for ESP-IDF v4.3.1. This update should fix the bootlooping issue
+  seen when using the port with v4.3.1+ of ESP-IDF.
+- Add support for `LOG2` deferred mode on Zephyr. This should fix bootloops when
+  enabling `LOG2`.
+- Fix a build error for the Nordic Connect SDK v1.7.99 development version
+- Update the esp32 and zephyr examples to use `1.0.0-dev` instead
+  of `1.0.0+<6 digits of build id>` for the version specifier. Build id is no
+  longer required for symbol file reconciliation and the `+` character is a
+  reserved character for URI schemes; this impacted OTA release requests. See
+  this document
+  for [Memfault's recommended versioning strategy](/docs/platform/software-version-hardware-version/#software-version)
+- Add a reboot reason port for the STM32F7xx family.
+
+## Android SDK
+
+There was no new version of
+[the Memfault Android SDK](https://github.com/memfault/bort) in November.
