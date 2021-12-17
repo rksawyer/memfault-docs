@@ -16,11 +16,11 @@ the OTA update process. This supports:
   Memfault dashboard.
 - Downloading updates (and resuming interrupted downloads).
 - UI notifications of available updates, and download progress.
+- Incremental updates, referred to as
+  [Delta Releases](/docs/platform/ota/#delta-releases) in Memfault lingo.
 
 In future updates, additional features will be supported:
 
-- Incremental updates (once supported by Memfault servers - no client updates
-  will be required).
 - Further remote configuration of update behavior (e.g. headless update
   behavior, force-update policy).
 
@@ -95,8 +95,8 @@ export TARGET_USES_MFLT_OTA=1
 ```
 
 After building and installing the system image, the Memfault OTA app will be
-active. A release can now be
-[deployed to the cohort](android-releases-integration-guide#deploy-release)
+active. A Release can now be
+[activated in the Cohort](android-releases-integration-guide#activate-the-release)
 containing this device.
 
 ## Customizing the OTA Update Client

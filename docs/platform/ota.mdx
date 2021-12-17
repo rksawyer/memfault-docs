@@ -37,6 +37,15 @@ platform:
 - [OTA Updates for Android (AOSP)][platform-android],
 - [OTA Updates for Embedded Linux][platform-linux].
 
+Read about related Memfault-specific terminology that you may need to refer to
+to better grasp the contents of this document:
+
+- [Software Versions and Hardware Versions](/docs/platform/software-version-hardware-version).
+- [Version Schemes](/docs/platform/software-version-hardware-version#version-schemes)
+  to understand Software Version ordering.
+- Generic
+  [Memfault terminology documentation](/docs/platform/memfault-terminology).
+
 Memfault provides two Release entities to solve the challenges of over-the-air
 updates: Full Releases and Delta Releases.
 
@@ -90,13 +99,13 @@ Cohort.
 
 #### Staged Rollout of a Release
 
-Staged-rollout deployments can be used to make a Release available to a Cohort
-incrementally.
+Staged-rollout Release Activations can be used to make a Release available to a
+Cohort incrementally.
 
-When a staged-rollout deployment is created for a Cohort, a random subset of its
-devices (amounting to the selected rollout percentage) will be marked as
-_staged_ in this Cohort. Staged-rollout deployments are only applicable to
-devices that are _staged_ in the Cohort.
+When a staged-rollout Release Activation is created for a Cohort, a random
+subset of its devices (amounting to the selected rollout percentage) will be
+marked as _staged_ in this Cohort. Staged-rollout deployments are only
+applicable to devices that are _staged_ in the Cohort.
 
 ### Best Practices When Activating Releases
 
@@ -136,6 +145,12 @@ When a device queries the [Latest Release endpoint][endpoint], the Memfault
 platform needs to decide which OTA payload to send it. This section covers the
 behavior of our backend when receiving one such query.
 
+In this section, we'll sometimes refer to one Software Version being higher or
+lower than another. To understand how Memfault resolves Software Version
+ordering, refer to the
+[Version Schemes](/docs/platform/software-version-hardware-version#version-schemes)
+documentation section.
+
 :::info
 
 If you wish to better understand Memfault's behavior from the point of view of a
@@ -173,8 +188,7 @@ applicable.
 If a device has multiple possible update paths, the following rules of
 precedence apply to determine which release is selected.
 
-The following rules apply to all active Releases (Releases that have an active
-Deployment) per Cohort:
+The following rules apply to all active Releases per Cohort:
 
 1. Use a Delta Release whose From Version matches the current version of the
    device.

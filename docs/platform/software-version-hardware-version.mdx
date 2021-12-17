@@ -16,17 +16,16 @@ https://api-docs.memfault.com/#memfault-resources
 
 ## Hardware Version
 
-The "Hardware Version" is used to identify the type of hardware on which
-software is running. In Memfault, a device always has exactly one "Hardware
-Version". It can be used to differentiate different device types being tracked
-in the same project (i.e. `smart-toaster` and `smart-oven`) and different board
-revisions of the same device type (i.e. `smart-toaster-evt`,
-`smart-toaster-pvt`, etc.).
+The Hardware Version is used to identify the type of hardware on which software
+is running. In Memfault, a device always has exactly one Hardware Version. It
+can be used to identify different device types being tracked in the same Project
+(i.e. `smart-toaster` and `smart-oven`) and different board revisions of the
+same device type (i.e. `smart-toaster-evt`, `smart-toaster-pvt`, etc.).
 
 ### Android
 
 On Android, Memfault uses the `ro.product.board` system property as the device's
-hardware version by default. From the
+Hardware Version by default. From the
 [Android product documentation](https://source.android.com/setup/develop/new-device#build-layers):
 
 > The board/device layer represents \[...\] the bare schematics of a product.
@@ -34,11 +33,11 @@ hardware version by default. From the
 
 ## Software Type
 
-The "Software Type" is used to identify the separate pieces of software running
-on a given device. This can be images running on different MCUs (i.e
-`main-mcu-app` & `bluetooth-mcu`) or different images running on the same MCU
-(i.e `main-mcu-bootloader` & `main-mcu-app`). You can also use "Software Type"
-to distinguish between build variants (i.e. `main-mcu-dvt` & `main-mcu-evt`).
+The Software Type is used to identify the separate pieces of software running on
+a given device. This can be images running on different MCUs (i.e `main-mcu-app`
+& `bluetooth-mcu`) or different images running on the same MCU (i.e
+`main-mcu-bootloader` & `main-mcu-app`). You can also use Software Types to
+distinguish between build variants (i.e. `main-mcu-dvt` & `main-mcu-evt`).
 
 ### MCU
 
@@ -51,10 +50,10 @@ side.
 
 ### Android
 
-Memfault uses the "Software Type" `android-build` to identify the system
-software running on the device.
+Memfault uses the Software Type `android-build` to identify the system software
+running on the device.
 
-Applications have a "Software Type" equal to their
+Applications have a Software Type equal to their
 [application ID](https://developer.android.com/studio/build/application-id),
 e.g. `com.acme.smartsink`.
 
@@ -64,31 +63,25 @@ A Software Version is a single build of a particular Software Type. Software
 Versions are used in Memfault in a variety of ways, including but not limited
 to:
 
-- Displaying issue distributions by version
-- Determining regressions: re-opening an issue if a defect recurs in a newer
-  Software Version after the issue was marked as resolved
-- Checking if a device is up to date: if your project uses Memfault to deploy
+- Displaying [Issue distributions](/docs/platform/charts) by version.
+- Determining regressions: re-opening an Issue if a defect recurs in a newer
+  Software Version after the Issue was marked as resolved.
+- Checking if a device is up to date: if your Project uses Memfault to deploy
   firmware, the firmware's Software Version is used to determine if a device
-  requires an update
+  requires an update.
 
 ### Version Schemes
 
+If you're interested in learning how Memfault decides which OTA Release to
+deliver to a specific device, refer to the
+[Updating Behavior section on our platform-agnostic OTA documentation page](/docs/platform/ota#updating-behavior).
+
 #### Ordering
 
-We recommend using a [SemVer](https://semver.org/) for your software version,
-[see details here](#recommended-versioning-scheme).
-
-If you do not use SemVer, we fallback to using natural sort, as implemented by
+We recommend using a [SemVer](https://semver.org/) for your Software Versions,
+[see details here](#recommended-versioning-scheme). If you do not use SemVer, we
+fallback to using natural sort, as implemented by
 [natsort](https://pypi.org/project/natsort/) to resolve ordering.
-
-This means that a device will not receive a previous OTA release, even if it's
-deployed to the cohort (or the device cohort changes); in other words,
-**downgrades are not permitted**.
-
-To override this logic, there's a per-cohort setting _"Disable Version
-Checking"_ which will always return the currently-deployed release to a device,
-even if it's older (downgrades will then be possible! so be sure the affected
-devices can tolerate the downgrade).
 
 Memfault uses a slight tweak on top of `natsort` to support `rc` or `dev`
 versioning schemes. This is achieved by
@@ -121,7 +114,7 @@ Or:
 1.0.0-rc.1
 ```
 
-Be cautious about more exotic versioning schemes! natsort will only handle the
+Be cautious about more exotic versioning schemes! `natsort` will only handle the
 common scenarios.
 
 For example, the semver 2.0 spec permits appending build metadata to a version
@@ -131,8 +124,8 @@ number:
 1.0.0+092ced197518c8e304232239315c611af6ff2404
 ```
 
-But natsort will apply lexical ordering (under the default settings), which may
-not result in the expected OTA response
+But `natsort` will apply lexical ordering (under the default settings), which
+may not result in the expected OTA response
 ([see _"Disable Version Checking"_](#ordering)).
 
 #### Recommended Versioning Scheme
@@ -166,7 +159,6 @@ Specifically, using these forms will result in the least confusion:
    # using a calendar version. always increments, and can be generated without
    # context (assuming only 1 build is deployed per day)
    1.0.0-nightly.20220123
-
    ```
 
 4. development builds generated locally (using git sha or other identifier):
@@ -234,12 +226,12 @@ To test version ordering, two approaches are recommended:
    [Releases API](https://api-docs.memfault.com/#89d8dfa4-10d7-41d3-9c20-7cc356030c4b)
    for more information.
 
-### Platform Specific Considerations
+### Platform-Specific Considerations
 
 #### MCU
 
-A single Software Version is associated with one Symbol Software Artifact (.elf
-file).
+A single Software Version is associated with one Symbol Software Artifact
+(`.elf` file).
 
     ├── main-fw     # Software Type
     │   ├── 1.0.0   # Software Version

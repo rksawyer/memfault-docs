@@ -56,6 +56,7 @@ Commands:
   upload-mcu-symbols          Upload symbols for an MCU build.
   upload-ota-payload          Upload a binary to be used for an OTA update.
   upload-symbols              [DEPRECATED] Upload symbols for an MCU or...
+  upload-xed                  Upload an .xed or .xcd file for analysis.
 ```
 
 ### Authentication
@@ -72,11 +73,13 @@ commands require which forms of authentication.
 
 | Command                    | Email + Password | Email + API key | Organization Token | Project Key |
 | -------------------------- | :--------------: | :-------------: | :----------------: | :---------: |
+| deploy-release             |        ✅        |       ✅        |         ✅         |     ✅      |
 | post-chunk                 |                  |                 |                    |     ✅      |
 | upload-android-app-symbols |        ✅        |       ✅        |         ✅         |             |
 | upload-aosp-symbols        |        ✅        |       ✅        |         ✅         |             |
 | upload-bugreport           |        ✅        |       ✅        |         ✅         |     ✅      |
 | upload-coredump            |        ✅        |       ✅        |         ✅         |     ✅      |
+| upload-xed                 |        ✅        |       ✅        |         ✅         |     ✅      |
 | upload-mcu-symbols         |        ✅        |       ✅        |         ✅         |             |
 | upload-ota-payload         |        ✅        |       ✅        |         ✅         |             |
 
