@@ -18,10 +18,11 @@ discuss the platform-specific aspects for MCU Projects.
 For a device in a Project, several pieces of identifying information are
 tracked.
 
-- Device Serial: a unique identifier of a device. For example, this may be a
-  serial number written into the EEPROM of your product in the factory or a chip
-  identifier present in the silicon of the main MCU on your platform. This
-  identifier _must_ be unique for every device in the same Project.
+- Device ID: a unique identifier of a device (often the device serial number).
+  For example, this may be a serial number written into the EEPROM of your
+  product in the factory or a chip identifier present in the silicon of the main
+  MCU on your platform. This identifier _must_ be unique for every device in the
+  same Project.
 - Hardware Version: for a given device, the revision of hardware present. For
   example, this can be used to represent the different stages of
   [manufacturing builds](https://mflt.io/hardware-engineer-speak) (`evt`, `dvt`,

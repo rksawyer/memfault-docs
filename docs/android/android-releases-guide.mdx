@@ -25,8 +25,8 @@ discuss the platform-specific aspects for Android.
 For a device in a project, several pieces of identifying information are
 tracked.
 
-- Device ID/Device Serial: a unique identifier of a device. The system property
-  `ro.serialno` or
+- Device ID: a unique identifier of a device (often the device serial number).
+  The system property `ro.serialno` or
   [`android.os.Build.getSerial()` API](<https://developer.android.com/reference/android/os/Build#getSerial()>)
   is used to get this value. Make sure it is unique for every device in the same
   Project, and that the calling app has the requisite permissions to obtain the
