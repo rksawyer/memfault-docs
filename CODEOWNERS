@@ -4,6 +4,5 @@
 * @owners-docs
 /src/ @memfault/owners-typescript
 
-/docs/embedded/ @memfault/owners-mcu
 /docs/mcu/ @memfault/owners-mcu
 /docs/android/ @memfault/owners-kotlin
