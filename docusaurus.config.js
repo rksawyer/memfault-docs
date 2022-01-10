@@ -16,7 +16,8 @@ module.exports = {
     projectName: "memfault-firmware-sdk", // Usually your repo name.
     themeConfig: {
         algolia: {
-            apiKey: "0ef3936beda1a4d57af35bd5917462b2",
+            appId: "4SXF6GYFKZ",
+            apiKey: "2028276a4fc7f09eeb0bd082fbd85164",
             indexName: "memfault",
         },
         gtag: {
