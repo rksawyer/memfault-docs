@@ -13,9 +13,9 @@ import DEPLOYMENT_MATRIX_FIGURE_STYLES from "./deploymentMatrixFigureStyles";
 # Over-the-Air Updates (OTA)
 
 Memfault provides secure and scalable updates for all IoT devices
-([MCU][platform-mcu], [Android][platform-android], [Linux][platform-linux], or a
-combination of them). With [real-time monitoring](/docs/platform/charts) and
-controlled releases, you can debug and ship new releases confidently.
+([MCU][docs-mcu], [Android][docs-android], [Linux][docs-linux], or a combination
+of them). With [real-time monitoring](/docs/platform/charts) and controlled
+releases, you can debug and ship new releases confidently.
 
 ## Introduction and Concepts
 
@@ -23,7 +23,7 @@ To deliver OTA Updates:
 
 - Memfault users have different ways to configure which OTA payloads to
   distribute to which devices.
-- Each device polls Memfault's [Latest Release endpoint][endpoint].
+- Each device polls Memfault's [Latest Release endpoint][latest-endpoint].
 - Memfault uses [various inputs](#updating-behavior), predominantly the current
   Software Version of the device, to decide what to return.
 - Each device may receive information about a new available payload.
@@ -33,9 +33,13 @@ To deliver OTA Updates:
 Read more about integrating with Memfault's OTA Updates system on each supported
 platform:
 
-- [OTA Updates for MCU devices][platform-mcu],
-- [OTA Updates for Android (AOSP)][platform-android],
-- [OTA Updates for Embedded Linux][platform-linux].
+- [OTA Updates for MCU devices][docs-mcu],
+- [OTA Updates for Android (AOSP)][docs-android],
+- [OTA Updates for Embedded Linux][docs-linux].
+
+[docs-mcu]: /docs/mcu/releases-integration-guide
+[docs-android]: /docs/android/android-releases-integration-guide
+[docs-linux]: /docs/linux/linux-releases-integration-guide
 
 Read about related Memfault-specific terminology that you may need to refer to
 to better grasp the contents of this document:
@@ -62,8 +66,8 @@ See the [updating behavior](#updating-behavior) section for more details.
 
 #### Must-pass-through Full Releases
 
-Full Releases can be marked as _must-pass-through_, or MPT for short. When a MPT
-Release is activated, a device on a lower version will be forced to "pass
+Full Releases can be marked as _must-pass-through_, or MPT for short. When an
+MPT Release is activated, a device on a lower version will be forced to "pass
 through" this Release before an update is allowed to a Full Release with a
 version greater than that of the MPT Release. Typically this setting is not
 needed.
@@ -75,6 +79,9 @@ one To Version. The behavior can be described as: `[1.0→2.0]`.
 
 Note that Delta Releases are referred to as ["incremental updates" in Android
 documentation][incremental], or "differential updates" in other places.
+
+[incremental]:
+  https://source.android.com/devices/tech/ota/tools#incremental-updates
 
 A Delta Release is only applied when the device’s current version matches the
 Release’s From Version.
@@ -141,9 +148,9 @@ percentage.
 
 ## Updating Behavior
 
-When a device queries the [Latest Release endpoint][endpoint], the Memfault
-platform needs to decide which OTA payload to send it. This section covers the
-behavior of our backend when receiving one such query.
+When a device queries the [Latest Release endpoint][latest-endpoint], the
+Memfault platform needs to decide which OTA payload to send it. This section
+covers the behavior of our backend when receiving one such query.
 
 In this section, we'll sometimes refer to one Software Version being higher or
 lower than another. To understand how Memfault resolves Software Version
@@ -169,6 +176,8 @@ Along with the query to the Latest Release endpoint, a device sends:
   which to apply these rules,
 - its current [Software Version][terminology],
 - device-specific attributes such as [Hardware Version][terminology].
+
+[terminology]: /docs/platform/memfault-terminology
 
 A Release must be [active](#activating-a-release) for the Cohort a device is in
 to be applicable.
@@ -241,10 +250,144 @@ view. To add an OTA payload, click on the _Add OTA payload to Release_ button on
 the top-right corner of the _OTA payloads_ card.
 
 Alongside the actual payload file, you'll be prompted for different inputs that
-a device querying the [Latest Release endpoint][endpoint] must match for this
-Release to be applicable to it.
+a device querying the [Latest Release endpoint][latest-endpoint] must match for
+this Release to be applicable to it.
 
 See the [updating behavior](#updating-behavior) section for more details.
+
+### Cohort Version Management
+
+To dive into your OTA configuration for a specific Cohort, you can access the
+**Cohort detail** view by first opening the **Cohorts** list view from the main
+menu, and then selecting the Cohort you're interested in.
+
+Under the **Version Management** tab, you'll find the _version matrix_: a live
+view into the very next OTA update that each device in this Cohort will receive.
+
+The version matrix consists of rows representing _current versions_ that are
+currently reported by devices in the field. Its columns represent _future
+versions_ devices of the Cohort will report (after having applied OTA releases).
+What follows is a tour of the different interface elements of the version
+matrix.
+
+In each cell of the version matrix you'll find a count of devices. If, for
+example, a device count of 10K showed up on a cell in the intersection of row
+version 1.1 and the column 2.0, that would mean 10K devices are currently on
+version 1.1 and the immediate next step they're going to take is to download an
+OTA payload for a Release with version 2.0.
+
+Conversely, if 5K devices were to show up on a cell in a row with version 1.0
+and under the column for version 1.0, that would mean those 5K devices will stay
+on version 1.0.
+
+All device counts on the version matrix are clickable, and will take you to a
+complete list of the devices represented under that count.
+
+<figure id="figure-1" style={DEPLOYMENT_MATRIX_FIGURE_STYLES}>
+  <img
+    src="/img/docs/platform/ota/matrix-focus-full-releases-min.png"
+    alt="Figure 1: Full Releases highlighted on the version matrix"
+  />
+  <figcaption>
+    Figure 1: Full Releases highlighted on the version matrix.
+  </figcaption>
+</figure>
+
+[Figure 1](#figure-1) highlights the area of the version matrix that shows
+future versions. In this example, three [Full Releases](#full-releases) exist
+(for versions 1.0, 2.0 and 1.1), but only Full Releases 1.0 and 2.0 are active.
+This is represented by the blue checkbox icon <CheckSquareTwoTone />. The dotted
+line around the icon for the 2.2 version means that there is no Full Release
+with the same version.
+
+The <TargetVersionFilled /> icon (which conventionally means "final state") on
+top of the 2.2 version shows us that 2.2 is a final target version for this
+Cohort. Eventually, all devices in this Cohort will end up on this version 2.2.
+
+<figure id="figure-2" style={DEPLOYMENT_MATRIX_FIGURE_STYLES}>
+  <img
+    src="/img/docs/platform/ota/matrix-focus-delta-releases-min.png"
+    alt="Figure 2: Delta Releases highlighted on the version matrix"
+  />
+  <figcaption>
+    Figure 2: Delta Releases highlighted on the version matrix.
+  </figcaption>
+</figure>
+
+[Figure 2](#figure-2) highlights the area of the version matrix that represents
+[Delta Releases](#delta-releases). The _Current Version_ column is where you may
+see the From Version of a Delta Release, and the _Target_ column is where the
+Target Version of a Delta Release can be found. An empty drop-down icon
+indicates that there is no active Delta Release from the row's version. In the
+picture, only a Delta Release (marked with a <CheckSquareTwoTone />) from 2.0 to
+2.1 is active .
+
+<figure id="figure-3" style={DEPLOYMENT_MATRIX_FIGURE_STYLES}>
+  <img
+    src="/img/docs/platform/ota/matrix-full-and-delta-min.png"
+    alt="Figure 3: Full Releases and Delta Releases on the version matrix"
+  />
+  <figcaption>
+    Figure 3: Full Releases and Delta Releases on the version matrix.
+  </figcaption>
+</figure>
+
+[Figure 3](#figure-3) shows the following scenario:
+
+- Two active Full Releases exist (1.0 and 2.0) and there's one active Delta
+  Release from 2.0 to 2.1.
+- Full Release 1.0 is currently not applicable to any device.
+- 21K devices currently on 0.9 are going to download a Full Release to 2.0.
+- 36K devices currently on 1.1 are going to download a Full Release to 2.0.
+- 132K devices currently on 2.0 are going to download a Delta Release from 2.0
+  to 2.1.
+- 738K devices are already on 2.1. They will not receive any updates and will
+  stay on version 2.1.
+
+<figure id="figure-4" style={DEPLOYMENT_MATRIX_FIGURE_STYLES}>
+  <img
+    src="/img/docs/platform/ota/matrix-staged-min.png"
+    alt="Figure 4: A staged rollout on the version matrix"
+  />
+  <figcaption>Figure 4: a staged rollout on the version matrix.</figcaption>
+</figure>
+
+[Figure 4](#figure-4) shows the addition of a
+[staged rollout](#staged-rollout-of-a-release) of a Delta Release from version
+2.1 to version 2.2. The percentage icon <StyledPercentageOutlined /> indicates a
+staged rollout. In this scenario, only 5.9K devices out of a total of 54K that
+are on version 2.1 will download the payload from Delta Release from 2.1 to 2.2.
+
+#### Managing OTA Updates
+
+The version matrix in the Cohort Version Management tab can also be used to
+manage your OTA Releases.
+
+<figure id="figure-5" style={DEPLOYMENT_MATRIX_FIGURE_STYLES}>
+  <img
+    src="/img/docs/platform/ota/matrix-actions-min.png"
+    alt="Figure 5: Highlighted actions on the version matrix"
+  />
+  <figcaption>Figure 5: highlighted actions on the version matrix.</figcaption>
+</figure>
+
+[Figure 5](#figure-5) highlights the location of buttons on the version matrix
+that allow for fine-grained control of OTA Releases in a specific Cohort.
+
+You can manage Full Releases by using the controls arranged horizontally on the
+top side of the version matrix:
+
+- Click on the plus icon on the right end to create a new Full Release.
+- Use the highlighted buttons under each future version to create a Full Release
+  targeting this version, or to create a Release Activation, abort it, or
+  configure it.
+
+Similarly, you can manage Delta Releases using the controls arranged vertically
+on the left side of the matrix:
+
+- Click on the plus icon at the bottom to create a new Delta Release.
+- Use the buttons next to each current version to create a Delta Release with
+  this From Version, or to activate an existing Delta Release.
 
 ### Cohorts View
 
@@ -264,16 +407,11 @@ If a device in your fleet is not downloading the OTA payload you anticipated
 from our description of [update behavior](#update-behavior), you can use the
 **device details view** to find out about the Software Version history of each
 particular device, and to inspect the result of it calling the [Latest Release
-endpoint][endpoint].
+endpoint][latest-endpoint].
 
 ![Inspecting device Software Version history details](/img/docs/platform/ota/device-details-inspect-min.png)
 The _Inspect details_ feature allows you to see the result of calling the Latest
 Release endpoint as this device.
 
-[endpoint]: https://api-docs.memfault.com/#89d8dfa4-10d7-41d3-9c20-7cc356030c4b
-[incremental]:
-  https://source.android.com/devices/tech/ota/tools#incremental-updates
-[terminology]: /docs/platform/memfault-terminology
-[platform-mcu]: /docs/mcu/releases-integration-guide
-[platform-android]: /docs/android/android-releases-integration-guide
-[platform-linux]: /docs/linux/linux-releases-integration-guide
+[latest-endpoint]:
+  https://api-docs.memfault.com/#89d8dfa4-10d7-41d3-9c20-7cc356030c4b
