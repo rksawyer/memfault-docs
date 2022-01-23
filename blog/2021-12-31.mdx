@@ -1,0 +1,56 @@
+---
+title: December 2021
+---
+
+## Device Sets
+
+You can now observe the development of your device fleet even better via fully
+customizable
+[Device Sets](https://docs.memfault.com/docs/platform/projects-and-fleets#device-sets)
+(Fleet→Device Sets). Based on your project-specific
+[Device Attributes and Time-Series Metrics](https://docs.memfault.com/docs/platform/metrics)
+each set describes devices that match unique criteria such as “devices that
+exceeded 40MB of daily network traffic” or “devices in the UK”.
+
+You can create a Device Set from any existing device search and use them to
+track key performance indicators over time.
+
+![Various Charts based on Device Sets](/img/blog/2021-12-31-devicesets.png)
+
+## Issue Charts
+
+The new chart type
+[Issue Chart](https://docs.memfault.com/docs/platform/charts#issue-charts)
+complements the custom Metrics Chart (Dashboards→Metrics) and plots the number
+of occurrences of a specific group of issues over time. When combined with the
+recently introduced
+[Chart Comparison Mode](https://docs.memfault.com/docs/platform/charts#comparison-mode),
+Issue Charts allow for sophisticated tracking of ongoing software updates to
+answer the relevant question “does my software update fix the bugs it claims to
+fix?”
+
+![Dialog to create a new Issue Chart](/img/blog/2021-12-31-configuring-issue-chart.png)
+
+<!-- truncate -->
+
+## General
+
+- Added editing of primary software type via Project→Settings
+- Added ability to search for issues by ID (when merging or for issue charts)
+- Added option to disable checks for Primary Software Type per Cohort in OTA
+  rules
+- Improved [Documentation on OTA](https://docs.memfault.com/docs/platform/ota)
+- Removed `min_version` from OTA releases
+- Removed the term “Deployment” from UI and documentation
+- Removed Events Charts from Overview Dashboard
+
+## MCU SDK
+
+There was no new version of
+[the Memfault MCU SDK](https://github.com/memfault/memfault-firmware-sdk) in
+December.
+
+## Android SDK
+
+We did not publish a new version of
+[Bort, the Memfault AOSP SDK](https://github.com/memfault/bort), in December.
