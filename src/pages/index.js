@@ -13,36 +13,66 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
-const features = [
+const supportedTargets = [
     {
+        col: 4,
+        title: <>MCU Guides</>,
+        description: (
+            <>
+                Memfault's{" "}
+                <a href="https://github.com/memfault/memfault-firmware-sdk/">
+                    open-source SDK
+                </a>{" "}
+                supports any MCU device irrespective of the RTOS in use or
+                connectivity path in place. See{" "}
+                <a href="docs/mcu/introduction">documentation for MCUs</a>.
+            </>
+        ),
+    },
+    {
+        col: 4,
+        title: <>Android Guides</>,
+        description: (
+            <>
+                Memfault supports any AOSP device. Our{" "}
+                <a href="https://github.com/memfault/bort">open-source SDK</a>{" "}
+                is available for Android 8-12. See{" "}
+                <a href="docs/android/introduction">
+                    documentation for Android
+                </a>
+                .
+            </>
+        ),
+    },
+    {
+        col: 4,
+        title: <>Embedded Linux Guides</>,
+        description: (
+            <>
+                Memfault support for Linux is a new addition, and it's currently
+                limited to over-the-air updates (OTA) and release management.
+                See{" "}
+                <a href="docs/linux/introduction">documentation for Linux</a>.
+            </>
+        ),
+    },
+];
+
+const externalContent = [
+    {
+        col: 6,
         title: <>Memfault Platform</>,
-        // TODO replace with Memfault artwork
-        // imageUrl: "img/undraw_docusaurus_react.svg",
         description: (
             <>
-                <a href="/docs/platform/memfault-terminology">Memfault</a> can
-                catch, triage, and fix issues on any hardware platform. Catch
-                issues automatically, fix them in hours, and deploy updates
-                surgically.
+                The <a href="/docs/platform">Memfault Platform</a> is a web
+                application where all the features you've integrated with in
+                your project come to life.
             </>
         ),
     },
     {
-        title: <>Embedded SDK</>,
-        // TODO replace with Memfault artwork
-        // imageUrl: "img/undraw_docusaurus_mountain.svg",
-        description: (
-            <>
-                Memfault's <a href="docs/mcu/introduction">Embedded SDK</a>{" "}
-                packages send data and events from embedded hardware devices.
-                Example code is available for several platforms.
-            </>
-        ),
-    },
-    {
+        col: 6,
         title: <>Cloud API</>,
-        // TODO replace with Memfault artwork
-        // imageUrl: "img/undraw_docusaurus_tree.svg",
         description: (
             <>
                 Memfault's open{" "}
@@ -58,19 +88,47 @@ const features = [
             </>
         ),
     },
+    {
+        col: 6,
+        title: <>Webinars</>,
+        description: (
+            <>
+                Our <a href="on-demand webinars">on-demand webinars</a> contain
+                plenty of conversations and advice on embedded development.
+            </>
+        ),
+    },
+    {
+        col: 6,
+        title: <>Interrupt Blog</>,
+        description: (
+            <>
+                We are proud to be the founders of the{" "}
+                <a href="https://interrupt.memfault.com/">Interrupt Blog</a>, a
+                great community for people who share a passion for hardware and
+                embedded development.
+            </>
+        ),
+    },
 ];
 
-function Feature({ imageUrl, title, description }) {
+function FeatureRow({ features }) {
+    return (
+        <div className="row">
+            {features.map((props, idx) => (
+                <Feature key={idx} {...props} />
+            ))}
+        </div>
+    );
+}
+
+function Feature({ imageUrl, title, description, col }) {
     const imgUrl = useBaseUrl(imageUrl);
     return (
-        <div className={classnames("col col--4", styles.feature)}>
+        <div className={classnames(`col col--${col}`, styles.feature)}>
             {imgUrl && (
                 <div className="text--center">
-                    <img
-                        className={styles.featureImage}
-                        src={imgUrl}
-                        alt={title}
-                    />
+                    <img src={imgUrl} alt={title} />
                 </div>
             )}
             <h3>{title}</h3>
@@ -107,17 +165,12 @@ function Home() {
                 </div>
             </header>
             <main>
-                {features && features.length && (
-                    <section className={styles.features}>
-                        <div className="container">
-                            <div className="row">
-                                {features.map((props, idx) => (
-                                    <Feature key={idx} {...props} />
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
+                <section className={styles.features}>
+                    <div className="container">
+                        <FeatureRow features={supportedTargets} />
+                        <FeatureRow features={externalContent} />
+                    </div>
+                </section>
             </main>
         </Layout>
     );
