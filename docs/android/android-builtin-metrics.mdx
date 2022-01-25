@@ -1,0 +1,135 @@
+---
+id: android-builtin-metrics
+title: Android Built-in Metrics
+sidebar_label: Built-in Metrics
+---
+
+The Bort SDK contains built-in support for collecting various types of metrics
+from Android devices.
+
+Some are automatically collected, and some require configuration in the Memfault
+dashboard.
+
+To record custom metrics, see the [Reporting APIs](android-custom-metrics).
+
+:::info
+
+Be sure to configure which metrics you would like to be
+[Timeseries](/docs/platform/metrics#timeseries) and
+[Attributes](/docs/platform/metrics#attributes) in the Metrics Dashboard.
+
+:::
+
+### Battery (and related) Metrics
+
+**Collected Since Bort 3.0**
+
+Bort collects metrics from the
+[Android batterystats subsystem](https://developer.android.com/topic/performance/power/setup-battery-historian).
+This includes data from many components which may affect battery usage (Radio,
+Wifi, Bluetooth, Screen, CPU, GPS), in addition to statistics about the battery
+itself.
+
+These metrics are displayed on the device timeline:
+
+![](/img/docs/android/metrics-battery-timeline.png)
+
+And several summary metrics are also available:
+
+- `audio_on_ratio`
+- `battery_health_not_good_ratio`
+- `battery_level_pct_avg`
+- `bluetooth_scan_ratio`
+- `cpu_running_ratio`
+- `cpu_resume_count_per_hour`
+- `cpu_suspend_count_per_hour`
+- `cpu_wake_count_per_hour`
+- `doze_full_ratio`
+- `doze_ratio`
+- `gps_on_ratio`
+- `max_battery_temp`
+- `phone_radio_active_ratio`
+- `phone_scanning_ratio`
+- `phone_signal_strength_none_ratio`
+- `phone_signal_strength_poor_ratio`
+- `screen_on_ratio`
+- `screen_brightness_light_or_bright_ratio`
+- `wifi_on_ratio`
+- `wifi_radio_active_ratio`
+- `wifi_running_ratio`
+- `wifi_scan_ratio`
+- `wifi_signal_strength_poor_or_very_poor_ratio`
+
+These metrics would be good candidates for Timeseries metrics, to monitor fleet
+performance over time and find outlier devices.
+
+### Device Temperatures
+
+**Collected Since Bort 4.0**
+
+Bort regularly collects several device temperature metrics:
+
+- CPU
+- Device Skin
+
+These are reported with min/max/mean values each hour, for each available
+sensor:
+
+![](/img/docs/android/metrics-temp.png)
+
+These metrics would be good candidates for Timeseries metrics, to monitor fleet
+performance over time and find outlier devices.
+
+### Storage Usage
+
+**Collected Since Bort 4.0**
+
+Bort regularly collects device storage usage metrics:
+
+- `storage.primary.bytes_free`
+- `storage.primary.bytes_total`
+- `storage.primary.bytes_used`
+- `storage.primary.percentage_used`
+
+![](/img/docs/android/metrics-temp.png)
+
+These metrics would be good candidates for Timeseries metrics, to monitor fleet
+performance over time and find outlier devices.
+
+### Installed App Versions
+
+**Collected Since Bort 4.0**
+
+Bort can collect installed app versions as metrics. These can be configured on
+the Memfault Settings Dashboard, on the **Data Sources** tab, by entering
+package names to collect:
+
+![](/img/docs/android/metrics-configure-app-versions.png)
+
+Wildcards can be used, to collect multiple apps sharing the same package root.
+
+Each collected version is stored as a metric, prefixed with `version.`:
+
+![](/img/docs/android/metrics-app-versions.png)
+
+These metrics would be good candidates for Attributes, to enable e.g. searching
+for devices with a given app version installed, or checking the installed
+versions on a specific device.
+
+### System Properties
+
+**Collected Since Bort 4.0**
+
+Bort can collect Android System Properties. These can be configured on the
+Memfault Settings Dashboard, on the **Data Sources** tab, by entering each
+property to collect:
+
+![](/img/docs/android/metrics-configure-system-properties.png)
+
+Each collected property is stored as a metric, prefixed with `sysprop.`:
+
+![](/img/docs/android/metrics-system-properties.png)
+
+These metrics would be good candidates for Attributes, to enable e.g. searching
+for devices with a given system property, or checking the properties for a
+specific device.

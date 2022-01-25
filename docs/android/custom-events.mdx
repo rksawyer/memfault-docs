@@ -9,9 +9,10 @@ sidebar_label: Custom Events
 Custom Events were previously called Structured Logs. This API was changed in
 Bort 3.6.0.
 
-Any code using the `StructuredLog` API from the `structured-log-lib` library
-(now removed) must be changed to call the equivalent methods in the
-`CustomEvent` API from the `custom-event-lib` library, as described below.
+Any code using the `StructuredLog` or `CustomEvent` APIs from the
+`structured-log-lib` or `custom-event-lib` libraries (now removed) must be
+changed to call the equivalent methods in the `CustomEvent` API from the
+`reporting-lib` library, as described below.
 
 :::
 
@@ -84,7 +85,7 @@ Tapping into the Custom Events feature, boils down to these steps:
 
 - Defining the log types and data payloads your applications and services need
   to log
-- Add the `custom-event-lib` library to the component from which you want to log
+- Add the `reporting-lib` library to the component from which you want to log
 - Call the `CustomEvent.log(...)` API
 - Test & Debug
 
@@ -106,9 +107,9 @@ recommend the following to get the most out of Custom Events:
 - Type strings should be statically defined in your code. Do not create type
   strings dynamically at run-time.
 
-### Add the `custom-event-lib` library
+### Add the `reporting-lib` library
 
-The `custom-event-lib` library is a small Java library that wraps the Binder
+The `reporting-lib` library is a small Java library that wraps the Binder
 service that is published by MemfaultStructuredLogd. The next two sections
 describe how to add this library to an AOSP-built Java app and how to add it to
 a Gradle-built Java or Kotlin app.
@@ -116,13 +117,13 @@ a Gradle-built Java or Kotlin app.
 Note it is possible to log from native C/C++ programs, but we do not have a
 C/C++ helper library at the moment.
 
-#### Add `custom-event-lib` to AOSP-built Java apps
+#### Add `reporting-lib` to AOSP-built Java apps
 
 Make sure the
 [Bort SDK has been integrated](https://mflt.io/android-getting-started) with
 your AOSP build first.
 
-Once integrated, a target called `memfault-custom-event-lib` will be available.
+Once integrated, a target called `memfault-reporting-lib` will be available.
 This is a static Java library that will need to be linked to your app's build
 target.
 
@@ -131,31 +132,30 @@ If you are using an Android.mk file, add this to the
 
 ```makefile
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    memfault-custom-event-lib \
+    memfault-reporting-lib \
 ```
 
-Or if you are using an Android.bp file, add `memfault-custom-event-lib` to a
+Or if you are using an Android.bp file, add `memfault-reporting-lib` to a
 `static_libs` clause of your build target:
 
 ```
  static_libs: [
-    "memfault-custom-event-lib"
+    "memfault-reporting-lib"
  ]
 ```
 
-#### Add `custom-event-lib` to Gradle-built, Java or Kotlin apps
+#### Add `reporting-lib` to Gradle-built, Java or Kotlin apps
 
 For apps that are build outside of the AOSP build system using Gradle, the
-easiest way to include `custom-event-lib` in your project is using Gradle's
-`includeBuild` API.
+easiest way to include the `reporting-lib` published on Maven Central.
 
-In your project's `settings.gradle` file, add:
+Ensure that Maven Central is included in your project's root `build.gradle`
+file:
 
 ```
-includeBuild('/path/to/bort/MemfaultPackages') {
-    dependencySubstitution {
-        substitute module('com.memfault:custom-event-lib') with project(':custom-event-lib')
-    }
+repositories {
+   mavenCentral()
+   ...
 }
 ```
 
@@ -163,13 +163,13 @@ Then in your app's `build.gradle` file, add:
 
 ```
 dependencies {
-    implementation 'com.memfault:custom-event-lib'
+    implementation 'com.memfault.bort:reporting-lib:1.0'
     ...
 }
 ```
 
-When you build your project, the `custom-event-lib` library will be built as
-well and can now be used from your app's Java or Kotlin source files.
+When you build your project, the `reporting-lib` library will be built as well
+and can now be used from your app's Java or Kotlin source files.
 
 ### Logging API
 

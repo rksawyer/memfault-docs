@@ -1,0 +1,307 @@
+---
+id: android-custom-metrics
+title: Android Custom Metrics
+sidebar_label: Custom Metrics
+---
+
+:::info
+
+Reporting APIs are available from Bort 4.0 onwards.
+
+:::
+
+Memfault has support for various built-in AOSP metrics, like battery health,
+wakelock counts, foregrounded apps and so on. See
+[Built-in Metrics](android-builtin-metrics) for more details.
+
+Aside from the built-in metrics, it is also possible to define custom ones. In
+this guide we describe the different kinds of metric that can be collected.
+
+## Summary
+
+The `Reporting` API enables logging individual metrics. These are aggregated by
+the Bort SDK, and regularly uploaded to Memfault. These aggregates are:
+
+- Shown on the device timeline.
+- Available for use as [Timeseries](/docs/platform/metrics#timeseries) or
+  [Attributes](/docs/platform/metrics#attributes) metrics, aggregated across the
+  entire fleet.
+
+See [Metrics](/docs/platform/metrics) for more details on how metrics can be
+configured and used in the Memfault dashboard.
+
+## Including the Reporting SDK
+
+Custom Metrics can be recorded from any Java/Kotlin application, by including
+the `reporting-lib` library. This library reports metrics to the
+`memfault_structured` system service (The main Bort application is not required
+to be started for every value recorded).
+
+To add the library,
+[follow these instructions](custom-events#add-the-reporting-lib-library).
+
+A C/C++ library will be added in a future release.
+
+## Recording Metrics
+
+The Bort SDK creates a metric report on a regular schedule (roughly once per
+hour). This report contains aggregated values for all metrics which were
+reported during the period covered by the report.
+
+For example, if we create a `counter` metric and invoke its `increment` method 5
+times during a reporting period, the the metric report will contain this value
+(5). Its value will be reset for the next reporting period.
+
+The regular "heartbeat" metric `Report` is accessed using:
+
+```
+Reporting.report()
+```
+
+Custom Reporting periods may be available in a future release of the SDK.
+
+Individual metrics are created with methods on the `Report` class e.g.
+
+```
+Reporting.report().counter("my-counter")
+```
+
+We recommend creating constants to define each metric that you will use, so that
+configuration (naming, defining aggregations) only has to happen in one place
+e.g.
+
+```
+val distributionMetric = Reporting.report().distribution("my-distribution", NumericAgg.MEAN, NumericAgg.MIN)
+```
+
+Then we can use this metric to record values from elsewhere in our codebase:
+
+```
+distributionMetric.record(6.89)
+distributionMetric.record(9.86)
+```
+
+## Metric Types
+
+The Reporting APIs provide convenience wrappers for several common types of
+metrics.
+
+### Counter
+
+Tracks the number of times that an event occured during each reporting period.
+As described above, the Bort SDK will track all recorded values, and report the
+sum in the metric report.
+
+Create a metric counter named `disconnection-events`:
+
+```
+val disconnectionCounter = Reporting.report().counter("disconnection-events")
+```
+
+Then record values:
+
+```
+disconnectionCounter.increment()
+disconnectionCounter.incrementBy(4)
+disconnectionCounter.incrementBy(7.9)
+```
+
+This will create a metric in Memfault named `disconnection-events.sum`. In the
+example above, this would have a value of `12.9` for the current reporting
+period.
+
+:::info Counters could be useful as either
+[Timeseries Metrics](/docs/platform/metrics#timeseries) (tracking trends over
+time), or simply for reviewing on Device Timeline. :::
+
+### Distribution
+
+Tracks the distribution of a numerical value during the reporting period.
+Several aggregations are available to use.
+
+Create a distribution metric named `rssi`, which tracks `MEAN` and `MIN` values:
+
+```
+val rssiMetric = Reporting.report().distribution("rssi", NumericAgg.MEAN, NumericAgg.MIN)
+```
+
+Then record values periodically:
+
+```
+rssiMetric.record(-38.68)
+rssiMetric.record(-39.83)
+rssiMetric.record(-43.67)
+rssiMetric.record(-78.89)
+```
+
+This will create one metric in Memfault to track each requested aggregation:
+
+- `rssi.mean`: The mean RSSI value seen in the reporting period (i.e. the
+  average signal strength).
+- `rssi.min`: The minimum RSSI value seen in the reporting period (i.e. the
+  worst signal strength).
+
+The available distribution aggregations are defined in the `NumericAgg` enum:
+
+- `MIN`: Minimum value recorded during the period.
+- `MAX`: Maximum value recorded during the period.
+- `SUM`: Sum of all values recorded during the period.
+- `MEAN`: Mean value recorded during the period.
+- `COUNT`: Number of values recorded during the period.
+
+Note that you must request at least one aggregation when creating a
+`distribution` metric (otherwise no entries will be created in the metric
+report).
+
+:::info Distributions may we well suited to track selected metrics over time
+across the fleet, as [Timeseries Metrics](/docs/platform/metrics#timeseries) -
+while also useful on the Device Timeline as part of the Metric Report. :::
+
+### State Tracker
+
+Tracks state transitions - for example, the connection state of a peripheral
+device or enabled state of a device function.
+
+State trackers track state using an `enum`:
+
+```
+enum class ConnectionState {
+    DISCONNECTED,
+    CONNECTING,
+    CONNECTED,
+}
+```
+
+Create a state tracker named `connection-state`, tracking the total time spent
+in each state:
+
+```
+private val connectionStateMetric = Reporting.report().stateTracker<ConnectionState>("connection-state", StateAgg.TIME_TOTALS)
+```
+
+Then record state transitions as they occur:
+
+```
+connectionStateMetric.state(DISCONNECTED)
+connectionStateMetric.state(CONNECTING)
+connectionStateMetric.state(CONNECTED)
+connectionStateMetric.state(DISCONNECTED)
+```
+
+This creates one metric for each state:
+
+- `state_DISCONNECTED.total_secs`: total seconds spent in the `DISCONNECTED`
+  state in the reporting period.
+- `state_CONNECTING.total_secs`: total seconds spent in the `CONNECTING` state
+  in the reporting period.
+- `state_CONNECTED.total_secs`: total seconds spent in the `CONNECTED` state in
+  the reporting period.
+
+Note that we used `TIME_TOTALS` for this example. There are three available
+aggregation types, defined in `StateAgg`. We must request at least one
+aggregation, otherwise no entries will be generated in metric report:
+
+- `TIME_TOTALS`: Creates a metric per state, totalling the time (in seconds)
+  spent in that state.
+- `TIME_PER_HOUR`: Creates a metric per state, showing time per hour (in
+  seconds) spent in that state. This is useful if reports are not exactly one
+  hour long.
+- `LATEST_VALUE`: Creates one metric in the report, with the last recorded value
+  at the end of the reporting period. This is similar to using a
+  `stringProperty` or `numberProperty`.
+
+:::info Tracking time spent in selected states may be useful to track across the
+fleet using [Timeseries Metrics](/docs/platform/metrics#timeseries), while
+`LATEST_VALUE` could be an interesting
+[Device Attribute](/docs/platform/metrics#attributes) to filter devices. :::
+
+### String / Number Properties
+
+Track device properties using these metrics. The last reported value will be
+included in the Metric Report, at the end of the reporting period.
+
+Create string/numeric property trackers (named
+`device-color`/`first-boot-time`):
+
+```
+val deviceColor = Reporting.report().stringProperty("device-color")
+val firstBootTime = Reporting.report().stringProperty("first-boot-time")
+```
+
+Then record values for these properties:
+
+```
+deviceColor.update("orange")
+firstBootTime.update(1642794263)
+```
+
+This creates one metric for each property, with the last reported value for each
+reporting period:
+
+- `device-color.latest`: Latest value of this string property.
+- `first-boot-time.latest`: Latest value of this numeric property.
+
+:::info Properties are likely to be useful as
+[Device Attributes](/docs/platform/metrics#attributes), so that we can search
+the fleet for devices with specific properties (and create
+[Device Sets](/docs/platform/projects-and-fleets/#device-sets) based on them).
+:::
+
+## Recommendations
+
+We recommend creating a wrapper class to define the metrics that you will use in
+your application. This could even be in a shared library, if you plan to record
+the same metrics from multiple applications.
+
+```kotlin
+package com.memfault.bort
+
+import com.memfault.bort.reporting.NumericAgg
+import com.memfault.bort.reporting.Reporting
+import com.memfault.bort.reporting.StateAgg
+
+enum class ConnectionState {
+    DISCONNECTED,
+    CONNECTING,
+    CONNECTED,
+}
+
+object RecordMetrics {
+    val rssiMetric = Reporting.report().distribution("rssi", NumericAgg.MEAN, NumericAgg.MIN)
+    val connectionStateMetric = Reporting.report().stateTracker<ConnectionState>("connection-state", StateAgg.TIME_TOTALS)
+    val disconnectionCounter = Reporting.report().counter("disconnection-events")
+    val deviceColor = Reporting.report().stringProperty("device-color")
+    val firstBootTime = Reporting.report().stringProperty("first-boot-time")
+}
+```
+
+We can then record values from wherever we like in the application, without
+having to recreate the metric configuration:
+
+```
+disconnectionCounter.incrementBy(4)
+```
+
+```
+rssiMetric.record(-43.67)
+```
+
+```
+connectionStateMetric.state(CONNECTED)
+```
+
+```
+deviceColor.update("orange")
+firstBootTime.update(1642794263)
+```
+
+## Troubleshooting
+
+- If you record metric values but don't see them appearing in the Memfault
+  timeline:
+  - Check that one of more aggregations are defined, for `distribution` and
+    `stateTracker` metrics - otherwise no aggregations will be created in each
+    metric report.
+  - Wait for Bort to create the next metric report (roughly once per hour) -
+    this is the same process which populates the built-in battery metrics on the
+    device timeline (so you can tell when this has happened).
