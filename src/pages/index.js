@@ -64,9 +64,12 @@ const externalContent = [
         title: <>Memfault Platform</>,
         description: (
             <>
-                The <a href="/docs/platform">Memfault Platform</a> is a web
-                application where all the features you've integrated with in
-                your project come to life.
+                The{" "}
+                <a href="docs/platform/projects-and-fleets">
+                    Memfault Platform
+                </a>{" "}
+                is a web application where all the features you've integrated
+                with in your project come to life.
             </>
         ),
     },
@@ -93,8 +96,10 @@ const externalContent = [
         title: <>Webinars</>,
         description: (
             <>
-                Our <a href="on-demand webinars">on-demand webinars</a> contain
-                plenty of conversations and advice on embedded development.
+                Our{" "}
+                <a href="https://memfault.com/webinars">on-demand webinars</a>{" "}
+                contain plenty of conversations and advice on embedded
+                development.
             </>
         ),
     },
@@ -104,7 +109,7 @@ const externalContent = [
         description: (
             <>
                 We are proud to be the founders of the{" "}
-                <a href="https://interrupt.memfault.com/">Interrupt Blog</a>, a
+                <a href="https://interrupt.memfault.com">Interrupt Blog</a>, a
                 great community for people who share a passion for hardware and
                 embedded development.
             </>
