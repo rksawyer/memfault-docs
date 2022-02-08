@@ -110,9 +110,13 @@ This will create a metric in Memfault named `disconnection-events.sum`. In the
 example above, this would have a value of `12.9` for the current reporting
 period.
 
-:::info Counters could be useful as either
+:::info
+
+Counters could be useful as either
 [Timeseries Metrics](/docs/platform/metrics#timeseries) (tracking trends over
-time), or simply for reviewing on Device Timeline. :::
+time), or simply for reviewing on Device Timeline.
+
+:::
 
 ### Distribution
 
@@ -153,9 +157,13 @@ Note that you must request at least one aggregation when creating a
 `distribution` metric (otherwise no entries will be created in the metric
 report).
 
-:::info Distributions may we well suited to track selected metrics over time
-across the fleet, as [Timeseries Metrics](/docs/platform/metrics#timeseries) -
-while also useful on the Device Timeline as part of the Metric Report. :::
+:::info
+
+Distributions may we well suited to track selected metrics over time across the
+fleet, as [Timeseries Metrics](/docs/platform/metrics#timeseries) - while also
+useful on the Device Timeline as part of the Metric Report.
+
+:::
 
 ### State Tracker
 
@@ -210,10 +218,14 @@ aggregation, otherwise no entries will be generated in metric report:
   at the end of the reporting period. This is similar to using a
   `stringProperty` or `numberProperty`.
 
-:::info Tracking time spent in selected states may be useful to track across the
-fleet using [Timeseries Metrics](/docs/platform/metrics#timeseries), while
+:::info
+
+Tracking time spent in selected states may be useful to track across the fleet
+using [Timeseries Metrics](/docs/platform/metrics#timeseries), while
 `LATEST_VALUE` could be an interesting
-[Device Attribute](/docs/platform/metrics#attributes) to filter devices. :::
+[Device Attribute](/docs/platform/metrics#attributes) to filter devices.
+
+:::
 
 ### String / Number Properties
 
@@ -241,10 +253,13 @@ reporting period:
 - `device-color.latest`: Latest value of this string property.
 - `first-boot-time.latest`: Latest value of this numeric property.
 
-:::info Properties are likely to be useful as
+:::info
+
+Properties are likely to be useful as
 [Device Attributes](/docs/platform/metrics#attributes), so that we can search
 the fleet for devices with specific properties (and create
 [Device Sets](/docs/platform/projects-and-fleets/#device-sets) based on them).
+
 :::
 
 ## Recommendations
