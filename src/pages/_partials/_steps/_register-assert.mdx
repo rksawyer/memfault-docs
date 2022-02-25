@@ -6,3 +6,41 @@ Memfault can automatically capture crash information on asserts by calling
 
 #define YOUR_PLATFORM_ASSERT(x) MEMFAULT_ASSERT(x)
 ```
+
+### Newlib C library assert.h
+
+If your platform is using the `assert()` or `abort()` calls directly from a libc
+implementation, you should override the implementations to call
+`MEMFAULT_ASSERT`.
+
+To accomplish this with Newlib C library (bundled as the default with most
+compilers), we recommend adding the following to a C File in your project:
+
+```c
+//! @file assert_overrides.c
+
+#include <assert.h>
+#include <stdlib.h>
+
+void __assert_func(const char *file, int line,
+                   const char *func, const char *failedexpr) {
+   MEMFAULT_ASSERT(0);
+}
+
+void _exit(int status) {
+   MEMFAULT_ASSERT(0);
+}
+```
+
+:::tip
+
+Memfault advises **against** calling `assert()` directly from a project.
+Instead, we suggest adding a `YOUR_PLATFORM_ASSERT(x)` macro as described above
+instead. Benefits include:
+
+- making it easier to swap out behavior for different environments such as
+  compile code for a unit test versus a real target.
+- leading to substantial code space savings by enabling the removal of assert
+  conditions passed via the `failedexpr` arg.
+
+:::
