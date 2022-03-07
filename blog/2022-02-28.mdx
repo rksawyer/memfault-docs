@@ -1,0 +1,129 @@
+---
+title: February 2022
+---
+
+## Android SDK Bort 4.0
+
+Memfault’s AOSP SDK “Bort” received a major
+[update 4.0 with many improvements](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v400---february-09-2021)
+such as additional support for Android 12 and multi-user compatibility.
+
+We added [support for Custom Metrics](/docs/android/android-custom-metrics) so
+that devices can report product-specific numerical values, strings, and state
+transitions on regular intervals. Together with a growing set of
+[built-in Metrics](/docs/android/android-builtin-metrics), this leads to a
+powerful combination of **per-device debugging** (e.g. correlation of CPU
+activity and battery voltage) and **fleet-wide insights** (e.g. “how many
+devices exceed 80% of their storage” or “What is the average battery discharge
+rate?”). The reported values contribute to the recently introduced
+[Time-Series Metrics and Device Attributes](/docs/platform/metrics).
+
+![Visualized Metrics per Device on its Timeline](/img/blog/2022-02-28-deviceTimeline.png)
+
+Another rather advanced feature enables devices without direct Internet
+connection to report crashes and metrics to Memfault. Data is packaged as `.mar`
+(Memfault Archive) files and vendors may upload them at a later time or upon
+request (e.g. downloaded periodically via USB or in a local network by an
+auxiliary device). This allows vendors to use Memfault in scenarios with strict
+security requirements.
+
+## Dashboard changes to charts
+
+[Memfault’s Dashboard](/docs/platform/charts#overview-dashboard) provides an
+overview of your fleet at a glance. We have updated the charts “Active Devices”
+(more sources used as signal) and “Software Versions” (only active devices
+considered) to better compare apples to apples.
+
+![Dashboard showing Acive Devices and Version distribution](/img/blog/2022-02-28-dashboard.png)
+
+The visible time range for “Software Versions” can now be changed from “2
+months” all the way down to just “24 hours”. Since the same chart is now being
+used on the [Cohort details page](/docs/platform/ota#cohorts-view), it not only
+allows you to see long-term trends, but also acts as timely signal to observe
+the effect of an ongoing OTA software rollout.
+
+The charts “Seen Devices” and “Received Events” have been removed.
+
+<!-- truncate -->
+
+## General
+
+- Added: Ability to create
+  [Alerts on device threshold](/docs/platform/alerts#device-threshold-alerts)
+  for Android projects
+- Added: [Memfault CLI](https://pypi.org/project/memfault-cli/#history) with
+  support for delta releases
+- Added: Batch resolve button on issue list
+- Improved: More details on notification emails for issues
+- Improved: Search UI for issues and devices (now with multi-select) in several
+  places
+- Improved: Crash analysis on Android (empty oopses, handling of missing Java
+  exceptions)
+- Improved: Device search fields (e.g. “software version” allows for prefix and
+  exact search, “device id” better handles large number of values)
+- Improved: Qualcomm support (better exception unwind, improved `.xed`
+  processing, allow for reprocessing of queue, `.xed`/`.xcd` now visible on
+  device timeline)
+- Improved documentation:
+  [FAQ on integration of ARM Cortex-M](/docs/mcu/arm-cortex-m-guide#frequently-asked-questions),
+  Note about
+  [Newlib C Assertion handler](/docs/mcu/self-serve/#newlib-c-library-asserth),
+  more details on
+  [How to Organize your Devices using Memfault](/docs/platform/projects-and-fleets),
+  many details on [Memfault’s Android SDK](/docs/android/introduction)
+- Changed: Several charts on dashboard (see highlight section above), also
+  “Active Devices” shows “weekly” by default
+- Changed: Layout of header part on Device Details page (Cohort no longer
+  editable on top of page but next to other fields)
+- Fixed: Unable to create new Custom Metric Charts
+- Fixed: API incorrectly handles delta releases in some cases
+- Fixed: UI glitches on tooltip for software version in device search
+- Fixed: Inconsistencies in device event log
+- Fixed: Email addresses for user invites were treated as case-sensitive
+- Fixed: Issue search for “first seen”
+- Removed: Cohort selector on issue list in device details
+
+## MCU SDK
+
+In February, two SDK versions
+[0.28.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0282-and-sdk-0281---feb-1-2022)
+and
+[0.29.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0290-and-sdk-0282---feb-28-2022)
+were released. Here are some highlights:
+
+- Updated [nRF91 sample test app](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/nrf-connect-sdk/nrf9160/memfault_demo_app) to
+  be compatible with nRF Connect SDK 1.9 release
+- Added a port to Particle's Device OS,
+  see`[ports/particle/README.md](https://github.com/memfault/memfault-firmware-sdk/blob/master/ports/particle/README.md)`
+- Utility function
+  `[memfault_base64_encode_inplace](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/util/base64.h#L35)` for
+  base64 encoding data in place
+- More [reboot reason options](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/reboot_reason_types.h#L16):
+  - `kMfltRebootReason_KernelPanic` for explicitly tracking fatal resets from
+    within a OS or RTOS
+  - `kMfltRebootReason_FirmwareUpdateError` for explicitly tracking resets due
+    to firmware update failures or rollbacks
+- Several internal improvements
+
+## Android SDK
+
+We have published the
+[Bort AOSP SDK 4.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v400---february-09-2021)
+which includes:
+
+- Additional support for Android 12 (all the way down to Android 8)
+- Support for [Custom Metrics](/docs/android/android-custom-metrics) (supporting
+  [various system-wide built-in metrics](/docs/android/android-builtin-metrics)
+  such as app versions, storage usage, temperature or selected system
+  properties), see `Reporting` APIs in `reporting-lib`
+- Support for devices without a direct Internet connection (see highlight
+  section above)
+- Update dependencies (Gradle, Kotlin, Android Gradle Plugin) and
+  `compileSdkVersion` of 31
+- Several other improvements (multi-user support, various bug fixes, build
+  improvements)
+- Several fixes (SELinux violations on recent targetSdkVersion, race condition
+  if started via ContentProvider query, missing DropBoxManager entry in rare
+  scenarios)
+- Unfortunately,
+  [two breaking changes](https://github.com/memfault/bort/blob/4.0-RC1/CHANGELOG.md)
