@@ -15,9 +15,9 @@ configure it.
 For a detailed guide on how to integrate the Bort SDK into your devices, see the
 [Getting Started](android/android-getting-started-guide.mdx) guide.
 
-## Feature Release History
+## Collection Types - Bug Reports and Caliper
 
-The Bort SDK supports two parallel and complementary data collection systems:
+The Bort SDK supports two data collection systems:
 
 1. [Bug reports](#bug-reports-via-memfaultdumpstaterunner), a diagnostics
    reporting tool built into AOSP.
@@ -25,24 +25,27 @@ The Bort SDK supports two parallel and complementary data collection systems:
    what diagnostics information to collect on the device for improved
    performance and privacy.
 
-Below is a summary of the Bort SDK features and the version of the SDK in which
-they were added. See the
-[Bort Changelog](https://github.com/memfault/bort/blob/master/CHANGELOG.md) for
-more details.
+We do not recommend collecting Bug Reports from production devices, because of
+the collection overhead, upload size and privacy implications.
 
-| Feature                | Bug Reports | Caliper |
-| ---------------------- | ----------- | ------- |
-| Traces                 | 1.0         | 3.0     |
-| Device History Metrics | 1.0         | 3.0     |
-| Fleet-Wide Metrics     | 3.0         | 3.0     |
-| Reboot Events          | 3.0         | 3.0     |
-| Logs                   | 1.0         | 3.3     |
-| Custom Events          |             | 3.5     |
-| Installed Packages     | 1.0         | 4.0     |
-| System Properties      | 1.0         | 4.0     |
-| Storage Metrics        |             | 4.0     |
-| Temperature Metrics    |             | 4.0     |
-| Custom Metrics         |             | 4.0     |
+|                          | Bug Reports                                                                                                                              | Caliper _(Available from Bort 3.0)_                                                                                                                                                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Collection mechanism** | Pull: collects all system state, metrics & logs at a point in time. Events/metrics may be missed if they occur long enough ago.          | Event-driven: collects crashes as they occur using DropBoxManager, periodically collecting logs and metrics.                                                                                                                                |
+| **Performance Impact**   | Collecting a bugreport (using dumpstate) is CPU-intensive, and can have a noticeable impact (causing stuttering/lag on the device).      | Caliper collects small chunks of relevant information on a regular basis, with low impact.                                                                                                                                                  |
+| **Size**                 | Bug Reports can be huge files - this is not configurable. Much of what is collected is not useful (e.g. every dumpsys, unfiltered logs). | Caliper only collects useful data - so storage/upload sizes are **much** smaller. This is entirely remotely configurable (collection intervals, log filters, which types of crashes to collect, etc).                                       |
+| **Privacy**              | PII may be contained within a Bug Report (e.g. email addresses in logs, or IP addresses in dumpsys output).                              | Logs can be scrubbed for PII on-device before upload. What data is collected is fully configurable.                                                                                                                                         |
+| **Logs**                 | Logs are collected at the time of taking the Bug Report. Server-side Log Scrubbing is available.                                         | Logs (from all buffers) are collected at a regular interval, and uploaded when a crash occurs. They are scrubbed on-device for PII. _Collected from Bort 3.3._                                                                              |
+| **Crashes**              | Crashes are parsed from logs (may be missed if buffers expire).                                                                          | Crashes are processed as they occur, via DropBoxManager. Kernel oops are extracted from regular logcat collection.                                                                                                                          |
+| **Reboots**              | N/A                                                                                                                                      | Collected on boot, and visible on timeline/fleet overview pages.                                                                                                                                                                            |
+| **Battery Metrics**      | Battery metrics are collected, and displayed on the Bug Report tab. They are not available as fleet-aggregated metrics.                  | Battery metrics are collected and displayed continuously on the Device Timeline tab. They are also available as fleet-aggregated timeseries metrics. _Collected from Bort 3.0._                                                             |
+| **Installed Apps**       | Installed app versions can be viewed on the Bug Report tab. They cannot be used as Device Properties/in Device Search.                   | Installed app versions are collected as Device Properties. These can be used for Device Search (or to create Device Sets). _Collected from Bort 4.0._                                                                                       |
+| **System Properties**    | Can be viewed on the Bug Report tab. They cannot be used as Device Properties/in Device Search.                                          | Are collected as Device Properties. These can be used for Device Search (or to create Device Sets). _Collected from Bort 4.0._                                                                                                              |
+| **Built-In Metrics**     | N/A                                                                                                                                      | Caliper collects device storage/temperature metrics (more metrics will be added here in the future). These can be used as fleet-wide timeseries metrics for charting/device search. _Collected from Bort 4.0._                              |
+| **Configurability**      | We provide an AOSP patch to optionally enable dumpstate minimal mode - but exactly what this collects is not remotely configurable.      | Fully configurable on the Memfault dashboard. Settings are synced down to devices, including enabling/disabling each type of data, configuring log filters and scrubbing rules, and tuning collection intervals. _Collected from Bort 4.0._ |
+
+See the
+[Bort Changelog](https://github.com/memfault/bort/blob/master/CHANGELOG.md) for
+a complete history of when features were added to the SDK.
 
 ## Components
 
