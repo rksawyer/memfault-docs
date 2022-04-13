@@ -88,12 +88,6 @@ function Home() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/docs/platform/introduction">
-                                        <FiFileText />
-                                        Memfault Web Application Guide
-                                    </a>
-                                </li>
-                                <li>
                                     <a href="https://api-docs.memfault.com/">
                                         <FiExternalLink />
                                         REST API Reference
