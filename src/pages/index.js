@@ -6,140 +6,28 @@
  */
 
 import React from "react";
-import classnames from "classnames";
 import Layout from "@theme/Layout";
-import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useColorMode } from "@docusaurus/theme-common";
 import styles from "./styles.module.css";
+import classNames from "classnames";
+import {
+    BiChip,
+    FcAndroidOs,
+    FcLinux,
+    FiCode,
+    FiExternalLink,
+    FiFileText,
+    FiPlayCircle,
+    FiTerminal,
+} from "react-icons/all";
 
-const supportedTargets = [
-    {
-        col: 4,
-        title: <>MCU Guides</>,
-        description: (
-            <>
-                Memfault's{" "}
-                <a href="https://github.com/memfault/memfault-firmware-sdk/">
-                    open-source SDK
-                </a>{" "}
-                supports any MCU device irrespective of the RTOS in use or
-                connectivity path in place. See{" "}
-                <a href="docs/mcu/introduction">documentation for MCUs</a>.
-            </>
-        ),
-    },
-    {
-        col: 4,
-        title: <>Android Guides</>,
-        description: (
-            <>
-                Memfault supports any AOSP device. Our{" "}
-                <a href="https://github.com/memfault/bort">open-source SDK</a>{" "}
-                is available for Android 8-12. See{" "}
-                <a href="docs/android/introduction">
-                    documentation for Android
-                </a>
-                .
-            </>
-        ),
-    },
-    {
-        col: 4,
-        title: <>Embedded Linux Guides</>,
-        description: (
-            <>
-                Memfault support for Linux is a new addition, and it's currently
-                limited to over-the-air updates (OTA) and release management.
-                See{" "}
-                <a href="docs/linux/introduction">documentation for Linux</a>.
-            </>
-        ),
-    },
-];
-
-const externalContent = [
-    {
-        col: 6,
-        title: <>Memfault Platform</>,
-        description: (
-            <>
-                The{" "}
-                <a href="docs/platform/projects-and-fleets">
-                    Memfault Platform
-                </a>{" "}
-                is a web application where all the features you've integrated
-                with in your project come to life.
-            </>
-        ),
-    },
-    {
-        col: 6,
-        title: <>Cloud API</>,
-        description: (
-            <>
-                Memfault's open{" "}
-                <a
-                    href="https://api-docs.memfault.com"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    Cloud API
-                </a>{" "}
-                can be used from embedded devices, continuous integration
-                systems (CI/CD), or cloud applications.
-            </>
-        ),
-    },
-    {
-        col: 6,
-        title: <>Webinars</>,
-        description: (
-            <>
-                Our{" "}
-                <a href="https://memfault.com/webinars">on-demand webinars</a>{" "}
-                contain plenty of conversations and advice on embedded
-                development.
-            </>
-        ),
-    },
-    {
-        col: 6,
-        title: <>Interrupt Blog</>,
-        description: (
-            <>
-                We are proud to be the founders of the{" "}
-                <a href="https://interrupt.memfault.com">Interrupt Blog</a>, a
-                great community for people who share a passion for hardware and
-                embedded development.
-            </>
-        ),
-    },
-];
-
-function FeatureRow({ features }) {
-    return (
-        <div className="row">
-            {features.map((props, idx) => (
-                <Feature key={idx} {...props} />
-            ))}
-        </div>
-    );
-}
-
-function Feature({ imageUrl, title, description, col }) {
-    const imgUrl = useBaseUrl(imageUrl);
-    return (
-        <div className={classnames(`col col--${col}`, styles.feature)}>
-            {imgUrl && (
-                <div className="text--center">
-                    <img src={imgUrl} alt={title} />
-                </div>
-            )}
-            <h3>{title}</h3>
-            <p>{description}</p>
-        </div>
-    );
+function MemfaultLogoImg(props) {
+    const { isDarkTheme } = useColorMode();
+    const src = isDarkTheme
+        ? "img/memfault-logo-full-dark-min.png"
+        : "img/memfault-logo-full-light-min.png";
+    return <img src={src} alt="Memfault logo" {...props} />;
 }
 
 function Home() {
@@ -150,32 +38,172 @@ function Home() {
             title={`${siteConfig.title}`}
             description="Description will go into a meta tag in <head />"
         >
-            <header
-                className={classnames("hero hero--primary", styles.heroBanner)}
-            >
-                <div className="container">
-                    <h1 className="hero__title">{siteConfig.title}</h1>
-                    <p className="hero__subtitle">{siteConfig.tagline}</p>
-                    <div className={styles.buttons}>
-                        <Link
-                            className={classnames(
-                                "button button--outline button--secondary button--lg hero__get-started-button",
-                                styles.getStarted
-                            )}
-                            to={useBaseUrl("docs/mcu/introduction")}
-                        >
-                            Get Started
-                        </Link>
+            <main className={styles["content"]}>
+                <header
+                    className={classNames(
+                        styles["hero-content"],
+                        styles["hero-text"]
+                    )}
+                >
+                    <a href="https://memfault.com" title="memfault.com">
+                        <MemfaultLogoImg className={styles["hero-logo"]} />
+                    </a>
+                    <p>
+                        Ship hardware products at the speed of software. With
+                        Memfault, you can continuously monitor devices, debug
+                        firmware issues, and deploy OTA updates to your fleet.
+                    </p>
+                </header>
+                <hr className={styles["divider"]} />
+                <div className={styles["resources"]}>
+                    <div className={styles["resources-column"]}>
+                        <div>
+                            <h2>Documentation</h2>
+                            <p>Getting Started</p>
+                            <ul className={styles["links"]}>
+                                <li>
+                                    <a href="/docs/mcu/introduction">
+                                        <BiChip />
+                                        MCU Integration Guide
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/docs/android/introduction">
+                                        <FcAndroidOs />
+                                        Android Integration Guide
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/docs/linux/introduction">
+                                        <FcLinux />
+                                        Linux Integration Guide
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/docs/platform/introduction">
+                                        <FiFileText />
+                                        Memfault Web Application Guide
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://api-docs.memfault.com/">
+                                        <FiExternalLink />
+                                        REST API Reference
+                                    </a>
+                                </li>
+                            </ul>
+                            <p>Tools</p>
+                            <ul className={styles["links"]}>
+                                <li>
+                                    <a href="/docs/ci/install-memfault-cli">
+                                        <FiTerminal />
+                                        Memfault CLI
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/docs/mcu/da1469x-sdk-guide/#post-data-to-cloud-via-web-bluetooth">
+                                        <FiTerminal />
+                                        Memfault WebBluetooth Bridge
+                                    </a>
+                                </li>
+                            </ul>
+                            <p>Get the Code</p>
+                            <ul className={styles["links"]}>
+                                <li>
+                                    <a href="https://github.com/memfault/memfault-firmware-sdk">
+                                        <FiCode />
+                                        MCU SDK
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/memfault/bort">
+                                        <FiCode />
+                                        Android Bort SDK
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/nrf/samples/nrf9160/memfault/README.html">
+                                        <FiCode />
+                                        Memfault Module in the nRF Connect SDK
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/memfault/particle-firmware-library">
+                                        <FiCode />
+                                        Memfault SDK for Particle
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/memfault/memfault-ios-cloud">
+                                        <FiCode />
+                                        Memfault Bridge SDK for iOS
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/memfault/memfault-cloud-android">
+                                        <FiCode />
+                                        Memfault Bridge SDK for Android
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className={styles["resources-column"]}>
+                        <h3>Videos</h3>
+                        <ul className={styles["links"]}>
+                            <li>
+                                <a href="https://vimeo.com/476494176">
+                                    <FiPlayCircle />
+                                    Quick Introduction to Memfault (2:16)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.youtube.com/watch?v=ge-ebleCi8o">
+                                    <FiPlayCircle />
+                                    Getting Started with Memfault for MCUs
+                                    (50:46)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.youtube.com/watch?v=B_dlThWJ7X0">
+                                    <FiPlayCircle />
+                                    Managing Android Devices At Scale (58:54)
+                                </a>
+                            </li>
+                        </ul>
+                        <h3>Learning Resources</h3>
+                        <p>
+                            The Interrupt Community was created and is moderated
+                            today by the founders of Memfault.
+                            <a href="https://interrupt.memfault.com/">
+                                Read the Interrupt Blog <FiExternalLink />
+                            </a>
+                        </p>
+                        <p>
+                            Memfault frequently holds webinars on embedded
+                            development and makes them available on demand.
+                            <a href="https://memfault.com/webinars/">
+                                Watch Webinars on Demand <FiExternalLink />
+                            </a>
+                        </p>
+                        <h3>Community</h3>
+                        <p>
+                            Discuss the content of our webinars and ask any
+                            question related to Memfault.
+                            <a href="https://community.memfault.com/">
+                                Join the Community Forum <FiExternalLink />
+                            </a>
+                        </p>
+                        <p>
+                            Comment on Interrupt blog posts and meet a thriving
+                            community of engineers, hobbyists and enthusiasts.
+                            <a href="https://interrupt-slack.herokuapp.com/">
+                                Join the Interrupt Slack Group{" "}
+                                <FiExternalLink />
+                            </a>
+                        </p>
                     </div>
                 </div>
-            </header>
-            <main>
-                <section className={styles.features}>
-                    <div className="container">
-                        <FeatureRow features={supportedTargets} />
-                        <FeatureRow features={externalContent} />
-                    </div>
-                </section>
             </main>
         </Layout>
     );

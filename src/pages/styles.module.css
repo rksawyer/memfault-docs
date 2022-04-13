@@ -1,45 +1,91 @@
-/**
- * Copyright (c) 2017-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-.heroBanner {
-    padding: 4rem 0;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+.content {
+    width: 100%;
+    max-width: 980px;
+    margin: 3em auto;
+    font-size: 16px;
 }
 
-.buttons {
+.hero-content {
+    width: 550px;
+    max-width: 90vw;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.hero-logo {
+    width: 400px;
+    max-width: 60vw;
+}
+
+.hero-link {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 12px;
 }
 
-.feature {
-    margin-bottom: 1.5rem;
+.hero-text {
+    font-size: 1.2em;
+    line-height: 1.5;
+    font-weight: 500;
 }
 
-.features {
+.divider {
+    margin-top: 3em;
+}
+
+.resources {
+    display: flex;
+    gap: 2em;
+    padding: 1em;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+.resources h2 {
+    font-size: 1.9em;
+}
+
+.resources h3 {
+    font-size: 1.4em;
+}
+
+.resources p, .resources a {
+    font-size: 1em;
+}
+
+.resources a {
     display: flex;
     align-items: center;
-    padding: 2rem 4rem;
-    width: 100%;
+    gap: 6px;
 }
 
-@media screen and (max-width: 966px) {
-    .heroBanner {
-        padding: 2rem;
+.resources p {
+    margin: 0 0 14px;
+}
+
+.resources-column {
+    flex: 50% 1 1;
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 1000px) {
+    .resources {
+        flex-direction: column;
+        gap: 1em;
     }
 
-    .features {
-        padding: 1rem;
+    .resources-column {
+        flex: 100% 0 0;
     }
+}
+
+.links {
+    padding-left: 0;
+    list-style: none;
+}
+
+.links li {
+    margin-bottom: 0.3em;
 }

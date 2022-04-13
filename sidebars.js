@@ -7,7 +7,7 @@
 
 module.exports = {
     docs: {
-        Platform: [
+        Dashboard: [
             "platform/memfault-terminology",
             "platform/projects-and-fleets",
             "platform/inspecting-a-device",

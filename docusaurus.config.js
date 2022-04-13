@@ -33,7 +33,7 @@ module.exports = {
                 {
                     to: "docs/platform/memfault-terminology",
                     activeBasePath: "docs/platform",
-                    label: "Platform",
+                    label: "Dashboard",
                     position: "left",
                 },
                 {
@@ -59,26 +59,21 @@ module.exports = {
                  */
                 {
                     to: "https://api-docs.memfault.com",
-                    label: "API",
+                    label: "REST API",
                     position: "left",
                     target: "_blank",
                     rel: "noopener",
                 },
                 { to: "changelog", label: "Changelog", position: "left" },
-
                 {
                     to: "https://app.memfault.com/",
-                    position: "left",
                     target: "_blank",
                     rel: "noopener",
                     label: "Log In",
                     position: "right",
                 },
-
                 {
                     to: "https://memfault.com/register?utm_campaign=Self%20Serve%20Launch&utm_source=Docs",
-                    label: "API",
-                    position: "left",
                     target: "_blank",
                     rel: "noopener",
                     label: "Sign Up",
