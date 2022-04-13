@@ -8,6 +8,7 @@
 import React from "react";
 import Layout from "@theme/Layout";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import useIsBrowser from "@docusaurus/core/lib/client/exports/useIsBrowser";
 import { useColorMode } from "@docusaurus/theme-common";
 import styles from "./styles.module.css";
 import classNames from "classnames";
@@ -23,14 +24,17 @@ import {
 } from "react-icons/all";
 
 function MemfaultLogoImg(props) {
-    const { isDarkTheme } = useColorMode();
+    const { colorMode } = useColorMode();
     // https://github.com/facebook/docusaurus/issues/2646
     // This is a hack to refresh the src after server-side rendering.
-    const { isClient } = useDocusaurusContext();
-    const src = isDarkTheme
-        ? "img/memfault-logo-full-dark-min.png"
-        : "img/memfault-logo-full-light-min.png";
-    return <img key={isClient} src={src} alt="Memfault logo" {...props} />;
+    const isBrowser = useIsBrowser();
+    const src =
+        colorMode === "dark"
+            ? `img/memfault-logo-full-dark-min.png`
+            : "img/memfault-logo-full-light-min.png";
+    return (
+        <img key={String(isBrowser)} src={src} alt="Memfault logo" {...props} />
+    );
 }
 
 function Home() {
