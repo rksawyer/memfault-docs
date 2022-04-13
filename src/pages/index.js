@@ -13,14 +13,15 @@ import { useColorMode } from "@docusaurus/theme-common";
 import styles from "./styles.module.css";
 import classNames from "classnames";
 import {
+    AiFillAndroid,
+    BiBluetooth,
     BiChip,
-    FcAndroidOs,
-    FcLinux,
     FiCode,
     FiExternalLink,
     FiFileText,
     FiPlayCircle,
     FiTerminal,
+    VscTerminalLinux,
 } from "react-icons/all";
 
 function MemfaultLogoImg(props) {
@@ -76,13 +77,13 @@ function Home() {
                                 </li>
                                 <li>
                                     <a href="/docs/android/introduction">
-                                        <FcAndroidOs />
+                                        <AiFillAndroid />
                                         Android Integration Guide
                                     </a>
                                 </li>
                                 <li>
                                     <a href="/docs/linux/introduction">
-                                        <FcLinux />
+                                        <VscTerminalLinux />
                                         Linux Integration Guide
                                     </a>
                                 </li>
@@ -109,7 +110,7 @@ function Home() {
                                 </li>
                                 <li>
                                     <a href="/docs/mcu/da1469x-sdk-guide/#post-data-to-cloud-via-web-bluetooth">
-                                        <FiTerminal />
+                                        <BiBluetooth />
                                         Memfault WebBluetooth Bridge
                                     </a>
                                 </li>
