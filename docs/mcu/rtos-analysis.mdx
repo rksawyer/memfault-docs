@@ -1,0 +1,73 @@
+---
+id: rtos-analysis
+title: RTOS Threads Analysis
+sidebar_label: RTOS Analysis
+---
+
+Memfault automatically detects what RTOS your system is running. For uploaded
+coredumps, it will attempt to extract backtraces for all threads in the system
+and optionally determine what state each thread is in and the stack usage high
+water mark.
+
+![](/img/docs/mcu/threads-with-popover.png)
+
+In order for this to work correctly, the coredump must capture the RTOS' thread
+state variables, all thread control blocks as well as the stack memory of each
+thread. The following sections list for each RTOS what needs to be captured. See
+the documentation on [Coredump Collection](/docs/mcu/coredumps) for details on
+how to set up additional coredump capturing regions.
+
+### FreeRTOS
+
+#### Required
+
+These variables must be captured in the coredump. On top of this, the memory of
+all task control blocks (`TCB_t`) must be captured. Because FreeRTOS TCBs double
+as linked list nodes, all TCBs must be captured.
+
+- `uxCurrentNumberOfTasks`
+- `pxCurrentTCB`
+- `pxReadyTasksLists`
+- `xDelayedTaskList1`
+- `xDelayedTaskList2`
+- `xPendingReadyList`
+- `uxTopReadyPriority`
+- `xSchedulerRunning`
+
+:::note
+
+There were several releases of FreeRTOS that did not include
+`uxTopUsedPriority`, see this GitHub issue:
+
+https://github.com/FreeRTOS/FreeRTOS-Kernel/issues/33#issue-583304006
+
+If the version of FreeRTOS in use doesn't include the fix, add the sample file
+(for example,
+[this copy](https://github.com/arduino/OpenOCD/blob/c404ff5d3a2ec568daa106455845dd403b08dab4/contrib/rtos-helpers/FreeRTOS-openocd.c))
+and relevant linker flags.
+
+:::
+
+#### Optional
+
+- `xTasksWaitingTermination`
+- `xSuspendedTaskList`
+
+To enable stack usage high water marking, the `configCHECK_FOR_STACK_OVERFLOW`
+configuration option must be enabled and the _full_ stacks for each thread must
+be captured as well.
+
+### Zephyr
+
+#### Required
+
+These variables must be captured in the coredump:
+
+- `_kernel`
+- `_kernel_openocd_offsets`
+- `_kernel_openocd_size_t_size`
+
+### Other RTOSes
+
+Memfault also supports these other RTOSes: Argon, ChibiOS, Mynewt, NuttX,
+Quantum Platform, Keil RTX5 / ARM mbedOS, ThreadX and TI RTOS.

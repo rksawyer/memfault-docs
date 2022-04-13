@@ -51,6 +51,7 @@ module.exports = {
                     "mcu/releases-integration-guide",
                     "mcu/symbol-file-build-ids",
                     "mcu/heap-stats",
+                    "mcu/rtos-analysis",
                 ],
             },
             {
