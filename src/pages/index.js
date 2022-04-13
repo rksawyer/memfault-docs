@@ -24,10 +24,13 @@ import {
 
 function MemfaultLogoImg(props) {
     const { isDarkTheme } = useColorMode();
+    // https://github.com/facebook/docusaurus/issues/2646
+    // This is a hack to refresh the src after server-side rendering.
+    const { isClient } = useDocusaurusContext();
     const src = isDarkTheme
         ? "img/memfault-logo-full-dark-min.png"
         : "img/memfault-logo-full-light-min.png";
-    return <img src={src} alt="Memfault logo" {...props} />;
+    return <img key={isClient} src={src} alt="Memfault logo" {...props} />;
 }
 
 function Home() {
