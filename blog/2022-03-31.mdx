@@ -1,0 +1,91 @@
+---
+title: March 2022
+---
+
+## Improved Device Search
+
+Memfault
+[organizes your data](https://docs.memfault.com/docs/platform/projects-and-fleets#organizing-devices-within-a-project)
+around the concept of _devices_. An investigative
+[search for matching devices](https://docs.memfault.com/docs/platform/metrics#searching-devices-by-attributes-and-timeseries)
+is a key activity when analyzing data around device attributes and time-series
+metrics. Memfault’s device search also acts as a hub when clicking on details on
+charts, OTA management, or as part of crash analysis. It allows you to precisely
+describe a population of devices before performing follow-up tasks such as
+assigning them to a specific Cohort or describing a new Device Set.
+
+![DeviceSearch_multi_value.png](/img/blog/2022-03-31-DeviceSearch_multi_value.png)
+
+We made significant improvements to the device search! Most fields now accept
+multiple values (”OR”) and can be repeated where applicable (”AND”). You can
+search for device attributes and time-series data at the same time and it is
+even possible to search for historical data across different time ranges at
+once.
+
+![DeviceSearch_historical_data.png](/img/blog/2022-03-31-DeviceSearch_historical_data.png)
+
+When combined, you can now conveniently describe (and store as
+[Device Set](https://docs.memfault.com/docs/platform/projects-and-fleets#device-sets))
+populations such as
+
+- “Devices on v1.2 that were charged >90% earlier this week but rebooted due to
+  low power yesterday” – to **validate presumed bug fixes via operational
+  data**, or
+- “Devices with attributes `was_reworked`: `true`, `shipment_state`:
+  `"back to us"` and `assignee`: `"John"`” – to use
+  [custom device attributes](https://docs.memfault.com/docs/platform/metrics#attributes)
+  for **inventory management**
+
+<!-- truncate -->
+
+## General
+
+- Added:
+  [Memfault example for ESP32 Wrover kit](https://github.com/memfault/amazon-freertos-esp32-example),
+  based on Amazon FreeRTOS SDK
+- Improved: Device Search (see highlight section above)
+- Improved:
+  [Memfault CLI tool to 0.6.5](https://pypi.org/project/memfault-cli/#history)
+  (added support for Qualcomm audio ELFs, and improved validation checks)
+- Improved: Qualcomm globals view + support for Audio ELF and logs
+- Improved: Performance for MCU globals view + support for
+  [compressed elf sections](https://interrupt.memfault.com/blog/dealing-with-large-symbol-files)
+- Improved: Navigation between various pages (reboots to timeline, various
+  charts to device search, MCU queue analyzer opens memory view, version matrix
+  to search, navigation to delta releases)
+- Improved: Metric picker component (search, alerts, charts) only presents
+  compatible metrics and provides a matching value editor (numeric, string,
+  boolean)
+- Improved: Device Set charts distinguish between “no past data” and zero values
+- Improved: Built-in metrics for Android Bort Client/Server system
+- Fixed: Several UI quirks (names in Version Matrix, axis labels on version
+  charts, occasionally overlapping labels in charts, occasional flicker on
+  charts, occasionally covered popovers in charts, scrollbar jumping on some
+  pages)
+- Fixed: Stale data (required browser refresh) when moving devices to another
+  cohort
+- Fixed: Parsing of several edge cases for MCU coredumps and Android bug reports
+- Fixed: Button “Download Binary” (for traces and coredumps) on Chrome
+- Fixed: Too frequently required SSO Login
+- Changed: Now enforcing maximum file size of 300MB for symbol file
+- Removed: Stale historical data according to retention policy
+- Removed: Ability to navigate from column summary cells in Version Matrix to
+  Device Search
+
+## MCU SDK
+
+In March,
+[SDK version 0.29.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0291-and-sdk-0290---mar-16-2022)
+was released:
+
+- [Memfault Diagnostic GATT Service (MDS)](https://github.com/memfault/memfault-firmware-sdk/blob/master/ports/include/memfault/ports/ble/mds.h)
+  to transparently forward data collected by the SDK to a Bluetooth Low Energy
+  gateway and proxied to the cloud (more soon)
+- improved stability of Mbed OS invoke commands
+- Breaking Change: If your project is based on Zephyr < 2.6, you now need to
+  explicitly set `CONFIG_OPENOCD_SUPPORT=y` in your `prj.conf`
+
+## Android SDK
+
+We have not published a new version of the
+[Android Bort AOSP SDK](https://github.com/memfault/bort) in March.
