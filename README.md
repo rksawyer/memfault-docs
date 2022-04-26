@@ -49,4 +49,4 @@ Add a new post to the changelog:
 1. Create a new post under `blog/` using the existing filename conventions. Copy
    the header from an existing post and give it a nice title.
 
-2. Place any images needed by thte post in `static/img/blog/`.
+2. Place any images needed by the post in `static/img/blog/`.

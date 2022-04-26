@@ -187,7 +187,7 @@ argument is the type of the Custom Event and is a string.
 The second argument is the data payload and must be a string containing valid
 JSON, of up to 4KB in size.
 
-For the sake of simplicty of this example, we hand-coded the JSON string. In
+For the sake of simplicity of this example, we hand-coded the JSON string. In
 real projects, we recommend using a JSON serialization library.
 
 In case the data was invalid JSON or exceeded the 4KB limit, "Invalid Data" and
@@ -199,7 +199,7 @@ containing information to help debug these issues.
 By default, the MemfaultStructuredLogd daemon only flushes out received logs
 periodically or when the configured maximum log count has been reached. During
 development, this is not very practical. Therefore, on debug builds of AOSP, you
-can also programatically trigger it to flush out received logs:
+can also programmatically trigger it to flush out received logs:
 
 ```java
 import com.memfault.bort.customevent.CustomEvent;

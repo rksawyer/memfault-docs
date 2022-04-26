@@ -40,7 +40,7 @@ MEMFAULT_METRICS_KEY_DEFINE(MainTaskWakeups, kMemfaultMetricType_Unsigned)
 #### Instrument Code to Update Heartbeat
 
 ```c
-voit my_main_task(void) {
+void my_main_task(void) {
    while (1) {
       your_rtos_wait_for_event();
       memfault_metrics_heartbeat_add(
