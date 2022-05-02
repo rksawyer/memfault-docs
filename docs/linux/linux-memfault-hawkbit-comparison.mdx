@@ -1,0 +1,56 @@
+---
+id: linux-memfault-hawkbit-comparison
+title: Memfault OTA for hawkBit users
+sidebar_label: Memfault OTA for hawkBit users
+---
+
+Memfault's Embedded Linux Over-the-Air updates (OTA) solution is hawkBit Direct
+Device Integration (DDI) API compatible. For information on Linux OTA, please
+see [Embedded Linux OTA Integration Guide][memfault-linux-ota-guide].
+
+For general information about Memfault OTA, including all the features
+available, please see our [OTA Update docs][memfault-release-management-ui].
+
+This page is aimed at users who are already familiar with the [hawkBit DDI
+API][hawkbit-ddi-api] and [Management UI][hawkbit-management-ui].
+
+## Differences between hawkBit and Memfault
+
+For migrations to Memfault, hawkBit Clients on the device remain unchanged but
+need to be configured to point to Memfault;
+[Memfault acts as a hawkBit update server](/docs/linux/linux-releases-integration-guide#query-for-ota-payload)
+by implementing the [hawkBit DDI API][hawkbit-ddi-api].
+
+Users leverage the [Memfault Web Application][memfault-release-management-ui] as
+a replacement of the [hawkBit Management UI][hawkbit-management-ui].
+
+Memfault does not implement the [hawkBit Management
+API][hawkbit-management-api]; for headless OTA management, one should exercise
+the [Memfault Releases API][memfault-linux-ota-guide].
+
+Memfault relies on the [Gateway Security Token
+Authentication][hawkbit-ddi-api-security-token-auth] system as defined by
+hawkBit.
+
+Here is an overview of hawkBit concepts and how they map to Memfault:
+
+| hawkBit                                                                                          | Memfault                                                                       | What it's used for                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Provisioning Target](https://www.eclipse.org/hawkbit/concepts/datamodel)                        | [Device](/docs/platform/inspecting-a-device)                                   | System to update.                                                                                                                                                                                                                                                  |
+| [Controller ID][hawkbit-ddi-api]                                                                 | [Device ID](/docs/linux/linux-releases-integration-guide#identifying-a-device) | Identifying specific devices. This value must be unique per Project.                                                                                                                                                                                               |
+| [Software Module / Artifact](https://www.eclipse.org/hawkbit/ui/#artifact-management)            | [OTA Payload](/docs/platform/ota#adding-an-ota-payload-to-a-release)           | The binary to be downloaded to the device. The combination of hawkBit Software Modules and Artifacts describe a hiararchy of files to be distributed to devices. A Memfault Release contains OTA Payload(s), each of which can target a specific hardware version. |
+| [Distribution / Rollout](https://www.eclipse.org/hawkbit/concepts/datamodel)                     | [Release][memfault-release-management-ui]                                      | Instruction to start releasing binaries to devices. A hawkBit Distribution is a versioned set of Software Modules. A Memfault Release is a versioned set of OTA Payloads.                                                                                          |
+| [Target Filter](https://www.eclipse.org/hawkbit/ui/#target-filter-management)                    | [Cohort](/docs/platform/projects-and-fleets#cohorts)                           | Identifying which devices to update in a Release.                                                                                                                                                                                                                  |
+| [Gateway Security Token Authentication](https://www.eclipse.org/hawkbit/concepts/authentication) | [Project key](/docs/linux/linux-releases-integration-guide#project-key)        | Authenticating devices to the update server.                                                                                                                                                                                                                       |
+
+## Reference
+
+- [Memfault Terminology](/docs/platform/memfault-terminology)
+
+[hawkbit-ddi-api]: https://www.eclipse.org/hawkbit/apis/ddi_api
+[hawkbit-ddi-api-security-token-auth]:
+  https://www.eclipse.org/hawkbit/concepts/authentication
+[hawkbit-management-ui]: https://www.eclipse.org/hawkbit/ui
+[hawkbit-management-api]: https://www.eclipse.org/hawkbit/apis/management_api
+[memfault-release-management-ui]: /docs/platform/ota
+[memfault-linux-ota-guide]: /docs/linux/linux-releases-integration-guide
