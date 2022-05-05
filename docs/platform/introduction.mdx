@@ -4,6 +4,8 @@ title: Introduction to Memfault
 sidebar_label: Introduction
 ---
 
+import ReadMoreAdmonition from "@site/src/components/ReadMoreAdmonition";
+
 import { AiFillAndroid, BiChip } from "react-icons/all";
 
 Memfault is a cloud platform that allows you and your team to continuously
@@ -100,25 +102,24 @@ matching error reasons is called an
 [Issue](/docs/platform/memfault-terminology/#issue) in Memfault. Even after
 deduplication, you can still access all available traces of an Issue.
 
-:::tip
-
-<p style={{ marginBottom: "5px" }}>
-  To learn more about debugging and set it up for your project, continue on to:
-</p>
-<ul style={{ listStyle: "none", paddingLeft: 0 }}>
-  <li>
-    <a href="/docs/mcu/coredumps">
-      <BiChip /> Coredump Collection for MCU Devices
-    </a>
-  </li>
-  <li>
-    <a href="/docs/android/android-bort/#memfault-caliper">
-      <AiFillAndroid /> Trace Collection for Android Devices
-    </a>
-  </li>
-</ul>
-
-:::tip
+<ReadMoreAdmonition>
+  <p style={{ marginBottom: "5px" }}>
+    To learn more about debugging and set it up for your project, continue on
+    to:
+  </p>
+  <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+    <li>
+      <a href="/docs/mcu/coredumps">
+        <BiChip /> Coredump Collection for MCU Devices
+      </a>
+    </li>
+    <li>
+      <a href="/docs/android/android-bort/#memfault-caliper">
+        <AiFillAndroid /> Trace Collection for Android Devices
+      </a>
+    </li>
+  </ul>
+</ReadMoreAdmonition>
 
 ## Over-the-Air (OTA) Updates {#ota}
 
@@ -172,12 +173,12 @@ To benefit from the increased velocity while still maintaining the high
 standards of quality required by the nature of hardware products, use the rest
 of the Memfault feature suite: Debugging and Metrics.
 
-:::tip
+<ReadMoreAdmonition>
 
 To learn more about OTA updates and set up your project to use them, continue on
 to [documentation on OTA updates](/docs/platform/ota).
 
-:::tip
+</ReadMoreAdmonition>
 
 ## Monitoring via Metrics {#metrics}
 
@@ -269,9 +270,9 @@ Among others, adding metrics to your Memfault integration unlocks:
   </figcaption>
 </figure>
 
-:::tip
+<ReadMoreAdmonition>
 
 To learn more about monitoring using Metrics, continue on to
 [documentation on Metrics and Attributes](/docs/platform/metrics/).
 
-:::tip
+</ReadMoreAdmonition>
