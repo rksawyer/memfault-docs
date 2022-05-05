@@ -10,8 +10,9 @@ module.exports = {
         {
             type: "category",
             label: "Web Application",
-            link: { type: "doc", id: "platform/projects-and-fleets" },
+            link: { type: "doc", id: "platform/introduction" },
             items: [
+                "platform/introduction",
                 "platform/memfault-terminology",
                 "platform/projects-and-fleets",
                 "platform/inspecting-a-device",

@@ -1,0 +1,277 @@
+---
+id: introduction
+title: Introduction to Memfault
+sidebar_label: Introduction
+---
+
+import { AiFillAndroid, BiChip } from "react-icons/all";
+
+Memfault is a cloud platform that allows you and your team to continuously
+monitor devices, debug firmware issues, and deploy OTA updates to your fleet to
+ship hardware products at the speed of software.
+
+- Memfault is **embedded-first**: embedded systems and devices running on any
+  RTOS or operating systems such as Android or Linux are supported.
+- It **runs on any device**: from powerful SoCs down to MCUs with the most
+  constrained capabilities, Memfault will fit into your device’s available
+  flash, RAM, and bandwidth.
+- Our SDKs are made with **low and intermittent connectivity** in mind: if your
+  device can only send out a small amount of data, you'll be able to ration it
+  in chunks of the size you choose, and we'll take care of transporting it for
+  you. If your device relies on a companion (such as a mobile phone) for
+  Internet access, you can use it as a bridge. You can also post data directly
+  from your device.
+- **Privacy** is built into Memfault: you have full control over what your
+  Memfault-enabled devices send to our servers.
+
+Our platform is a **one-stop shop** for:
+
+- [Debugging](#debugging).
+- [Over-the-air (OTA) updates](#ota).
+- [Monitoring via metrics](#metrics).
+
+## Debugging {#debugging}
+
+On your devices, Memfault keeps track of crashes automatically and will make
+crash reports available to you on the Memfault web application as soon as
+they're uploaded.
+
+Our web application offers a rich and complete view into your collected MCU
+[traces](/docs/platform/memfault-terminology/#trace) and Android exceptions and
+Bug Reports. With them, there's **no need ship the device to your facility**, or
+attach a debug probe to it. Even if you have the device at hand, you'll find
+Memfault traces to be a better place to debug, thanks to many **helpful
+visualizations** and connected data we display from our parsing. You'll find
+Memfault traces are useful to you even during development.
+
+**Reproducing customer issues** is easier than ever before. Consider a workflow
+where a customer support agent files a ticket for engineering that already
+includes a Memfault link to the particular device that's having issues, or even
+a link to the trace itself.
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/1-debugging-registers-locals-min.png"
+    alt="MCU trace analysis view, viewing registers and locals"
+  />
+  <figcaption>
+    Our trace analysis view offers the highest resolution available into the
+    crash dumps your devices upload. In this example, you can see the values of
+    local variables and registers at the time of the crash.
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/2-debugging-globals-statics-min.png"
+    alt=""
+  />
+  <figcaption>
+    The Memfault Web Application performs crash symbolication on your devices'
+    traces and allows you to dig deep into the state of the device, right from
+    your browser.
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/3-debugging-logs-min.png"
+    alt=""
+  />
+  <figcaption>
+    Read logs relevant to each trace and perform complex text searches.
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/5-debugging-android-issue-min.png"
+    alt=""
+  />
+  <figcaption>
+    An example of a root-cause analysis for a Java runtime exception from an
+    Android device.
+  </figcaption>
+</figure>
+
+Memfault traces go through a process of deduplication, so that you don't have to
+look at every single instance of a problem. A group of collected traces with
+matching error reasons is called an
+[Issue](/docs/platform/memfault-terminology/#issue) in Memfault. Even after
+deduplication, you can still access all available traces of an Issue.
+
+:::tip
+
+<p style={{ marginBottom: "5px" }}>
+  To learn more about debugging and set it up for your project, continue on to:
+</p>
+<ul style={{ listStyle: "none", paddingLeft: 0 }}>
+  <li>
+    <a href="/docs/mcu/coredumps">
+      <BiChip /> Coredump Collection for MCU Devices
+    </a>
+  </li>
+  <li>
+    <a href="/docs/android/android-bort/#memfault-caliper">
+      <AiFillAndroid /> Trace Collection for Android Devices
+    </a>
+  </li>
+</ul>
+
+:::tip
+
+## Over-the-Air (OTA) Updates {#ota}
+
+Memfault changes the way teams prepare updates. Instead of handing a pilot
+device over to QA and waiting for bugs to be found, to then fix them and repeat
+the process, consider the following workflow:
+
+Traditionally, the process looks like this: hand a pilot device over to QA and
+wait for bugs to be found, to then fix them and repeat. Memfault changes and
+improves upon this process. Consider the following additions to that workflow:
+
+- Using Memfault [Cohorts](/docs/platform/memfault-terminology/#cohort), split
+  your devices into a production Cohort and a beta Cohort.
+- Configure an automatic update for devices in the beta Cohort.
+- Measure success metrics via Monitoring, number of reboots or crashes.
+- Once your software is ready, enable the update for all production devices.
+
+Memfault OTA updates enable this streamlined workflow as well as complex setups
+that may include staged rollouts (aiming at only a fraction of your population),
+delta releases (also known as incremental updates), and many more representable
+scenarios.
+
+Memfault OTA updates provide increased velocity, reduce the risk of rolling out
+an update, and offer visibility into team productivity.
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/6-version-matrix-staged-rollout-min.png"
+    alt=""
+  />
+  <figcaption>
+    Activating a staged rollout to test version <code>2.2.0</code> of our
+    product. Around 1.3K devices out of 9.1K in this fleet will receive the
+    latest version as a canary release, and the team will monitor the behavior
+    of the new firmware.
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/7-version-matrix-staged-rollout-activated-min.png"
+    alt=""
+  />
+  <figcaption>
+    A view into the current state of this cohort of 9.1K devices and the next
+    OTA payload they will be downloading.
+  </figcaption>
+</figure>
+
+To benefit from the increased velocity while still maintaining the high
+standards of quality required by the nature of hardware products, use the rest
+of the Memfault feature suite: Debugging and Metrics.
+
+:::tip
+
+To learn more about OTA updates and set up your project to use them, continue on
+to [documentation on OTA updates](/docs/platform/ota).
+
+:::tip
+
+## Monitoring via Metrics {#metrics}
+
+Memfault makes it easy to collect new data from your devices. In any of our
+SDKs, it's a matter of writing two lines of C or Kotlin. Since Memfault takes
+care of the plumbing and the multipart transport, adding a new metric does not
+involve data scientists, your web backend team, or your mobile app developers.
+
+Adding metrics to your Memfault integration unlocks many features whose value
+compounds with all other features of Memfault.
+
+### Device metrics
+
+A timeline view for every single individual device showcasing its metrics,
+including time-series data, reboots and crashes.
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/4-metrics-android-timeline-min.png"
+    alt=""
+  />
+  <figcaption>
+    The default set of metrics Android devices report when using Memfault.
+    Adding your own custom metrics to this selection is extremely easy.
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/img/docs/platform/intro-to-memfault/8-device-timeline-mcu-min.png"
+    alt=""
+  />
+  <figcaption>
+    Analyzing an apparent correlation between battery levels and CPU usage in a
+    single MCU device.
+  </figcaption>
+</figure>
+
+### Fleet metrics
+
+Among others, adding metrics to your Memfault integration unlocks:
+
+- [Device Attributes][device-attributes] and time-series data across your whole
+  fleet.
+- [Custom Metric charts][custom-metric-charts] that aggregate the value of your
+  metrics across your fleet, sliced by Cohort or Software Version.
+- [Email alerts][alerts] based on your own configured thresholds.
+- A rich [device search][device-search] view that allows you to express the most
+  complex queries.
+- [Device Sets][device-sets]: a way to visualize the change in the count
+  resulting from device searches over time.
+
+[custom-metric-charts]: /docs/platform/charts#metric-charts
+[device-attributes]: /docs/platform/metrics#attributes
+[alerts]: /docs/platform/alerts
+[device-search]:
+  /docs/platform/metrics/#searching-devices-by-attributes-and-timeseries
+[device-sets]: /docs/platform/projects-and-fleets/#device-sets
+
+<figure>
+  <img src="/img/docs/platform/overview-dashboard-drilldown-min.png" alt="" />
+  <figcaption>
+    An aggregation of reboot events in your fleet. Drill down to find out which
+    devices are causing an anomaly.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="/binary-assets/fleet-wide-metrics-compare-min.png" alt="" />
+  <figcaption>
+    Compare aggregated custom metrics on your whole fleet and see the effect of
+    your recent updates using hard data.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="/img/docs/platform/device-search-by-timeseries-min.png" alt="" />
+  <figcaption>
+    Search devices using complex queries. In this example, we're looking for
+    devices that have had a battery percentage of more than 80 in the week
+    starting on March 3rd.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="/img/docs/platform/device-set-page-min.png" alt="" />
+  <figcaption>
+    Save your searches as device sets and observe the evolution of the results.
+  </figcaption>
+</figure>
+
+:::tip
+
+To learn more about monitoring using Metrics, continue on to
+[documentation on Metrics and Attributes](/docs/platform/metrics/).
+
+:::tip

@@ -61,6 +61,12 @@ function Home() {
                         Memfault, you can continuously monitor devices, debug
                         firmware issues, and deploy OTA updates to your fleet.
                     </p>
+                    <a
+                        className={styles["hero-link"]}
+                        href="/docs/platform/introduction"
+                    >
+                        Feature Overview <FiExternalLink />
+                    </a>
                 </header>
                 <hr className={styles["divider"]} />
                 <div className={styles["resources"]}>

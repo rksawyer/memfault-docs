@@ -32,7 +32,7 @@ module.exports = {
             },
             items: [
                 {
-                    to: "docs/platform/memfault-terminology",
+                    to: "docs/platform/introduction",
                     activeBasePath: "docs/platform",
                     label: "Web Application",
                     position: "left",

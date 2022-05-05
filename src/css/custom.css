@@ -135,3 +135,11 @@ section.features_src-pages- {
         max-height: calc(100% - 80px) !important;
     }
 }
+
+/** When linking to anchors, sometimes they remain hidden by the header. Offset that. */
+.anchor-offset {
+    display: block;
+    position: relative;
+    top: -120px;
+    visibility: hidden;
+}
