@@ -1,0 +1,85 @@
+---
+title: April 2022
+---
+
+## More Documentation
+
+Memfault’s documentation at [docs.memfault.com](http://docs.memfault.com)
+received a new landing page and various other additions.
+
+![Updated Docs](/img/blog/2022-04-30-Updated_Docs.png)
+
+The updated [landing page](https://docs.memfault.com) outlines content across
+MCU, Android, and Linux. It also links to additional learning resources such as
+video content and source code examples. Other improvements include the new page
+[Introduction to Memfault](/docs/platform/introduction), more information on
+[Memfault’s Linux Support](/docs/linux/introduction), and many smaller new
+sections such as a
+[comparison between Android Bug Reports and Caliper](/docs/android/android-bort/#collection-types---bug-reports-and-caliper).
+
+## Improvements on Charts
+
+Memfault surfaces relevant insights about your fleet via charts. They receive
+updates regularly to be more comprehensive and useful.
+
+![Improved Charts](/img/blog/2022-04-30-Improved_Charts.gif)
+
+The dashboard chart “Active Devices” was redesigned to be a bar chart to
+communicate its underlying data more clearly: “Devices that communicated with
+Memfault in a given time period”. Tooltips on several charts better highlight
+the numerical values their lines and bars represent. The chart “Reboot Reasons”
+also allows for drill-down on any day by clicking on the respective labels.
+
+<!-- truncate -->
+
+## General
+
+- Added: Ability to delete Releases in the UI
+- Added: Support for CRC32-based `mflt-build-id`
+- Improved: Landing page and various other places at
+  [docs.memfault.com](http://docs.memfault.com)
+- Improved: Displayed Android software version on the device details page
+- Improved: Visualization of dashboard chart “Active Devices”
+- Improved: Search for Releases supports exact search via quotes “2.1”
+- Improved: Backtrace analysis for TI-clang compiler and Qualcomm
+- Improved: More info for reboots on device Timeline for MCU devices
+- Improved: Device search allows for up to 1,000 items per page
+- Fixed: Failing to process rare edge-cases for Android Bug Reports and MCU Core
+  Dumps
+- Fixed: OTA endpoint unable to handle single-digit hardware versions
+- Fixed: “Release Activations/Audit Log” fails to load for some projects
+- Fixed: URLs for device search not always applied correctly
+- Fixed: Error on device search when using 2 or more attributes as criteria
+- Fixed: Failing log parsing when encountering invalid bytes
+- Fixed: Various smaller UI glitches (content overlapping, tooltips on charts,
+  pagination when iterating on search criteria, cleanup of trace titles)
+
+## MCU SDK
+
+In April,
+[SDK versions 0.30.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0301-and-sdk-0300---april-6-2022),
+[0.30.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0302-and-sdk-0301---april-12-2022),
+and
+[0.30.3](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0303-and-sdk-0302---april-25-2022)
+were released. Some highlights:
+
+- Particle's Device OS port improvements
+- Zephyr port improvements
+- Misc README documentation improvements
+
+## Android SDK
+
+We have published the
+[Bort AOSP SDK 4.1](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v410---april-18-2022)
+with these highlights:
+
+- Enhanced
+  the [SDK validation tool](/docs/android/android-getting-started-guide#validating-the-sdk-integration) to
+  check that the `MemfaultStructuredLogD` (Bort's metric collection service) is
+  correctly configured.
+- In a client/server configuration, Bort SDK settings are now forwarded from the
+  server to the client device.
+- Added a maximum file storage limit on the client, in client/server mode.
+- Compiler and sepolicy fixes for Qualcomm/QSSI Android 12 release.
+- Fixes an issue in `MemfaultStructuredLogD` which could cause an error during
+  startup or shutdown when storage is not available.
