@@ -43,6 +43,283 @@ Here is an overview of hawkBit concepts and how they map to Memfault:
 | [Target Filter](https://www.eclipse.org/hawkbit/ui/#target-filter-management)                    | [Cohort](/docs/platform/projects-and-fleets#cohorts)                           | Identifying which devices to update in a Release.                                                                                                                                                                                                                  |
 | [Gateway Security Token Authentication](https://www.eclipse.org/hawkbit/concepts/authentication) | [Project key](/docs/linux/linux-releases-integration-guide#project-key)        | Authenticating devices to the update server.                                                                                                                                                                                                                       |
 
+## Comparing Memfault to hawkBit's Management UI
+
+Using Memfault's OTA features allows you to manage releases through the Memfault
+interface. Let's look at a comparison between the
+[hawkBit management UI](https://www.eclipse.org/hawkbit/ui/) and Memfault. The
+goal of this section is to visually connect hawkBit's management UI and Memfault
+concepts. If you're familiar with navigating hawkBit you'll be able to find the
+equivalent fleet data in Memfault.
+
+According to the hawkBit docs:
+
+> The hawkBit Management UI provides several views for the different use cases:
+
+> - Deployment Management view for target administration and manual deployment.
+> - Distribution Management view software repository metadata management.
+> - Artifact Management view to manage the artifacts.
+> - Target Filter Management view to manage target filters that can be used both
+>   in Deployment and Rollout Management views.
+> - Rollout Management for large scale rollout orchestration.
+
+:::warning
+
+Some data may not exist because Memfault doesn't have every hawkBit feature
+implemented yet.
+
+:::
+
+### System Configuration
+
+hawkBit provisions important things including authentication tokens in the
+System Config view.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-system-config.png"
+    alt="/img/docs/linux/hawkbit-ui-system-config.png"
+  />
+</p>
+
+Memfault project-level settings operate as hawkBit's system config data model.
+Notably, every device requires an auth token for receiving updates from
+Memfault. You can find the `Project Key` which acts like hawkBit's Gateway Token
+under Memfault's `Settings` tab. Provide the token in each device configuration.
+Create multiple projects for a multi-tenant approach. Each project is considered
+a different tenant.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-settings.png"
+    alt="/img/docs/linux/memfault-settings.png"
+  />
+</p>
+
+### Deployment Management
+
+The hawkBit management UI combines some device and release information in a
+single view.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-deployment-mgmt.png"
+    alt="/img/docs/linux/hawkbit-ui-deployment-mgmt.png"
+  />
+</p>
+
+In Memfault, navigate to `Fleet/Devices` to see your devices, similar to the
+Targets column hawkBit provides with more information density. You can view the
+current software version of every device in your fleet.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-devices.png"
+    alt="/img/docs/linux/memfault-devices.png"
+  />
+</p>
+
+We can do better. Devices are managed in **Cohorts**, which are logical groups
+of devices. Cohorts are similar to hawkBit Target Filters. Navigate to
+`Fleet/Cohorts`. A `default` cohort is available for every new project. You can
+also create your own cohorts.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-cohorts.png"
+    alt="/img/docs/linux/memfault-cohorts.png"
+  />
+</p>
+
+Click on any cohort and you'll find a version matrix, distribution, and settings
+for cohort management. Version management tracks different versions deployed
+within a cohort.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-default-cohort.png"
+    alt="/img/docs/linux/memfault-default-cohort.png"
+  />
+</p>
+
+The distribution tab in a Memfault cohort shows the breakdown of software
+versions deployed across the cohort.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-cohort-distribution.png"
+    alt="/img/docs/linux/memfault-cohort-distribution.png"
+  />
+</p>
+
+### Distribution Management
+
+hawkBit Distributions provide high-level information about releases.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-distribution-management.png"
+    alt="/img/docs/linux/hawkbit-ui-distribution-management.png"
+  />
+</p>
+
+The Memfault equivalent of a hawkBit Distribution is a **Release**. Releases are
+found under `Software/OTA Releases` on the sidebar.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-ota-releases.png"
+    alt="/img/docs/linux/memfault-ota-releases.png"
+  />
+</p>
+
+Select a release for more information about it. Keep in mind there's naming
+overlap where hawkBit and Memfault concepts don't align. For example the
+Memfault details widget isn't meant to exactly match hawkBit's Distribution set
+details tab.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-ota-release.png"
+    alt="/img/docs/linux/memfault-ota-release.png"
+  />
+</p>
+
+### Artifact Management
+
+hawkBit's view for managing Artifacts.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-artifact-management.png"
+    alt="/img/docs/linux/hawkbit-ui-artifact-management.png"
+  />
+</p>
+
+Memfault stores an **OTA Payload** which is similar to hawkBit Artifacts.
+Navigate into `Software/OTA Releases` and select a release. You can add an OTA
+Payload through the UI if no OTA Payloads are available.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-ota-release-payload.png"
+    alt="/img/docs/linux/memfault-ota-release-payload.png"
+  />
+</p>
+
+### Rollout Management
+
+hawkBit has two views for managing Rollouts.
+
+A list of Rollouts.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-rollout-management-progress.png"
+    alt="/img/docs/linux/hawkbit-ui-rollout-management-progress.png"
+  />
+</p>
+
+A single Rollout.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-rollout-management-complete.png"
+    alt="/img/docs/linux/hawkbit-ui-rollout-management-complete.png"
+  />
+</p>
+
+Memfault uses the term **Release** to describe a deployment of a software
+version to devices. Navigate to `Software/OTA Releases` and notice that the page
+shows any active releases.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-ota-releases.png"
+    alt="/img/docs/linux/memfault-ota-releases.png"
+  />
+</p>
+
+You can track the progress of a release by clicking on the name. The compact
+audit log has visibility into release progress and history.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-ota-release-payload.png"
+    alt="/img/docs/linux/memfault-ota-release-payload.png"
+  />
+</p>
+
+If you select a cohort with an active release, the version management tab within
+a cohort contains a progress percentage of the release.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-release-progress.png"
+    alt="/img/docs/linux/memfault-release-progress.png"
+  />
+</p>
+
+A **Cohort** distribution tab contains the current deployment.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-release-distribution.png"
+    alt="/img/docs/linux/memfault-release-distribution.png"
+  />
+</p>
+
+### Target Filter Management
+
+hawkBit's view for managing Target Filters.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/hawkbit-ui-target-filter-management.png"
+    alt="/img/docs/linux/hawkbit-ui-target-filter-management.png"
+  />
+</p>
+
+Memfault uses Cohorts for managing groups of devices. The `Fleet/Devices` page
+has top-level data for observing individual device health.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-devices.png"
+    alt="/img/docs/linux/memfault-devices.png"
+  />
+</p>
+
+Clicking into a device will yield more information.
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/linux/memfault-device.png"
+    alt="/img/docs/linux/memfault-device.png"
+  />
+</p>
+
 ## Reference
 
 - [Memfault Terminology](/docs/platform/memfault-terminology)
