@@ -6,7 +6,7 @@ sidebar_label: MCUXpresso SDK for i.MX RT
 
 This tutorial will go over integrating the
 [Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
-an NXP RT1060 project using NXP's MCUXpresso IDE.
+an NXP i.MX RT1060 project using NXP's MCUXpresso IDE.
 
 :::note
 
@@ -38,11 +38,11 @@ The strategy documented here follows these high-level steps:
 1. Add the Memfault SDK sources to the project using the `eclipse_patch.py`
    script from the Memfault SDK
 2. Configure a few build settings (gnu build id, debug level)
-3. (optional, for RT1060 network demo) Add the
+3. (optional, for i.MX RT1060 network demo) Add the
    [example HTTPS client port](https://github.com/memfault/mcuxpresso-rt1060-example/blob/e1302d2d832ade87cbc49974b270b11fef3c3891/lwip_httpscli_mbedTLS/httpsclient.c)
    and associated
    [application changes](https://github.com/memfault/mcuxpresso-rt1060-example/blob/e1302d2d832ade87cbc49974b270b11fef3c3891/source/lwip_httpscli_mbedTLS_freertos.c)
-   for the RT1060 LwIP project, and configure Memfault Project Key for uploading
+   for the i.MX RT1060 LwIP project, and configure Memfault Project Key for uploading
    Memfault data from the EVK
 
 ## Part 1: Setup and Verify LwIP Sample Application
@@ -108,7 +108,7 @@ the Memfault Demo CLI is connected to the debug UART in order to test the
 Memfault functionality, and an HTTPS client is enabled over the Ethernet
 connection for uploading Memfault data.
 
-Note that the provided HTTPS client example is specific to the RT1060 EVK sample
+Note that the provided HTTPS client example is specific to the i.MX RT1060 EVK sample
 app; other boards will potentially require a different connectivity
 implementation.
 
