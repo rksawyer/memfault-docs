@@ -1,0 +1,105 @@
+---
+id: android-multi-device-support
+title: Android Multi-Device Support
+sidebar_label: Multi-Device Support
+---
+
+Your product might consist of multiple Android devices connected together, where
+not all of the devices have direct internet access - this presents a challenge
+uploading diagnostics (and downloading settings) from the un-connected
+_companion_ devices.
+
+The Bort SDK (since version 4.0) supports offloading data from the _companion_
+devices, if there is a socket connection available to communicate between them.
+We call this **client-server mode** and it allows all participating devices to
+communicate with Memfault while only the server device is connected to the
+Internet.
+
+## Client-Server mode
+
+Disabled by default, Bort's client-server mode allows designating a
+network-connected Android device running the Bort SDK as _server_. One or more
+connected devices without direct network access can be designated _client_.
+
+Bort running on the _client_ device will collect and forward diagnostic data to
+Bort running on the _server_ device via a socket connection, so that the data
+can be forwarded to Memfault's web services.
+
+<p align="center">
+  <img width="1000" src="/binary-assets/android-client-server.svg" />
+</p>
+
+Data is bundled together in a MAR archive. This compressed file format collects
+several types of data (e.g. logs, metrics, bug reports) together, so that they
+can be uploaded in one file - resulting in fewer http requests.
+
+## Supported features
+
+All data collected by Bort (bugreports, logs, metrics, crashes/WTFs/ANRs/etc) is
+forwarded from _client_ devices to Memfault's web services when using
+**client-server** mode.
+
+Bort running on the _server_ device will forward SDK settings to the _client_
+device - this ensures that Bort on both devices is always fully remotely
+configurable.
+
+## Enabling Client-Server connectivity
+
+This mode is disabled by default. To enable, there are two configuration steps:
+
+### Configure Client-Server system property on each device
+
+Set a system property (`vendor.memfault.bort.client.server.mode`) on each of the
+devices, describing its role. This might be set in a `product.mk` file specific
+to each device e.g.:
+
+```
+PRODUCT_PROPERTY_OVERRIDES += vendor.memfault.bort.client.server.mode=server
+```
+
+or
+
+```
+PRODUCT_PROPERTY_OVERRIDES += vendor.memfault.bort.client.server.mode=client
+```
+
+If this property is absent, or not set to either `server` or `client` then the
+client-server feature is disabled.
+
+:::info
+
+This property is configured individually per device. A system property is used
+for this reason (so that the Bort SDK does not have to be configured/compiled
+separately for each device).
+
+:::
+
+### Configure socket communication parameters
+
+Set the `CLIENT_SERVER_PORT` and `CLIENT_SERVER_HOST` parameters in
+`bort.properties`. The _server_ device must be able to listen for connections on
+this port, and the _client_ devices must be able to communicate with the
+_server_ using this hostname and port.
+
+The Bort `UsageReporter` persistent service on the _server_ device will listen
+for connections on this host/port, and on _client_ devices will attempt to
+establish a connection with the _server_ device.
+
+:::info
+
+This property is configured as part of the Bort build - this enables the use of
+the same Bort/UsageReporter apks on each of the devices (i.e. it is _not_
+required to maintain/build separately configured versions of the Bort SDK for
+each of the connected Android devices).
+
+:::
+
+### Configure network interfaces
+
+Ensure that device network/firewall configuration is set up so that the
+client/server devices can communicate using the hostname/port specified in your
+`bort.properties` file.
+
+For security reasons, the network interface that the _server_ device is
+listening on should not be publicly accessible - it is expected to be an
+interface which can only communicate with the _client_ device.
