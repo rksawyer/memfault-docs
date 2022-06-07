@@ -486,6 +486,66 @@ to help!
 
 <SendingDataOverUdp />
 
+## Configuring and Invoking an OTA Update  
+By default, the NRF Connect [sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/nrf/samples/nrf9160/memfault/README.html#memfault-sample) does not come with OTA support enabled by default. 
+To enable this support a few things need to be added. The update process is invoked with a CLI command, this needs to be enabled. the `memfault_platform_config.h` file, add this line: 
+
+```c
+#define CONFIG_MEMFAULT_FOTA_CLI_CMD    1
+``` 
+
+In the `prj.conf` file the following lines need to be added: 
+
+```c
+# The subsystems we need so OTA payloads can be written to
+# flash and updated by MCUBoot
+CONFIG_DFU_TARGET=y
+CONFIG_DFU_TARGET_MCUBOOT=y
+CONFIG_IMG_MANAGER=y
+CONFIG_FLASH=y
+CONFIG_IMG_ERASE_PROGRESSIVELY=y
+
+# For Memfault FOTA, we will use the FOTA_DOWNLOAD API's
+# from the nRF Connect SDK which depends on the DOWNLOAD_CLIENT
+CONFIG_FOTA_DOWNLOAD=y
+CONFIG_DOWNLOAD_CLIENT=y
+
+# Enable printing of file download progress to console
+CONFIG_FOTA_DOWNLOAD_PROGRESS_EVT=y
+CONFIG_MEMFAULT_FOTA=y
+CONFIG_DOWNLOAD_CLIENT_MAX_FILENAME_SIZE=400
+CONFIG_DOWNLOAD_CLIENT_STACK_SIZE=1600
+``` 
+
+The full `prj.conf` file can be viewed [here](https://github.com/memfault/memfault-firmware-sdk/blob/1b88521c5f736a4acd57e7e75e859a69deb9d845/examples/nrf-connect-sdk/nrf9160/memfault_demo_app/prj.conf).
+
+Confirm you have already built and uploaded the OTA compatible `app_update.bin` to Memfault with the appropriate semantic version set. The device you wish to update should be running a lower version. 
+
+Finally to invoke the OTA process enter the following command: 
+```bash
+uart:~$ mflt_nrf fota 
+<inf> <mflt>: Checking for FOTA
+<inf> <mflt>: FOTA Update Available. Starting Download!
+<inf> download_client: Setting up TLS credentials, tag 1003
+<inf> download_client: Configuring socket timeout (30 s)
+...
+<inf> <mflt>: FOTA In Progress
+<inf> download_client: Downloaded 2048/204467 bytes (1%)
+<inf> download_client: Downloaded 4096/204467 bytes (2%)
+...
+<inf> download_client: Downloaded 204467/204467 bytes (100%)
+<inf> download_client: Download complete
+<inf> dfu_target_mcuboot: MCUBoot image upgrade scheduled. Reset device to apply
+*** Booting Zephyr OS build v2.7.99-ncs1  *** to install update!
+I: Starting bootloader
+I: Primary image: magic=unset, swap_type=0x1, copy_done=0x3, image_ok=0x3
+I: Secondary image: magic=good, swap_type=0x2, copy_done=0x3, image_ok=0x3
+```
+
+The device resets automatically, running your new firmware.  
+  
+
+
 ## Built-in Metrics for the nRF9160
 
 The nRF Connect SDK optionally provides some pre-enabled metrics for the nRF9160
