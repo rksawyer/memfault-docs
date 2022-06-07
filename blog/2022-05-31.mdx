@@ -1,0 +1,76 @@
+---
+title: May 2022
+---
+
+### Memfault OTA for SWUpdate users
+
+Memfault’s over-the-air update service is now
+[available on Embedded Linux](/docs/linux/linux-releases-integration-guide) and
+SWUpdate [via the hawkBit DDI](/docs/linux/linux-memfault-hawkbit-comparison).
+This makes all Memfault OTA management and hosting features such as cohorts,
+staged rollouts, full vs. delta releases, and a scalable global CDN available to
+Linux devices that utilize one of the most popular update agents. Memfault also
+added support for forced (non-interactive) updates – invaluable for delivering
+security updates to embedded IoT devices.
+
+![Memfault ❤️ Linux.png](/img/blog/2022-05-31-MemfaultHeartLinux.png)
+
+To communicate with SWUpdate clients,
+[Memfault acts as a hawkBit update server](/docs/linux/linux-memfault-hawkbit-comparison).
+It implements the Direct Device Integration API enabling other on-device agents
+such as [RAUC (via hawkBit client)](https://github.com/rauc/rauc-hawkbit) to
+deliver and install software remotely as well.
+
+<!-- truncate -->
+
+## General
+
+- Improved: User flow for Single Sign-On
+- Improved: UX when editing/deleting metrics to inform about affected charts and
+  alerts
+- Improved: Manually refreshing charts updates data for all accessible time
+  ranges
+- Improved: UI for Issues reflects data retention of raw data (e.g. “Recent
+  Traces”)
+- Improved: Alerts can only be configured with compatible metrics (time-series
+  vs. attributes)
+- Improved: New category “Danger Zone” in settings for irreversible operations
+  on projects and organizations
+- Improved: Various UI elements (app-level status badge, column header on issues
+  list, removed “Beta 🧪” badge from several places, tooltip for charts, title
+  on release details page, clarified grouping on cohort’s version distribution,
+  tooltips in version matrix)
+- Fixed: UI glitch when changing custom metric filter in device search
+- Fixed: Various UI glitches in issue details page (responsivenes, resetting
+  search criteria)
+- Fixed: Multi-select on Issue list broken
+- Fixed: Timeout for page Settings→Hardware for some projects
+
+## MCU
+
+- Added: Project type for [NXP MCUXpresso](/docs/mcu/arm-nxp-mcuxpresso-guide/)
+- Improved: Processing errors for traces now shown in status queue
+- Fixed: Different edge cases when processing coredumps for ESP32 and QCC51xx
+- Fixed: Coredumps not processed unless matching hardware_version was configured
+- Clarified license for MCU templates is Apache 2
+- SDK versions
+  [0.30.4](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0304-and-sdk-0303---may-4-2022)
+  and
+  [0.30.5](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0305-and-sdk-0304---may-24-2022)
+  were releases. Some highlights:
+  - Support NXP’s MCUXpresso IDE
+  - ESP-IDF: Memfault Compact Log example integration to
+    the [`examples/esp32`](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/esp32) project
+  - `MEMFAULT_NRF_CONNECT_SDK` enabled by default for nrf52 + nrf53
+
+## Android
+
+- Improved: Filtering by logging source for Android log viewer
+- No new version of
+  the [Android Bort AOSP SDK](https://github.com/memfault/bort) in May.
+
+## Linux
+
+- Added:
+  [API endpoint for hawkBit](/docs/linux/linux-memfault-hawkbit-comparison)
+  (including support for forced vs. soft releases)
