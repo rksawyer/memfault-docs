@@ -26,8 +26,8 @@ module.exports = {
                 "platform/charts",
                 "platform/alerts",
                 "platform/rate-limiting",
+                "platform/sso",
                 /* "platform/bulk-device-upload", */
-                /* Mentions features to be released: "platform/sso", */
             ],
         },
         {

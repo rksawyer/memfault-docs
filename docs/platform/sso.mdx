@@ -7,75 +7,94 @@ sidebar_label: Single Sign-On (SSO)
 import InviteNewUsers from "@site/src/pages/_partials/_invite-new-users.mdx";
 
 This guide covers Memfault's Single Sign-On (or SSO) offering. SSO allows users
-of your organization to log in using your organization's third-party
-authentication provider.
+of your organization to log in using your organization's third-party identity
+provider. Memfault supports Google OAuth, Microsoft OAuth, and SAML-based
+identity providers (e.g. Okta, Azure AD, Microsoft AD).
 
 :::note
 
-SSO on can be set up for organization on a per-request basis. We currently don't
-support automatic or autonomous provisioning of SSO for organizations.
-[Let us know](mailto:hello@memfault.com) if you'd like us to set you up.
+Please [contact us] if you want to use a SAML-based identity provider.
 
 :::
 
-Supported providers include:
+## Enabling SSO
 
-- Google OAuth
-- Microsoft OAuth
-- Okta
-- Azure AD
-- Microsoft AD FS
-- OneLogin
-- VMware Workspace ONE
+1. As an administrator, visit [**Admin > SSO**][sso-new] to **Add Connection**.
+2. Select the identity provider you want to use:
+   - **Google OAuth** and **Microsoft OAuth**: Provide email domain that you use
+     (e.g. `example.com` for `alice@example.com`).
+   - **SAML**: You'll be taken to a guided portal to configure SAML.
+3. After the previous step you should end up at again [**Admin > SSO**][sso] and
+   the new connection should be visible now.
+   - If not, press **Refresh** in the top right corner.
+4. Consider turning on the [**Auto-Invite**](#auto-invite) setting.
+5. Copy the **Organization Log-In Portal** link at the bottom of [**Admin >
+   SSO**][sso]. Bookmark it and share it with your team.
 
-Memfault additionally supports logging in with SAML.
+## SSO Settings
 
-## Getting Started
+### Auto-Invite
 
-Please [contact us](mailto:hello@memfault.com) to enable Single Sign On for your
-organization.
+When this setting is enabled, any user that signs in through the configured
+identity provider will be granted access to your organization. This way you
+don't need to manually invite users.
 
-## Invite New Users
+If you turn this setting on after a user has already attempted to log into
+Memfault, they might have to log out and log in again for the auto-invite to
+work.
 
-Members with an `@your-domain.com` email address will need an invitation to your
-organization. Without one, they will be able to log in but they won't be members
-of your organization, and will not have access to your organization's projects.
+### Require SSO
 
-<InviteNewUsers />
+When this setting is enabled, users will not be able to access any of your
+organization's resources, unless they have used one of your configured identity
+providers.
 
-External users will still be able to log in to Memfault with their email address
-(even if it's not in `@your-domain.com`). If you'd like to restrict access to
-members with a `@your-domain.com` email address,
-[please contact us](mailto:hello@memfault.com).
-
-## Authenticating With SSO
-
-### Logging Into the App
-
-To log in with SSO, click on the **Log in with SAML SSO** link, and you'll be
-prompted to enter your email address. Make sure to enter the email address
-provided by your organization.
-
-<p align="center">
-  <img
-    width="800"
-    src="/img/docs/platform/login-with-saml-form-min.png"
-    alt="Memfault's log in form for SAML SSO"
-  />
-</p>
-
-After successfully authenticating, you'll be redirected back to the app
-automatically.
-
-## SSO Enforcement
-
-Please [contact us](mailto:hello@memfault.com) to enforce SSO usage for your
-organization.
-
-When your organization enforces SSO,
-[User API keys](/docs/ci/authentication#user-api-key) will stop working, as they
-can't be re-authenticated interactively.
-
-In that case, your users will need to use
+This also means that [User API keys](/docs/ci/authentication#user-api-key) will
+stop working, as they can't be re-authenticated interactively. In that case,
+your users will need to use
 [Organization Auth Tokens](/docs/ci/authentication#organization-auth-token)
 instead. Administrators can and have to revoke them as needed.
+
+Please [contact us] if you want to change that setting.
+
+## Logging in with SSO
+
+Always use the **Organization Log-In Portal** link (found at [**Admin >
+SSO**][sso]) for the best experience. It has this structure:
+
+<pre>
+  https://app.memfault.com/login/portal/<strong>ORGANIZATION_SLUG</strong>
+</pre>
+
+When you visit your organization's log-in portal, you'll be redirected to the
+configured identity provider. If multiple identity providers were configured,
+you'll be asked which one to use. Once successfully authenticated, you'll be
+redirected back to Memfault.
+
+## FAQs
+
+<details>
+  <summary><a id="organization-slug"></a>What is the Organization Slug?</summary>
+  <div>
+
+Each organization has a unique identifier named "[slug]". You'll find it in most
+of your project's pages in the URL behind `organizations/` and `/projects`. In
+the following URL it would be `acme`:
+
+<pre>
+  https://app.memfault.com/organizations/<strong>acme</strong>
+  /projects/gadget/issues
+</pre>
+
+The login page needs this "slug" to redirect you to the correct identity
+provider. We strongly recommend saving a bookmark to your **Organization Log-In
+Portal** URL (which can be found on [**Admin > SSO**][sso]) so that you don't
+have to remember this piece of information.
+
+  </div>
+</details>
+
+[sso]: https://app.memfault.com/organizations/-/settings/sso
+[sso-new]: https://app.memfault.com/organizations/-/settings/sso?new
+[slug]: https://en.wikipedia.org/wiki/Clean_URL#Slug
+[contact us]: mailto:hello@memfault.com
