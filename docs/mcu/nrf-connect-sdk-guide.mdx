@@ -486,15 +486,19 @@ to help!
 
 <SendingDataOverUdp />
 
-## Configuring and Invoking an OTA Update  
-By default, the NRF Connect [sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/nrf/samples/nrf9160/memfault/README.html#memfault-sample) does not come with OTA support enabled by default. 
-To enable this support a few things need to be added. The update process is invoked with a CLI command, this needs to be enabled. the `memfault_platform_config.h` file, add this line: 
+## Configuring and Invoking an OTA Update
+
+By default, the NRF Connect
+[sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/nrf/samples/nrf9160/memfault/README.html#memfault-sample)
+does not come with OTA support enabled by default. To enable this support a few
+things need to be added. The update process is invoked with a CLI command, this
+needs to be enabled. the `memfault_platform_config.h` file, add this line:
 
 ```c
 #define CONFIG_MEMFAULT_FOTA_CLI_CMD    1
-``` 
+```
 
-In the `prj.conf` file the following lines need to be added: 
+In the `prj.conf` file the following lines need to be added:
 
 ```c
 # The subsystems we need so OTA payloads can be written to
@@ -515,15 +519,19 @@ CONFIG_FOTA_DOWNLOAD_PROGRESS_EVT=y
 CONFIG_MEMFAULT_FOTA=y
 CONFIG_DOWNLOAD_CLIENT_MAX_FILENAME_SIZE=400
 CONFIG_DOWNLOAD_CLIENT_STACK_SIZE=1600
-``` 
+```
 
-The full `prj.conf` file can be viewed [here](https://github.com/memfault/memfault-firmware-sdk/blob/1b88521c5f736a4acd57e7e75e859a69deb9d845/examples/nrf-connect-sdk/nrf9160/memfault_demo_app/prj.conf).
+The full `prj.conf` file can be viewed
+[here](https://github.com/memfault/memfault-firmware-sdk/blob/1b88521c5f736a4acd57e7e75e859a69deb9d845/examples/nrf-connect-sdk/nrf9160/memfault_demo_app/prj.conf).
 
-Confirm you have already built and uploaded the OTA compatible `app_update.bin` to Memfault with the appropriate semantic version set. The device you wish to update should be running a lower version. 
+Confirm you have already built and uploaded the OTA compatible `app_update.bin`
+to Memfault with the appropriate semantic version set. The device you wish to
+update should be running a lower version.
 
-Finally to invoke the OTA process enter the following command: 
+Finally to invoke the OTA process enter the following command:
+
 ```bash
-uart:~$ mflt_nrf fota 
+uart:~$ mflt_nrf fota
 <inf> <mflt>: Checking for FOTA
 <inf> <mflt>: FOTA Update Available. Starting Download!
 <inf> download_client: Setting up TLS credentials, tag 1003
@@ -542,9 +550,7 @@ I: Primary image: magic=unset, swap_type=0x1, copy_done=0x3, image_ok=0x3
 I: Secondary image: magic=good, swap_type=0x2, copy_done=0x3, image_ok=0x3
 ```
 
-The device resets automatically, running your new firmware.  
-  
-
+The device resets automatically, running your new firmware.
 
 ## Built-in Metrics for the nRF9160
 
