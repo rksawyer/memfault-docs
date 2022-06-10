@@ -4,6 +4,8 @@ title: Charts
 sidebar_label: Charts
 ---
 
+import NormalizedCharts from "@site/src/components/icons/NormalizedCharts";
+
 Memfault charts allow you to proactively monitor any smart device, anywhere.
 Monitor your releases and view data-driven device and fleet-level metrics, like
 battery health, connectivity, and more in real-time dashboards.
@@ -116,3 +118,81 @@ When comparing Metric and Issue Charts, bear in mind that the aggregations
 Devices reporting the given value. When visualizing absolute values for
 different sets of Devices, the resulting chart could be misleading as the
 underlying number of Devices per set may vary.
+
+## Chart Normalization
+
+Chart Normalization converts absolute values such as number of incidents, sums,
+and counts to relative values “per 1,000 devices". This helps understanding real
+trends when you are comparing these values between populations of different
+sizes (e.g. comparing devices from large production cohort Default against those
+from a smaller test cohort Beta) or when the population size changes over time
+(e.g. new devices being activated continuously).
+
+### Toggling Chart Normalization on/off
+
+![Toggling Chart Normalization at the top](/img/docs/platform/charts-normalized-toggle.gif)
+
+This is a global setting for all browser tabs that you can toggle in the top
+right corner of the page, next to the timezone selector. Additionally for
+convenience, each chart has a small button <NormalizedCharts /> that allows
+toggling the feature globally.
+
+### Charts that support Normalization
+
+![Toggle Chart Normalization at the chart](/img/docs/platform/charts-normalized-per-chart-toggle.gif)
+
+Chart Normalization is supported on all charts that show absolute values such as
+number of incidents, sums, or counts. For values that are not affected by the
+population size (e.g. minimum, maximum, average) Chart Normalization would have
+no affect and the feature is unavailable.
+
+### Population and Normalized Values
+
+The population represents the number of devices that contributed to the value.
+Usually, this is based on the **Active Devices** for the corresponding time
+span.
+
+![Tooltip for Normalized Charts](/img/docs/platform/charts-normalized-tooltip.png)
+
+Normalized values are depicted with a suffix **1k** in the bottom right corner
+next to the value (and are pronounced "per 1,000 devices"). Examples:
+
+- 42₁ₖ means “42 per 1,000 devices”
+- 3K₁ₖ means "3,000 per 1,000 devices".
+
+To calculate the normalized value ($Norm$) from the absolute value ($Real$) and
+a given population ($Pop$) use the following formula:
+
+$$
+Norm=Real\times \frac{1000}{Pop}
+$$
+
+For the values in the screenshot above that translates to:
+
+$$
+63\textup{M}_{1k}=2.2\textup{B} \times \frac{1000}{35\textup{K}}
+$$
+
+### Examples of Chart Normalization
+
+#### Comparing Values Between Cohorts
+
+![Using normalized charts when comparing cohorts](/img/docs/platform/charts-normalized-cohort-comparison.png)
+
+Without Chart Normalization (left): Cohort A (blue) reported more than 10x the
+duration spent charging compared to cohort B (purple). But in reality, both
+cohorts have a growing population with Cohort A consisting of 13,000 devices and
+Cohort B of only 1,000 devices.
+
+Relatively speaking, the time spent charging stayed the same at about **60M₁ₖ**.
+
+#### Population Changes
+
+![Using normalized charts for populations with varying size](/img/docs/platform/charts-normalized-growing-population.png)
+
+Two weeks ago, the fleet reported 36K reboots per day steadily growing towards
+130K daily reboots. It looks like the devices started to reboot more often. But
+in reality, the population grew from 10K devices to 36K devices during the same
+time span (as more people unpacked devices).
+
+Relatively speaking, the number of reboots stayed the same at about **3.6₁ₖ**.

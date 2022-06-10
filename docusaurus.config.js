@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+const math = require("remark-math");
+const katex = require("rehype-katex");
+
 module.exports = {
     title: "Memfault Docs",
     tagline: "Learn how to say goodbye to firmware bugs",
@@ -166,6 +169,8 @@ module.exports = {
                     sidebarPath: require.resolve("./sidebars.js"),
                     editUrl:
                         "https://github.com/memfault/memfault-docs/edit/main/",
+                    remarkPlugins: [math],
+                    rehypePlugins: [katex],
                 },
                 gtag: {
                     trackingID: "G-R5JYJ06TDJ",
@@ -184,6 +189,15 @@ module.exports = {
                 },
             },
         ],
+    ],
+    stylesheets: [
+        {
+            href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+            type: "text/css",
+            integrity:
+                "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+            crossorigin: "anonymous",
+        },
     ],
     scripts: [
         {
