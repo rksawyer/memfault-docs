@@ -272,6 +272,23 @@ Your device may require a different `postupdatecmd` than `reboot`.
 
 `swupdate -f /etc/swupdate.cfg`
 
+#### Polling interval and forced updates
+
+SWUpdate receives a polling interval from Memfault which it uses to decide how
+often to wake up to check for updates. This value is currently set to 12h to
+preserve bandwidth and battery. On restart, SWUpdate will wait a full polling
+interval before it fetches an update.
+
+During development, you may want to force the system to fetch an update without
+waiting. This can be accomplished on the device with the `swupdate-ipc` tool:
+
+```
+swupdate-ipc hawkbitcfg -t
+```
+
+Running this command will wake up swupdate and cause it to install an available
+update if there is one.
+
 #### Integration with Yocto
 
 :::warning
