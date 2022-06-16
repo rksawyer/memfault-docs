@@ -37,29 +37,51 @@ These metrics are displayed on the device timeline:
 
 And several summary metrics are also available:
 
-- `audio_on_ratio`
-- `battery_health_not_good_ratio`
-- `battery_level_pct_avg`
-- `bluetooth_scan_ratio`
-- `cpu_running_ratio`
-- `cpu_resume_count_per_hour`
-- `cpu_suspend_count_per_hour`
-- `cpu_wake_count_per_hour`
-- `doze_full_ratio`
-- `doze_ratio`
-- `gps_on_ratio`
-- `max_battery_temp`
-- `phone_radio_active_ratio`
-- `phone_scanning_ratio`
-- `phone_signal_strength_none_ratio`
-- `phone_signal_strength_poor_ratio`
-- `screen_on_ratio`
-- `screen_brightness_light_or_bright_ratio`
-- `wifi_on_ratio`
-- `wifi_radio_active_ratio`
-- `wifi_running_ratio`
-- `wifi_scan_ratio`
-- `wifi_signal_strength_poor_or_very_poor_ratio`
+- `audio_on_ratio`: percentage of time (0.0-1.0) audio was switched on (see
+  batterystats `a`).
+- `battery_health_not_good_ratio`: percentage of time (0.0-1.0) when the battery
+  health was not "good" (`g`) (see batterystats `Bh`).
+- `battery_level_pct_avg`: mean battery level (0-100).
+- `bluetooth_scan_ratio`: percentage of time (0.0-1.0) with bluetooth LE
+  scanning active (see batterystats `bles`).
+- `cpu_running_ratio`: percentage of time (0.0-1.0) CPU was running (see
+  batterystats `r`).
+- `cpu_resume_count_per_hour`: number of times per hour CPU became active (see
+  batterystats `r`).
+- `cpu_suspend_count_per_hour`: number of times per hour CPU became inactive
+  (see batterystats `r`).
+- `cpu_wake_count_per_hour`: number of individual CPU wakeups (see batterystats
+  `wr`).
+- `doze_full_ratio`: percentage of time (0.0-1.0) spent in full Doze mode (see
+  batterystats `di`).
+- `doze_ratio`: percentage of time (0.0-1.0) spent in any (full or light) Doze
+  mode (see batterystats `di`).
+- `gps_on_ratio`: percentage of time (0.0-1.0) GPS was switched on (see
+  batterystats `g`).
+- `max_battery_temp`: maximum battery temperature (°C x 10) during the period
+  (see batterystats `Bt`).
+- `phone_radio_active_ratio`: percentage of time (0.0-1.0) the phone radio was
+  active (see batterystats `Pr`).
+- `phone_scanning_ratio`: percentage of time (0.0-1.0) the phone was scanning
+  (see batterystats `Psc`).
+- `phone_signal_strength_none_ratio`: percentage of time (0.0-1.0) the phone
+  signal strength was "none" (`0`) (see batterystats `Pss`).
+- `phone_signal_strength_poor_ratio`: percentage of time (0.0-1.0) the phone
+  signal strength was "poor" (`1`) (see batterystats `Pss`).
+- `screen_on_ratio`: percentage of time (0.0-1.0) the screen was on (see
+  batterystats `S`).
+- `screen_brightness_light_or_bright_ratio`: percentage of time (0.0-1.0) the
+  screen brightness was "light" (`3`) or "bright" (`4`) (see batterystats `Sb`).
+- `wifi_on_ratio`: percentage of time (0.0-1.0) Wifi was on (see batterystats
+  `W`).
+- `wifi_radio_active_ratio`: percentage of time (0.0-1.0) Wifi was on (see
+  batterystats `Wr`).
+- `wifi_running_ratio`: percentage of time (0.0-1.0) Wifi was on (see
+  batterystats `Ww`).
+- `wifi_scan_ratio`: percentage of time (0.0-1.0) Wifi was scanning (see
+  batterystats `Ws`).
+- `wifi_signal_strength_poor_or_very_poor_ratio`: percentage of time (0.0-1.0)
+  Wifi signal was "poor" (`1`) or "very poor" (`0`) (see batterystats `Wss`).
 
 These metrics would be good candidates for Timeseries metrics, to monitor fleet
 performance over time and find outlier devices.
@@ -68,7 +90,8 @@ performance over time and find outlier devices.
 
 **Collected Since Bort 4.0**
 
-Bort regularly collects several device temperature metrics:
+Bort regularly collects several device temperature metrics, from the
+[HardwarePropertiesManager](<https://developer.android.com/reference/android/os/HardwarePropertiesManager#getDeviceTemperatures(int,%20int)>):
 
 - CPU
 - Device Skin
@@ -85,7 +108,9 @@ performance over time and find outlier devices.
 
 **Collected Since Bort 4.0**
 
-Bort regularly collects device storage usage metrics:
+Bort regularly collects device storage usage metrics from the
+[StorageStatsManager](<https://developer.android.com/reference/android/app/usage/StorageStatsManager#getFreeBytes(java.util.UUID)>)
+(`getFreeBytes`/`getTotalBytes` for the primary volume):
 
 - `storage.primary.bytes_free`
 - `storage.primary.bytes_total`
