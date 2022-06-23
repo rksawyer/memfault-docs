@@ -35,7 +35,10 @@ These metrics are displayed on the device timeline:
 
 ![](/img/docs/android/metrics-battery-timeline-min.png)
 
-And several summary metrics are also available:
+And several summary metrics are also available. Each metric is listed below,
+noting the batterystats output code that it is derived from (they are defined in
+the
+[batterystats source](https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/BatteryStats.java)):
 
 - `audio_on_ratio`: percentage of time (0.0-1.0) audio was switched on (see
   batterystats `a`).
@@ -96,10 +99,19 @@ Bort regularly collects several device temperature metrics, from the
 - CPU
 - Device Skin
 
-These are reported with min/max/mean values each hour, for each available
-sensor:
+These are reported with min/max/mean values each hour. Note that each device has
+a different collection of sensors - an example device with one device skin
+sensor and two CPU sensors might have a set of metrics like this:
 
-![](/img/docs/android/metrics-temp-min.png)
+- `temp_skin_0.max`
+- `temp_skin_0.mean`
+- `temp_skin_0.min`
+- `temp_cpu_0.max`
+- `temp_cpu_0.mean`
+- `temp_cpu_0.min`
+- `temp_cpu_1.max`
+- `temp_cpu_1.mean`
+- `temp_cpu_1.min`
 
 These metrics would be good candidates for Timeseries metrics, to monitor fleet
 performance over time and find outlier devices.
@@ -116,8 +128,6 @@ Bort regularly collects device storage usage metrics from the
 - `storage.primary.bytes_total`
 - `storage.primary.bytes_used`
 - `storage.primary.percentage_used`
-
-![](/img/docs/android/metrics-temp-min.png)
 
 These metrics would be good candidates for Timeseries metrics, to monitor fleet
 performance over time and find outlier devices.
