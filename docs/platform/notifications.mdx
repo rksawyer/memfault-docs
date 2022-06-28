@@ -1,0 +1,115 @@
+---
+id: notifications
+title: Notifications
+sidebar_label: Notifications
+---
+
+## Concept: Sources and Targets
+
+Notifications in Memfault work on a concept of _Sources_ and _Targets_: a
+Notification is triggered by a _Source_, and sent to a _Target_. The resulting
+output can be sent in the form of an email, or a Slack webhook request.
+
+A **Notification Source** may be:
+
+- an [Alert](./alerts.mdx), defined in terms of Fleet or Device events,
+  thresholds and/or conditions to be met
+- an [Issue](./issue-management.mdx), representing a group of Traces manifesting
+  a particular problem.
+
+And the **Notification Target** may be:
+
+- a _Project Member_ (a user)
+- an _External Integration_ (via an email address, or Slack webhook request URL)
+- a _Notification Group_ (which is a collection zero or more targets of the
+  former two types, routing the Notification to each target in the collection)
+
+Effective use of Notification Targets allows you to direct information to the
+concerned parties and avoid flooding your team with non-relevant information.
+
+## Example: Alert Notification Targets
+
+Let's take the example of an [Alert](./alerts.mdx), to understand how Targets
+are matched to a Source. First, select Alerts in the sidebar and then click the
+"Create Alert" button on the Alerts screen.
+
+<figure>
+  <img src="/img/docs/platform/alerts-page.png" alt="" />
+</figure>
+
+In the Alert creation dialog, you see a field labelled _Notification Targets_.
+In this field you can select options from the dropdown or type to search the
+names or handles of Notification Targets in your project.
+
+<figure>
+  <img src="/img/docs/platform/alert-target-select-full.png" alt="" />
+</figure>
+
+In the selection pictured above, the Targets `@device-qa-slack` and
+`@prod-alerts-pager-duty` represent External targets (recognizable by their
+Slack and Email icons), while `@qa-team` is a Group Target (recognizable by the
+trailing number in parentheses, showing the number of Targets it contains), and
+the Target `@allen` is a single User in your project.
+
+With this selection, the Alert you are configuring here would trigger
+Notifications to user Allen Walker and external targets "Slack channel
+#device-qa" and "Production Alerts Pager Duty", as well as to whatever Targets
+are contained in the "QA Team" Group Target.
+
+## Managing Notification Targets
+
+Under **Settings → Notifications**, there are four panels for viewing and
+managing your Notification Targets.
+
+<figure>
+  <img src="/img/docs/platform/settings-notifs.png" alt="" />
+</figure>
+
+### User Handles
+
+The _User Handles_ panel of the Notifications Settings allows you to view the
+list of users in your project. For each of these Users you can see a list of the
+Group Targets in which they are included, and you can edit their "handle"
+string. This is important for example, in cases where two users' handles may be
+the same, or too similar, within the same project.
+
+<figure>
+  <img src="/img/docs/platform/settings-notifs-handles-alt.png" alt="" />
+</figure>
+
+### Group Targets
+
+Group targets are one of the most important mechanisms for managing
+Notifications in your team, allowing you to define the precise lists of Project
+Members and/or External Targets concerned about particular events and
+information.
+
+<figure>
+  <img src="/img/docs/platform/settings-notifs-groups-alt.png" alt="" />
+</figure>
+
+### External Targets
+
+External Targets allow you to route Notifications in to external notification
+services that your on-call responders may already be using (e.g. PagerDuty,
+OpsGenie, etc.) through Email Targets, or to collect them for visibility in
+Slack through a webhook integration. These targets can then be included within
+Group Targets, to further refine your workflows.
+
+<figure>
+  <img src="/img/docs/platform/settings-notifs-externals.png" alt="" />
+</figure>
+
+### Default Lists
+
+Default Target lists are a way of pre-setting your target selections, so that
+your most commonly used configuration can be pre-filled within newly created
+Alerts, speeding up your workflow.
+
+NOTE: The "default default" as it were, is `@everyone` (All Project Members),
+but this can be changed to be any combination you want of Project Members,
+External Targets and/or Group Targets.
+
+<figure>
+  <img src="/img/docs/platform/settings-notifs-defaults.png" alt="" />
+</figure>
