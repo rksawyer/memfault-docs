@@ -31,7 +31,8 @@ tracked.
   For example, this may be a serial number written into the EEPROM of your
   product in the factory or a chip identifier present in the silicon of the main
   MCU on your platform. This identifier _must_ be unique for every device in the
-  same Project.
+  same Project. It must be an alphanumeric slug (matching this regex:
+  `^[-a-zA-Z0-9_]+$`).
 - Hardware Version: for a given device, the revision of hardware present. For
   example, this can be used to represent the different stages of
   [manufacturing builds](https://mflt.io/hardware-engineer-speak) (`evt`, `dvt`,
