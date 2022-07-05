@@ -230,5 +230,15 @@ module.exports = {
                 path: "./embed/linux",
             },
         ],
+        [
+            "@docusaurus/plugin-ideal-image",
+            {
+                quality: 70,
+                max: 960,
+                min: 320,
+                steps: 3,
+                disableInDev: false,
+            },
+        ],
     ],
 };

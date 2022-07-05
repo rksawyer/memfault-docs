@@ -15,7 +15,9 @@
     },
     "dependencies": {
         "@docusaurus/core": "2.0.0-beta.18",
+        "@docusaurus/plugin-ideal-image": "2.0.0-beta.18",
         "@docusaurus/preset-classic": "2.0.0-beta.18",
+        "@endiliey/react-ideal-image": "^0.0.11",
         "classnames": "^2.2.6",
         "core-js": "^3.4.1",
         "hast-util-is-element": "1.1.0",
@@ -46,6 +48,7 @@
         "glob": "^7.2.0",
         "netlify-cli": "^2.30.0",
         "prettier": "^2.5.1",
+        "react-datocms": "^3.0.15",
         "sharp": "^0.30.5"
     }
 }

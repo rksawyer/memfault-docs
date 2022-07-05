@@ -1,7 +1,7 @@
+# Memfault Docusaurus
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/53e9bd12-7f75-468c-ab7f-eb4b70d10e07/deploy-status)](https://app.netlify.com/sites/memfault-docs/deploys)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/memfault/memfault-docs)
-
-# Memfault Docusaurus
 
 _Docs are auto-deployed when you commit to `main` (merge a PR!)_ If the deploy fails, netlify will roll back to the previous version.
 
@@ -50,3 +50,41 @@ Add a new post to the changelog:
    the header from an existing post and give it a nice title.
 
 2. Place any images needed by the post in `static/img/blog/`.
+
+## Images
+
+Images can be implemented with our `ImageFigure` component, which is available in every MDX file.
+
+NOTE: for raster images (.jpg, .png, .gif), _the asset file paths need to be imported in to your MDX file_ so that Docusaurus can pre-process the assets.
+
+### `ImageFigure` component usage
+
+For each image you want to use:
+
+1. Depending on the type of image, either...
+   1. If the file is an SVG, place it under the `/static/` directory and use the file path relative to that folder as your `src` value; or
+   2. If it is a raster file (JPG, PNG, GIF), import the file (with an absolute `"@site/*"` -based path, or a file-relative path, e.g. `"./my-image.jpeg"`) and use the imported data as your `src` value
+2. Write an `ImageFigure` component in to your MDX file with empty lines before and after it, using that `src` value and optional `alt` and `title`
+3. To provide a `caption` for the image, add child content to the `ImageFigure` component!
+
+The following demonstrates the complete pattern with all props, as well as child content which becomes the content of a `figcaption` element:
+
+```jsx
+// for a PNG, JPEG or GIF -> import the file as `src` !
+import mfltLogo from "@site/assets/memfault-logo-full-dark-min.png";
+
+<ImageFigure
+  src={mfltLogo}
+  alt="The Memfault logo"
+  title="Memfault"
+>
+  This is what the <strong>Memfault</strong> logo looks like 👆
+</ImageFigure>
+
+// for an SVG -> use a static file path as `src` !
+<ImageFigure
+  src="/binary-assets/android-bort-architecture.svg"
+  alt="Schematic of Android BORT Architecture"
+>
+</ImageFigure>
+```

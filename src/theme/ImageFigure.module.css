@@ -1,0 +1,18 @@
+
+.figure {
+    margin: 2em 1em 3em;
+}
+
+.image {
+    display: block;
+    margin: 0;
+    outline: 2px solid #eee;
+    outline-offset: 2px;
+    background-color: var(--figure-bg-color);
+}
+
+.caption {
+    color: var(--ifm-color-content-secondary);
+    font-size: 0.9em;
+    margin-top: 12px;
+}
