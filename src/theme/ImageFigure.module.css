@@ -3,12 +3,21 @@
     margin: 2em 1em 3em;
 }
 
+.link {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
 .image {
     display: block;
+    max-width: 100%;
     margin: 0;
     outline: 2px solid #eee;
     outline-offset: 2px;
     background-color: var(--figure-bg-color);
+    /* NOTE: same transition duration as `fadeInDuration in component ! */
+    transition: background-color 200ms linear;
 }
 
 .caption {

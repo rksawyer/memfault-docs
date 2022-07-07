@@ -65,18 +65,20 @@ For each image you want to use:
    1. If the file is an SVG, place it under the `/static/` directory and use the file path relative to that folder as your `src` value; or
    2. If it is a raster file (JPG, PNG, GIF), import the file (with an absolute `"@site/*"` -based path, or a file-relative path, e.g. `"./my-image.jpeg"`) and use the imported data as your `src` value
 2. Write an `ImageFigure` component in to your MDX file with empty lines before and after it, using that `src` value and optional `alt` and `title`
-3. To provide a `caption` for the image, add child content to the `ImageFigure` component!
+3. **NOTE**: to provide a `caption` for the image, just add child content to the `ImageFigure` component
+4. **NOTE**: if the image happens to be high-density (e.g. Retina) image, or a screenshot taken on such a screen, you can also supply a `pixelRatio` prop to make sure it will display no larger than its intrinsic or natural size.
 
 The following demonstrates the complete pattern with all props, as well as child content which becomes the content of a `figcaption` element:
 
 ```jsx
 // for a PNG, JPEG or GIF -> import the file as `src` !
-import mfltLogo from "@site/assets/memfault-logo-full-dark-min.png";
+import mfltLogo from "@site/assets/memfault-logo-full-dark@2x.png";
 
 <ImageFigure
   src={mfltLogo}
   alt="The Memfault logo"
   title="Memfault"
+  pixelRatio={2} // this ensures the image displays at natural size
 >
   This is what the <strong>Memfault</strong> logo looks like 👆
 </ImageFigure>

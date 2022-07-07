@@ -233,10 +233,11 @@ module.exports = {
         [
             "@docusaurus/plugin-ideal-image",
             {
-                quality: 70,
-                max: 960,
+                /* implied widths: 320, 640, 960, 1280, 1600, 1920 */
                 min: 320,
-                steps: 3,
+                max: 1920,
+                steps: 6,
+                quality: 70,
                 disableInDev: false,
             },
         ],
