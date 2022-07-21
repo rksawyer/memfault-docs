@@ -59,3 +59,26 @@ On top of the entries in this view, Memfault will send an email every **5
 minutes** summarizing the number of devices that meet this threshold. Given this
 fact, it is best to set up the Alerts so that they are hit rarely to prevent
 abuse of the email inbox.
+
+## Notification Frequency
+
+Expect alerts will be delivered in the UI almost immediately under Incidents.
+Navigate to
+[**Alerts**](https://app.memfault.com/organizations/-/projects/-/alerts) and
+select the Alert you want. Incidents are listed per device. An email will also
+get sent once every 12 hours.
+
+At most 1 incident is generated in a 24 hour period per device. This is to
+minimize the number of incidents created and avoid alert fatigue. Devices can
+hit a metric threshold multiple times in 24 hours without creating duplicate
+incidents.
+
+:::info
+
+When only 1 device hits a metric threshold within the last 24 hours and reports
+an alert incident, the captured date timestamp is updated once within 24 hours.
+When multiple devices begin hitting the threshold for a given metric within a 24
+hour period, the captured date timestamp will be updated when the new alert is
+emitted.
+
+:::
