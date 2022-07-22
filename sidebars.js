@@ -17,7 +17,6 @@ module.exports = {
                 "platform/projects-and-fleets",
                 "platform/inspecting-a-device",
                 "platform/software-version-hardware-version",
-                "platform/jira-integration",
                 "platform/user-management",
                 "platform/organization-auth-tokens",
                 "platform/issue-management",
@@ -28,6 +27,7 @@ module.exports = {
                 "platform/notifications",
                 "platform/rate-limiting",
                 "platform/sso",
+                "platform/jira-integration",
                 /* "platform/bulk-device-upload", */
             ],
         },
