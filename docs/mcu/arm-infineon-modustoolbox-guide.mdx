@@ -1,0 +1,351 @@
+---
+id: arm-infineon-modustoolbox-guide
+title: ModusToolbox™ Getting Started Guide for PSoC™ 6
+sidebar_label: ModusToolbox™ SDK for PSoC™ 6
+---
+
+import UploadSymbolFile from "@site/src/pages/_partials/_steps/_upload-symbol-file.mdx";
+import PostChunksLocally from "@site/src/pages/_partials/_steps/_post-chunks-locally.mdx";
+import DataTransferTroubleshooting from "@site/src/pages/_partials/_steps/_data-transfer-troubleshooting.mdx";
+import PublishDataToCloud from "@site/src/pages/_partials/_steps/_publish-data-to-cloud.mdx";
+import AddCliTestCommands from "@site/src/pages/_partials/_steps/_add-cli-test-commands.mdx";
+
+This tutorial will go over integrating the
+[Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
+a PSoC™ 6 project using Infineon's ModusToolbox™ Software SDK.
+
+:::note
+
+Note: these instructions were written using ModusToolbox™ release `2.4.0.5972`
+and tested against the
+[`CY8CKIT-062S2-43012`](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/)
+evaluation board.
+
+These instructions should also apply to any other PSoC™ 6 family board.
+
+A full example project targeting the `CY8CKIT-062S2-43012` development board can
+be found at
+[https://github.com/memfault/mtb-example-memfault](https://github.com/memfault/mcuxpresso-rt1060-example)
+:::
+
+## Overview
+
+This document describes how to integrate the Memfault SDK into a ModusToolbox™
+based project.
+
+### Prerequisite
+
+This guide assumes you already have an application running on a PSoC™ 6
+development board. At a high level, this will require the following steps.
+
+1. Download ModusToolbox™ Software SDK from Infineon.
+2. Generate a sample project from that SDK. This can be done from the IDE or
+   using the `project-creator-cli`, i.e
+
+```bash
+project-creator-cli --board-id CY8CKIT-062S2-43012 --app-id  mtb-example-anycloud-udp-server --user-app-name my_example_app
+```
+
+3. Compile and program application on development board, i,e
+
+   ```bash
+   $ make getlibs
+   $ make build -j8
+   $ make program
+   ```
+
+For further documentation about ModusToolbox™ and how to use it, check out
+Infineon's website
+[here](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/)!
+
+## Integrate the Memfault SDK
+
+### Add the Memfault Sources and Build Flags
+
+1. The Memfault SDK is implemented as a ModusToolbox™ middleware and can be
+   imported using the "library-manager". To launch the library manager for your
+   project, either type `make modlib` from the command line or click on "Library
+   Manager" under the tools tab in the IDE. From there, search for "Memfault
+   Firmware SDK" and click "Update"
+
+   ![](/img/docs/mcu/arm-mtb-library-manager.png)
+
+   Alternatively, you can add the library manually by creating
+   `deps/memfault-firmware-sdk.mtb` and running `make getlibs`
+
+   ```
+   $ echo 'https://github.com/memfault/memfault-firmware-sdk#0.31.0#$$ASSET_REPO$$/memfault-firmware-sdk/0.31.0' > deps/memfault-firmware-sdk.mtb
+   $ make getlibs
+   ```
+
+1. Add `#include "memfault/ports/freertos_trace.h"` to your `FreeRTOSConfig.h`
+   file. By default ModusToolbox™ will place the file in your projects root
+   directory.
+
+   ```diff
+   diff --git a/FreeRTOSConfig.h b/FreeRTOSConfig.h
+   index 4718e2a..7fc9a78 100644
+   --- a/FreeRTOSConfig.h
+   +++ b/FreeRTOSConfig.h
+   @@ -39,6 +39,8 @@
+    #ifndef FREERTOS_CONFIG_H
+    #define FREERTOS_CONFIG_H
+
+   +#include "memfault/ports/freertos_trace.h"
+   +
+   ```
+
+1. Add a unique identifier to project. Memfault will use this to match the
+   appropriate symbol files to decode information published by the
+   memfault-firmware-sdk. This requires the following modification to your
+   projects `Makefile`
+
+   :::important
+
+   This step requires the memfault build id package in your python environment,
+   which can be installed with pip:
+
+   ```bash
+   pip install mflt-build-id
+   ```
+
+   :::
+
+   ```diff
+   diff --git a/Makefile b/Makefile
+
+   -POSTBUILD=
+   +POSTBUILD=python -m mflt_build_id.__init__ $(CY_OPENOCD_SYMBOL_IMG)
+   ```
+
+1. Update Makefile with an additional linker script. Add the following .ld file
+   to the build. This will enable the collection of all FreeRTOS task state when
+   a crash takes place.
+
+   ```diff
+   diff --git a/Makefile b/Makefile
+
+   -LDFLAGS=
+   +LDFLAGS= -T$(SEARCH_memfault-firmware-sdk)/ports/cypress/psoc6/memfault_bss.ld
+   ```
+
+1. Implement the following dependency functions in your project following the
+   inline steps below:
+
+   ```c
+   #include "memfault/components.h"
+
+   sMfltHttpClientConfig g_mflt_http_client_config = {
+     // retrieve project key from: https://mflt.io/project-key
+     .api_key = "YOUR_PROJECT_KEY",
+   };
+
+   void memfault_platform_get_device_info(sMemfaultDeviceInfo *info) {
+     // !FIXME: Populate with platform device information
+
+     // IMPORTANT: All strings returned in info must be constant
+     // or static as they will be used _after_ the function returns
+
+     // See https://mflt.io/version-nomenclature for more context
+     *info = (sMemfaultDeviceInfo) {
+       // An ID that uniquely identifies the device in your fleet
+       // (i.e serial number, mac addr, chip id, etc)
+       // Regular expression defining valid device serials: ^[-a-zA-Z0-9_]+$
+       .device_serial = "DEMOSERIAL",
+        // A name to represent the firmware running on the MCU.
+       // (i.e "ble-fw", "main-fw", or a codename for your project)
+       .software_type = "app-fw",
+       // The version of the "software_type" currently running.
+       // "software_type" + "software_version" must uniquely represent
+       // a single binary
+       .software_version = "1.0.0-dev",
+       // The revision of hardware for the device. This value must remain
+       // the same for a unique device.
+       // (i.e evt, dvt, pvt, or rev1, rev2, etc)
+       // Regular expression defining valid hardware versions: ^[-a-zA-Z0-9_\.\+]+$
+       .hardware_version = "dvt1",
+     };
+   }
+   ```
+
+1. Initialize Memfault SDK from your `main` function before starting the
+   FreeRTOS scheduler
+
+   ```c
+   //! @file main.c
+   #include "memfault/components.h"
+
+   int main(void) {
+     // ...
+
+     memfault_platform_boot();
+
+     // ...
+     vTaskStartScheduler();
+   }
+   ```
+
+## Verification & Tuning Steps
+
+### Add Test Commands to CLI
+
+With Memfault compiling into your build, it's now time to add some initial
+instrumentation and test the integration! The quickest way to do this is to
+extend or add a command line interface.
+
+<details>
+<summary> For projects that have a CLI expand here for instructions </summary>
+<br/>
+<AddCliTestCommands />
+
+</details>
+
+If your project does not already have a command line for testing, the memfault
+demo CLI can be added for quick verification. To do this, copy the following
+into a `memfault_cli_task.c` and then call `memfault_cli_task_start()` from your
+main routine.
+
+```c
+//! @file memfault_cli_task.c
+
+#include "cyhal.h"
+#include "memfault/components.h"
+
+#include "cy_retarget_io.h"
+
+#include <FreeRTOS.h>
+#include <task.h>
+
+#define MEMFAULT_CLI_TASK_SIZE (1024)
+#define MEMFAULT_CLI_TASK_PRIORITY (1)
+
+static int prv_send_char(char c) {
+  cyhal_uart_putc(&cy_retarget_io_uart_obj, c);
+  return 0;
+}
+
+void memfault_cli_task(void *arg) {
+  cyhal_syspm_lock_deepsleep();
+  const sMemfaultShellImpl impl = {
+    .send_char = prv_send_char,
+  };
+  memfault_demo_shell_boot(&impl);
+
+  while (1) {
+    uint32_t num_bytes = cyhal_uart_readable(&cy_retarget_io_uart_obj);
+    if (num_bytes < 1) {
+      // Sleep for a little bit if there was not data
+      vTaskDelay(10);
+      continue;
+    }
+
+    uint8_t rx_byte;
+    // data should be available so we should not need to wait
+    const uint32_t uart_input_timeout_ms = 1;
+    cy_rslt_t result = cyhal_uart_getc(&cy_retarget_io_uart_obj, &rx_byte, uart_input_timeout_ms);
+    if (result != CY_RSLT_SUCCESS) {
+      MEMFAULT_LOG_ERROR("Unexpected UART read error: 0x%x", (int)result);
+      continue;
+    }
+
+    memfault_demo_shell_receive_char(rx_byte);
+  }
+}
+
+void memfault_cli_task_start(void) {
+  xTaskCreate(memfault_cli_task, "MFLT CLI", MEMFAULT_CLI_TASK_SIZE,
+              NULL, MEMFAULT_CLI_TASK_PRIORITY, NULL);
+}
+```
+
+At boot, you should now see something like:
+
+```bash
+[I] Memfault Build ID: 7726fbc695f4c50db091746118ad69468e152341
+[I] S/N: DEMOSERIAL
+[I] SW type: app-fw
+[I] SW version: 1.0.0-dev
+[I] HW version: dvt1
+[I] Reset Reason, Cy_SysLib_GetResetReason=0x10
+[I] Reset Cause:
+[I]  Software Reset
+[I] Memfault Initialized!
+
+mflt>
+mflt>
+help>
+clear_core: Clear an existing coredump
+drain_chunks: Flushes queued Memfault data. To upload data see https://mflt.io/posting-chunks-with-gdb
+export: Export base64-encoded chunks. To upload data see https://mflt.io/chunk-data-export
+get_core: Get coredump info
+get_device_info: Get device info
+test_assert: Trigger memfault assert
+test_busfault: Trigger a busfault
+test_hardfault: Trigger a hardfault
+test_memmanage: Trigger a memory management fault
+test_usagefault: Trigger a usage fault
+test_log: Writes test logs to log buffer
+test_log_capture: Trigger capture of current log buffer contents
+test_reboot: Force system reset and track it with a trace event
+test_trace: Capture an example trace event
+help: Lists all commands
+```
+
+### Post Data to Cloud via Local Debug Setup
+
+<PostChunksLocally />
+
+### Upload Symbol File
+
+:::important
+
+With ModusToolbox™ your projects symbol files can be found in the `build/`
+directory, i.e.ModusToolbox
+
+```c
+build/CY8CKIT-062S2-43012/Debug/your_application.elf
+```
+
+:::
+
+<UploadSymbolFile />
+
+### Troubleshooting Data Transfer
+
+<DataTransferTroubleshooting />
+
+## Data Transport Steps
+
+With data collection verified locally, the final step is to push data
+automatically to the Memfault cloud for analysis! Check out the two options
+below for the one that matches your use case.
+
+### Using Wi-Fi Connection Manager (WCM) & HTTPS
+
+If your project makes use of Wi-Fi, data can be posted directly to Memfault
+using HTTPS. To enable this functionality, make the following changes:
+
+1. Register Memfault Root certificates with stack
+
+```c
+#include "memfault/components.h"
+// [...]
+
+//! Load root certificates necessary for talking to Memfault servers
+result = cy_tls_load_global_root_ca_certificates(MEMFAULT_ROOT_CERTS_PEM, sizeof(MEMFAULT_ROOT_CERTS_PEM) - 1);
+if (result != CY_RSLT_SUCCESS) {
+  MEMFAULT_LOG_ERROR("cy_tls_load_global_root_ca_certificates failed! rv=0x%x", (int)result);
+}
+```
+
+2. Add periodic call to post data using Memfault HTTP client
+
+```c
+#include "memfault/components.h"
+// [...]
+memfault_http_client_post_chunk();
+```
+
+### Post Data to Cloud via Other Transport
+
+<PublishDataToCloud />

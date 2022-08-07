@@ -50,6 +50,7 @@ module.exports = {
                         "mcu/da1469x-sdk-guide",
                         "mcu/arm-nxp-mcuxpresso-guide",
                         "mcu/zephyr-guide",
+                        "mcu/arm-infineon-modustoolbox-guide",
                     ],
                 },
                 {
