@@ -14,6 +14,43 @@ the Trace.
 In other words, a Trace is a single occurrence of a problem and an Issue is a
 group of Traces manifesting the same problem.
 
+### De-Duplication of Traces into Issues
+
+A Trace's signature is a SHA256 hash of various pieces of information generated
+by the device at the time the Trace was captured. These pieces of information
+include, but are not limited to, the error code, active thread, the backtrace of
+the active thread, the software type running, and other attributes provided at
+the time of the Trace.
+
+The process in which Memfault groups Traces into Issues is constantly being
+improved over time. During such updates to our algorithms, new Issues might be
+created that seem similar to old ones but now appear as multiple Issues. In
+these instances, it's best to merge the issues so that all future Traces will be
+grouped into a single parent Issue.
+
+A similar occurrence can take place in a customers code base. Let's take the
+example below, which shows two backtraces, A and B.
+
+```
+Backtrace A
+
+2  write_something
+1  do_something
+0  prv_main
+
+Backtrace B
+
+3  write_something
+2  do something
+1  prv_update_context  <-- New stack frame added in new release
+0  prv_main
+```
+
+If a backtrace for a Trace changed from A to B between two releases, two Issues
+would likely be created. This is because the backtraces changed, and Memfault
+can not be 100% sure they are the same bug. The best practice is to merge the
+Issues in this scenario.
+
 ## Issue states
 
 An Issue can be in one of these states:
