@@ -143,3 +143,16 @@ section.features_src-pages- {
     top: -120px;
     visibility: hidden;
 }
+
+[role="tabpanel"] {
+    position: relative;
+}
+
+[role="tabpanel"]::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: calc(-1 * var(--ifm-spacing-horizontal));
+    border-left: 1px solid var(--ifm-toc-border-color);
+}

@@ -127,7 +127,20 @@ module.exports = {
             link: { type: "doc", id: "linux/introduction" },
             items: [
                 "linux/introduction",
+                "linux/linux-getting-started-guide",
                 "linux/linux-releases-integration-guide",
+                {
+                    label: "Reference",
+                    type: "category",
+                    link: {
+                        type: "doc",
+                        id: "linux/reference-memfaultd-configuration",
+                    },
+                    items: [
+                        "linux/reference-memfaultd-configuration",
+                        "linux/reference-memfaultd-cli",
+                    ],
+                },
                 "linux/linux-memfault-hawkbit-comparison",
             ],
         },

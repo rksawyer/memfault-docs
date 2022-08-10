@@ -1,0 +1,108 @@
+---
+id: reference-memfaultd-configuration
+title: "Reference: memfaultd Configuration"
+sidebar_label: "memfaultd Configuration"
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+
+Useful links:
+
+- [Reference: `memfaultd` CLI][docs-cli].
+- [Source for `memfaultd`][source-memfaultd].
+
+## `/etc/memfaultd.conf`
+
+A [full configuration example can be found in the source directory of
+`memfaultd`][source-builtin-conf]. Here's a copy:
+
+```json
+{
+  "queue_size_kib": 1024,
+  "refresh_interval_seconds": 3600,
+  "enable_data_collection": false,
+  "software_version": "<YOUR_SOFTWARE_VERSION>",
+  "software_type": "<YOUR_SOFTWARE_TYPE>",
+  "project_key": "<YOUR_PROJECT_KEY>",
+  "base_url": "https://device.memfault.com",
+  "data_dir": "/media/memfaultd",
+  "swupdate_plugin": {
+    "input_file": "/etc/swupdate.cfg",
+    "output_file": "/tmp/swupdate.cfg"
+  },
+  "reboot_plugin": {
+    "uboot_fw_env_file": "/etc/fw_env.config"
+  }
+}
+```
+
+The settings you add in `/etc/memfaultd.conf` extend the built-in configuration
+file.
+
+### Top-level `/etc/memfaultd.conf` configuration
+
+| Field                      | Description                                                                                                                                                                                        | Recommended value                         |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `queue_size_kib`           | Size of `$data_dir/queue` in kibibytes.                                                                                                                                                            | 1024                                      |
+| `refresh_interval_seconds` | The frequency (in seconds) with which `memfaultd` will attempt to flush its queue and post it to Memfault. Note that a recovery system with exponential back-off is in place for network failures. | 3600                                      |
+| `enable_data_collection`   | Whether `memfaultd` should collect and post data to Memfault by default. Read more [here][docs-enable-data-collection].                                                                            | `false` (ask for user consent first)      |
+| `base_url`                 | The base URL to Memfault's device API.                                                                                                                                                             | `https://device.memfault.com`             |
+| `software_version`         | The current version of your software. Read more [here][docs-software-version].                                                                                                                     | _Project-specific_                        |
+| `software_type`            | The current version of your software. Read more [here][docs-software-type].                                                                                                                        | _Project-specific_                        |
+| `project_key`              | A write-only key for your Project. Find yours in <ProjectMagicLink path="/settings" title="Open Project -> Settings in your Project">**Project -> Settings**</ProjectMagicLink> in the app.        | _Project-specific_                        |
+| `data_dir`                 | A directory where `memfaultd` can store application data persistently (needs to survive firmware upgrades). Read more [here][docs-data-dir].                                                       | _Project-specific_                        |
+| `swupdate_plugin`          | Configuration values for `plugin_swupdate` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`swupdate_plugin`](#swupdate_plugin) |
+| `reboot_plugin`            | Configuration values for `plugin_reboots` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                        | See [`reboot_plugin`](#reboot_plugin)     |
+
+### `swupdate_plugin`
+
+```json
+{
+  "swupdate_plugin": {
+    "input_file": "/etc/swupdate.cfg",
+    "output_file": "/tmp/swupdate.cfg"
+  }
+}
+```
+
+| Field         | Description                                                                                                                                                                                                                                                       | Recommended value   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `input_file`  | Will be used as the base SWUpdate configuration when generating `$output_file`. May specify a `suricatta` section (gets merged with generated parameters). If an `identify` section exists it will get replaced. See [upstream SWUpdate docs][swupdate-cfg-docs]. | `/etc/swupdate.cfg` |
+| `output_file` | Generated by `memfaultd` using `$input_file` as a base. Needs to be passed to SWUpdate as its config file. See [an example here][source-swupdate-args].                                                                                                           | `/tmp/swupdate.cfg` |
+
+### `reboot_plugin`
+
+```json
+{
+  "reboot_plugin": {
+    "uboot_fw_env_file": "/etc/fw_env.config"
+  }
+}
+```
+
+| Field               | Description                                                                                                                                                                             | Recommended value    |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `uboot_fw_env_file` | Path to a valid `fw_env.config` file. Needed for `memfaultd`'s reboot reason tracking plugin. Read [about `libubootenv`][source-libubootenv] and see [an example][source-fwenv-config]. | `/etc/fw_env.config` |
+
+[source-builtin-conf]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
+[docs-enable-data-collection]:
+  /docs/linux/linux-getting-started-guide#set-enable_data_collection
+[docs-software-type]:
+  /docs/platform/software-version-hardware-version#software-type
+[docs-software-version]:
+  /docs/platform/software-version-hardware-version#software-version
+[docs-data-dir]:
+  /docs/linux/linux-getting-started-guide#configure-a-persistent-storage-directory-for-memfaultd
+[docs-control-memfaultd-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[swupdate-cfg-docs]:
+  https://sbabic.github.io/swupdate/swupdate.html#command-line-parameters
+[source-libubootenv]: https://github.com/sbabic/libubootenv
+[docs-cli]: /docs/linux/reference-memfaultd-cli
+[source-memfaultd]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[source-swupdate-args]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-support/swupdate/files/09-swupdate-args
+[source-fwenv-config]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-bsp/u-boot/files/fw_env.config

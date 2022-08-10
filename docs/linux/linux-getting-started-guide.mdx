@@ -1,0 +1,364 @@
+---
+id: linux-getting-started-guide
+title: Getting Started
+sidebar_label: Getting Started
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
+import {
+  LinuxBuildSystemOptionsTabs,
+  SYSTEM_YOCTO,
+  SYSTEM_OTHER,
+} from "@site/src/components/LinuxBuildSystemOptionsTabs";
+import TabItem from "@theme/TabItem";
+
+This tutorial will cover integrating the Memfault Linux SDK into your system.
+This getting-started guide is designed with systems in mind that are built using
+[Yocto][yocto-homepage], but generic instructions are included for other setups.
+
+After you're done, you should have a basic integration setup that can talk to
+the Memfault cloud, enabling one or more of the following features:
+
+- Reporting reboot events to Memfault.
+- [Over-the-air (OTA) updates][docs-linux-ota].
+
+## Useful links
+
+- The [source for the Memfault Linux SDK][source-sdk].
+- A [sample integration using Yocto][source-yocto-example].
+- [Reference: `memfaultd` Configuration][docs-configuration].
+- [Reference: `memfaultd` CLI][docs-cli].
+
+## Assumptions and dependencies
+
+- Currently, our SDK is centered around [Yocto][yocto-homepage] and is verified
+  to work on [`4.0 kirkstone`][yocto-kirkstone].
+- Your project uses [`systemd`][systemd-homepage] as the init system.
+
+Optionally, as requirements of our [OTA system][docs-linux-ota]:
+
+- [SWUpdate][swupdate-homepage] as an OTA updates client.
+- [U-Boot][u-boot-homepage], since SWUpdate depends on it.
+
+## Integration steps
+
+<ProjectAwareCreateAProject />
+
+### Include `memfaultd` in your build
+
+:::tip
+
+Keep [`meta-memfault-example`][source-yocto-example] open as a reference
+implementation. Your integration should look similar to it once you're done
+following the steps in this tutorial.
+
+:::
+
+The `memfaultd` service is the main orchestrator of the subsystems that conform
+and are used by the Memfault Linux SDK. As with all our SDKs, its [source code
+is available on GitHub][source-memfaultd].
+
+Among its responsibilities are:
+
+- Keeping a queue of items to be uploaded to the Memfault cloud.
+- Uploading that data at a specified interval, and recovering from network
+  failures using an exponential back-off system, independent of the regular
+  refresh interval.
+- Controlling whether data is allowed to be collected (e.g. by user consent)
+  from a device or not.
+- Interacting with and configuring subsystems such as SWUpdate and collectd.
+- Providing configuration access via [CLI][docs-cli].
+
+`memfaultd` is required for integration.
+
+<LinuxBuildSystemOptionsTabs>
+  <TabItem value={SYSTEM_YOCTO}>
+
+#### Add `memfaultd` and dependencies to your Yocto project
+
+Include the [`meta-memfault`][source-meta-memfault] layer in your
+`bblayers.conf` file, alongside dependencies:
+
+```
+# Apart from other layers you may already depend on:
+BBLAYERS ?= " \
+    ${YOCTOROOT}/sources/memfault-linux-sdk/meta-memfault \
+    ${YOCTOROOT}/sources/meta-openembedded/meta-oe \
+    ${YOCTOROOT}/sources/meta-swupdate \
+"
+```
+
+You can grab a copy of `meta-swupdate` from [the source
+repository][source-meta-swupdate]. Note that `meta-oe` is a dependency of
+`meta-swupdate`.
+
+Since `memfaultd` has a commercial license, you'll need to add an exception for
+it, for example in your `local.conf`:
+
+```
+LICENSE_FLAGS_ACCEPTED:append = " commercial_memfaultd"
+```
+
+Add the necessary dependencies to your image file:
+
+```
+IMAGE_INSTALL:append = " \
+    u-boot-env \
+    u-boot-fw-utils \
+"
+```
+
+Finally, to use `systemd` as an init system (using `poky`):
+
+```
+DISTRO_FEATURES:append = " systemd"
+DISTRO_FEATURES:remove = "sysvinit"
+VIRTUAL-RUNTIME_init_manager = "systemd"
+DISTRO_FEATURES_BACKFILL_CONSIDERED:append = "sysvinit"
+VIRTUAL-RUNTIME_initscripts = ""
+```
+
+  </TabItem>
+  <TabItem value={SYSTEM_OTHER}>
+
+Grab a copy of [the source code for `memfaultd`][source-memfaultd] and build
+using CMake. The included `builtin.conf` contains built-in defaults for
+`/etc/memfaultd.conf` and is not meant to be changed. See
+[the section on `/etc/memfaultd.conf`](#add-etcmemfaultdconf-to-your-build) to
+learn how to configure `memfaultd` on the target device.
+
+```shell
+cd /path/to/source/memfaultd
+mkdir build
+cd build
+cmake ..
+make
+```
+
+  </TabItem>
+</LinuxBuildSystemOptionsTabs>
+
+#### (Optional) Opt out of `memfaultd` built-in plugins
+
+<details>
+
+<summary>
+  The `memfaultd` daemon has a plugin system. All plugins are included by
+  default, so you don't need to do anything if you want them in. However, you
+  can control which plugins are included at build time.
+</summary>
+
+The available plugins are:
+
+- `plugin-swupdate`: used for [OTA management][docs-linux-ota].
+- `plugin-reboots`: used for reboot reason tracking.
+
+<LinuxBuildSystemOptionsTabs>
+  <TabItem value={SYSTEM_YOCTO}>
+
+Set `PACKAGECONFIG` for the `memfaultd` package to control which plugins are
+included in the `memfaultd` build. For example, you can add a
+`memfaultd.bbappends` recipe with the following contents:
+
+```
+PACKAGECONFIG := "plugin-swupdate plugin-reboots"
+```
+
+Alternatively, in your `local.conf` file:
+
+```
+PACKAGECONFIG:pn-memfaultd := "plugin-swupdate plugin-reboots"
+```
+
+  </TabItem>
+  <TabItem value={SYSTEM_OTHER}>
+
+The included plugins can be configured using the flags `-DENABLE_PLUGINS=1`
+alongside `-DPLUGIN_REBOOT=1` and `-DPLUGIN_SWUPDATE=1`.
+
+  </TabItem>
+</LinuxBuildSystemOptionsTabs>
+
+</details>
+
+### Add a `memfault-device-info` executable to your build
+
+:::tip
+
+You may want to copy over [the entire `memfault-device-info` recipe from our
+examples][source-yocto-memfault-device-info-example] to get started. Make sure
+to edit its contents following the steps in this section.
+
+:::
+
+The `memfaultd` daemon expects to find a `memfault-device-info` executable in
+`$PATH`. The `memfault-device-info` executable is created by you during
+integration and is meant to provide device-specific information in order to
+identify it in Memfault services. The expected output is in the following
+format:
+
+```
+MEMFAULT_DEVICE_ID=<device-id>
+MEMFAULT_HARDWARE_VERSION=<hardware-version>
+```
+
+Read more about [Device ID][docs-device-id], [Software Versions, and Hardware
+Versions][docs-hardware-version-software-version] to better understand these
+core Memfault platform concepts.
+
+Here's an example `memfault-device-info` shell script one might add to
+`/usr/bin/memfault-device-info`:
+
+```shell
+#!/bin/sh
+echo MEMFAULT_DEVICE_ID=$(cat /etc/machine-id)
+echo MEMFAULT_HARDWARE_VERSION=$(dmidecode -s system-product-name)
+```
+
+The script would output something like this:
+
+```shell
+$ memfault-device-info
+MEMFAULT_DEVICE_ID=4a7d5d74-e8f0-471f-9f8c-23e3dd5ce18c
+MEMFAULT_HARDWARE_VERSION=some-board-rev-1.3
+```
+
+If you added a recipe named `memfault-device-info`, don't forget to add it to
+your image dependencies:
+
+```diff
+IMAGE_INSTALL:append = " \
+//highlight-next-line
+    memfault-device-info \
+    u-boot-env \
+    u-boot-fw-utils \
+"
+```
+
+### Add `/etc/memfaultd.conf` to your build
+
+:::tip
+
+Find a [full reference on `/etc/memfaultd.conf` here][docs-configuration]. You
+may want to copy over the entire [`memfaultd.bbappend` recipe from our
+examples][source-yocto-memfaultd-conf-example] to get started. Make sure to edit
+its contents following the steps in this section.
+
+:::
+
+A [default `memfaultd.conf`][source-builtin-conf] (called `builtin.conf` in the
+source files) is embedded within the `memfaultd` binary, and the daemon will
+fall back to it if `/etc/memfaultd.conf` does not provide an override for a
+specific key. All values in it can be overwritten by adding an
+`/etc/memfaultd.conf` file to your build, e.g. using a `bbappends` recipe for
+`memfaultd` (see an [example][source-yocto-memfaultd-conf-example]). You may
+copy parts of the built-in config (or the whole file) to customize configuration
+on your target device.
+
+Note that while the sample file has reasonable defaults for most keys, it cannot
+guess a value for some fields such as `software_version`, `software_type` or
+`project_key`. Hence, a minimal `/etc/memfaultd.conf` file should look like
+this:
+
+```json
+{
+  "software_version": "1.0.0",
+  "software_type": "main",
+  "project_key": "<YOUR_PROJECT_KEY>"
+}
+```
+
+Note that `/etc/memfaultd.conf` is designed to be in a read-only filesystem.
+
+Read more about [Software Versions and Hardware
+Versions][docs-hardware-version-software-version] to better understand these
+core Memfault platform concepts.
+
+#### Configure a persistent storage directory for `memfaultd`
+
+In `/etc/memfaultd.conf`:
+
+```json
+{
+  "software_version": "1.0.0",
+  "software_type": "main",
+  "project_key": "<YOUR_PROJECT_KEY>",
+  // highlight-next-line
+  "data_dir": "<YOUR_PERSISTENT_STORAGE_DIR>"
+}
+```
+
+By default it will be a directory in `/media`. You will most likely need to
+change this to wherever your device stores data in a persistent manner.
+Requirements for this directory are:
+
+- That it is writable to by `memfaultd`.
+- That its data persists after firmware upgrades.
+
+### Set `enable_data_collection`
+
+By default, `enable_data_collection` is `false` (see the [default
+configuration][source-builtin-conf]). This is to enable asking end users for
+consent before collecting or transmitting any data to Memfault services.
+
+Once the end user has given their consent, you can enable data collection like
+so:
+
+```shell
+$ memfaultd --enable-data-collection
+```
+
+To disable it:
+
+```shell
+$ memfaultd --disable-data-collection
+```
+
+The `memfaultd` service will restart automatically whenever you run either of
+those commands.
+
+### Test the integration
+
+<p>
+  If you've included the reboot reasons plugin, you can test your integration by
+  rebooting your test device. Then, on the Memfault app, open{" "}
+  <ProjectMagicLink path="/devices">
+    <b>Fleet -> Devices</b>
+  </ProjectMagicLink>{" "}
+  and check that your device shows up. If you open the specific device, you
+  should be able to find its reboot events under the <b>Reboots</b> tab.
+</p>
+
+### Integrate with our OTA subsystem
+
+Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
+
+[source-sdk]: https://github.com/memfault/memfault-linux-sdk
+[source-yocto-example]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault-example
+[source-yocto-memfault-device-info-example]:
+  https://github.com/memfault/memfault-linux-sdk/blob/master/meta-memfault-example/recipes-memfault/memfault-device-info/memfault-device-info.bb
+[source-yocto-memfaultd-conf-example]:
+  https://github.com/memfault/memfault-linux-sdk/blob/master/meta-memfault-example/recipes-memfault/memfaultd/memfaultd.bbappend
+[source-memfaultd]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[source-builtin-conf]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
+[source-meta-memfault]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault
+[yocto-homepage]: https://www.yoctoproject.org/
+[yocto-kirkstone]:
+  https://docs.yoctoproject.org/migration-guides/migration-4.0.html
+[docs-linux-ota]: /docs/linux/linux-releases-integration-guide
+[docs-hardware-version-software-version]:
+  /docs/platform/software-version-hardware-version
+[docs-device-id]: /docs/platform/memfault-terminology#device-id
+[systemd-homepage]: https://systemd.io/
+[swupdate-homepage]: https://swupdate.org/
+[u-boot-homepage]: https://www.denx.de/wiki/U-Boot
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-cli]: /docs/linux/reference-memfaultd-cli
+[docs-control-memfaultd-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[source-meta-swupdate]: https://github.com/sbabic/meta-swupdate

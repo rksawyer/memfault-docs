@@ -4,11 +4,6 @@ title: Embedded Linux OTA Integration Guide
 sidebar_label: OTA Management
 ---
 
-import LinuxOtaOptionsTabs, {
-  OtaSwupdateTab,
-  OtaCustomTab,
-} from "@site/src/components/LinuxOtaOptionsTabs";
-import TabItem from "@theme/TabItem";
 import OtaCdnFeaturesAdmonition from "@site/src/pages/_partials/_ota-cdn-features-admonition.mdx";
 
 This tutorial covers how to manage your embedded Linux over-the-air update flow
@@ -18,7 +13,7 @@ with Memfault!
 
 ## Terminology Overview
 
-Please refer to [Over-the-Air Updates(OTA)](/docs/platform/ota) for an
+Please refer to [Over-the-Air Updates (OTA)](/docs/platform/ota) for an
 introduction to Memfault's OTA concepts and terminology. The paragraphs below
 discuss the platform-specific aspects for Embedded Linux.
 
@@ -44,9 +39,37 @@ For any given device, neither of these pieces of information should ever change.
 
 :::
 
-## Getting Started
+## Prerequisites
 
-### Memfault CLI Tool
+### The `memfaultd` daemon
+
+We strongly recommend integrating `memfaultd` first. Follow the [getting-started
+guide][docs-linux-getting-started] to learn how to set this up for your device.
+A key function of `memfaultd` is to correctly configure and control SWUpdate.
+
+While we recommend using `memfaultd` to automate OTA configuration and benefit
+from more advanced Memfault features, Memfault OTA may be used without it. This
+can be done by configuring your OTA agent to talk to the Memfault API. Both
+SWUpdate and RAUC have built-in support for Memfault OTA using the standard
+hawkBit interface. A custom agent can also be developed using our REST API.
+Consult our [REST API docs][api-docs] if you wish to do so.
+
+:::tip
+
+Keep [`meta-memfault-example`][source-yocto-example] open as a reference
+implementation. Your integration should look similar to it once you're done
+following the steps in this tutorial.
+
+:::
+
+### Project Key
+
+This is a token that is used when pushing data between a device and the Memfault
+cloud. We will be using this to query for OTA Payloads in this tutorial. To
+locate this token you will also want to navigate to the "Settings" -> "General"
+page in the Memfault UI and copy/paste the token from the "Project Key" section.
+
+### (Optional) Memfault CLI Tool
 
 Releases can be managed either from the Memfault web UI or via the
 [memfault cli tool](https://docs.memfault.com/docs/ci/install-memfault-cli). In
@@ -56,7 +79,11 @@ this tutorial we will make use of the CLI client which can be installed via pip:
 $ pip3 install memfault-cli
 ```
 
-### User API Key
+If you'd like to use the Memfault web application instead, you can always refer
+to our [documentation on OTA Release Management][docs-webapp-ota-management] and
+keep it open as you follow this guide.
+
+### (Optional) User API Key
 
 This is an auth token that can be used as the "password" to make Memfault API
 requests which require Basic Authentication.
@@ -76,31 +103,17 @@ organization and project in the Memfault UI:
 1. Make sure that you've selected the right project on the top-left
 2. Click on "Settings" and then "General Settings"
 
-### Project Key
-
-This is a token that is used when pushing data between a device and the Memfault
-cloud. We will be using this to query for OTA Payloads in this tutorial. To
-locate this token you will also want to navigate to the "Settings" -> "General"
-page in the Memfault UI and copy/paste the token from the "Project Key" section.
-
 ## Managing Your First Release
 
 ### Create an OTA Payload
 
-<LinuxOtaOptionsTabs>
-  <TabItem value="swupdate">
-
 SWUpdate expects OTA Payloads in its own `.swu` format. Read [documentation on
-SWUpdate][3] to learn how to create `.swu` files for your project.
+SWUpdate][3] to learn how to create `.swu` files for your project. Our [Yocto
+example][source-yocto-example] contains a working SWUpdate image
+`memfault-image`.
 
-  </TabItem>
-  <TabItem value="custom">
-
-Any type of OTA Payload is supported by Memfault. It is the duty of your
-firmware to install the OTA Payload on the device.
-
-  </TabItem>
-</LinuxOtaOptionsTabs>
+Additionally, the [`meta-swupdate-boards`][meta-swupdate-boards] repository
+contains several examples and is a good source of working integration samples.
 
 ### Create Release
 
@@ -187,20 +200,15 @@ Release.
 Now that we have a release uploaded and published let's walk through the steps
 to download the Release on a device!
 
-<LinuxOtaOptionsTabs>
-  <TabItem value="swupdate">
-
 Memfault supports [SWUpdate][3] as a way to update the software on an Embedded
-Linux device using its [Suricatta][4] daemon. It communicates with the server
-using the [hawkBit][5] DDI API standard.
-
-Suricatta is a daemon mode of SWUpdate that runs on a device and polls a remote
-server for updates, downloads them, and installs them. Once an update is
-downloaded, SWUpdate reboots the system with updated software.
+Linux device using [SWUpdate's Suricatta][4] daemon. It communicates with the
+server using the [hawkBit][5] DDI API standard.
 
 #### Building SWUpdate to include Suricatta
 
-Find the following options, either via `menuconfig` or by modifying `defconfig`:
+Find the following options, either via `menuconfig` or by modifying `defconfig`,
+and add them to `defconfig` in a recipe that appends to `swupdate` (here's [an
+example][source-swupdate-defconfig]):
 
 - `CONFIG_SURICATTA=y`: configures SWUpdate to include the Suricatta daemon in
   the build.
@@ -210,158 +218,62 @@ Find the following options, either via `menuconfig` or by modifying `defconfig`:
 
 #### Configuring the Suricatta on-device daemon to use Memfault
 
-Three sections are required in the configuration file:
+The [`memfaultd`][source-memfaultd] daemon includes a SWUpdate plugin. You can
+[control which plugins are built-in][docs-linux-control-plugins], but by
+default, it builds with the SWUpdate plugin enabled.
 
-- `globals`: contains general settings for SWUpdate that are required for the
-  daemon to start. In the example below, we've configured SWUpdate to output
-  plenty of logs. You may want to tone this down for a production build.
-- `identify`: is used to uniquely identify the device in Memfault servers, and
-  to decide whether the device is eligible for an update.
-- `suricatta`: through which Suricatta's hawkBit client is configured.
+The [SWUpdate plugin for `memfaultd`][source-memfaultd-swupdate-plugin]
+constructs a valid SWUpdate configuration in a temporary file. The path of this
+temporary file defaults to `/tmp/swupdate.cfg`. To make SWUpdate use this file,
+you may add e.g. `--file /tmp/swupdate.cfg` to the `SWUPDATE_ARGS` environment
+variable, which gets picked up by SWUpdate. Check out [the example
+layer][source-swupdate-args] for inspiration.
 
-The following configuration can be used as a starter. Save it in `swupdate.cfg`
-and remember to replace all the placeholders with valid values for your project
-and device:
+To allow for further configuration, `memfaultd` uses `/etc/swupdate.cfg` as its
+base for the generated configuration. Feel free to configure your SWUpdate
+installation using `/etc/swupdate.cfg`, e.g. by adding a recipe that appends to
+`swupdate` (see [this example][source-swupdate-bbappends]).
 
-```libconfig
-globals:
+Note that `/etc/swupdate.cfg` may specify a `suricatta` section which will get
+merged with the corresponding section in `/tmp/swupdate.cfg`. The `identify`
+section is owned by `memfaultd` and would get overwritten completely.
+
+The path to both `/tmp/swupdate.cfg` and `/etc/swupdate.cfg` can be configured
+in `/etc/memfaultd.conf` (see a [full reference][docs-configuration]) like so:
+
+```json
 {
-  verbose       = true;
-  loglevel      = 6;
-  syslog        = true;
-  postupdatecmd = "reboot";
+  "software_version": "1.0.0",
+  "software_type": "main",
+  "project_key": "<YOUR_PROJECT_KEY>",
+  // highlight-start
+  "swupdate_plugin": {
+    "input_file": "/your/own/path/base-swupdate.cfg",
+    "output_file": "/your/own/path/generated-swupdate.cfg"
+  }
+  // highlight-end
 }
-
-identify : (
-  { name = "memfault__current_version"; value = "$SOFTWARE_VERSION"; },
-  { name = "memfault__hardware_version"; value = "$HARDWARE_VERSION"; },
-  { name = "memfault__software_type"; value = "$SOFTWARE_TYPE"; },
-);
-
-suricatta :
-{
-  tenant		   = "default";
-  url 		     = "https://device.memfault.com/api/v0/hawkbit";
-  id		       = "$DEVICE_SERIAL";
-  gatewaytoken = "$MEMFAULT_PROJECT_KEY";
-};
 ```
 
-:::note
+Remember to pass the path to `output_file` as a config file for SWUpdate.
 
-When SWUpdate downloads and applies your update, it will _not_ automatically
-update the `$SOFTWARE_VERSION` in this file. It is the responsibility of your
-setup to do this.
+#### SWUpdate plugin dependencies
 
-Your device may require a different `postupdatecmd` than `reboot`.
-
-:::
-
-- `$DEVICE_SERIAL` - This is used for determining the `cohort` a Device is in.
-- `$HARDWARE_VERSION` - To identify the board revision of the device for
-  situations when the device has not been seen before.
-- `$SOFTWARE_TYPE` - The software component on the device responsible for
-  performing OTA updates.
-- `$SOFTWARE_VERSION` - The current software version of the `software_type` that
-  performs OTA updates. This is used to determine if there is a newer version
-  available to be installed.
-
-#### Example SWUpdate invocation
-
-`swupdate -f /etc/swupdate.cfg`
-
-#### Polling interval and forced updates
-
-SWUpdate receives a polling interval from Memfault which it uses to decide how
-often to wake up to check for updates. This value is currently set to 12h to
-preserve bandwidth and battery. On restart, SWUpdate will wait a full polling
-interval before it fetches an update.
-
-During development, you may want to force the system to fetch an update without
-waiting. This can be accomplished on the device with the `swupdate-ipc` tool:
+The dependencies of the SWUpdate plugin are `u-boot-env` and `u-boot-fw-utils`.
+Make sure to include those in your image file like so:
 
 ```
-swupdate-ipc hawkbitcfg -t
+IMAGE_INSTALL:append = " memfault-device-info u-boot-env u-boot-fw-utils"
 ```
 
-Running this command will wake up swupdate and cause it to install an available
-update if there is one.
+Note that `memfault-device-info` is a required executable for `memfaultd`. Read
+[our docs on `memfault-device-info`][docs-memfault-device-info] for more
+information.
 
-#### Integration with Yocto
+#### Add `/etc/fw_env.config` to your build
 
-Please follow external docs (such as [SWUpdate documentation on building with
-Yocto][7]) for instructions on how to set up and build an SWUpdate Yocto layer.
-
-  </TabItem>
-  <TabItem value="custom">
-
-To receive an OTA Payload, a device will need to pass these REST API query
-parameters:
-
-- `device_serial` - This is used for determining the `cohort` a Device is in.
-- `hardware_version` - To identify the board revision of the device for
-  situations when the device has not been seen before.
-- `software_type` - The software component on the device responsible for
-  performing OTA updates.
-- `current_version` - The current `software_version` of the `software_type` that
-  performs OTA updates. This is used to determine if there is a newer
-  `software_version` available to be installed.
-
-We can test this out from our computer to see the exact response a device will
-see. Let's assume we have the following test device:
-
-- `hardware_version`: mp
-- `software_type`: bbb-fw
-- `current_version`: 0.0.1
-- `device_serial`: DEMOSERIAL
-
-#### Example Response when Newer OTA Payload Available
-
-```bash
-$ export MEMFAULT_LATEST_API_ROUTE=https://device.memfault.com/api/v0/releases/latest
-$ export SOFTWARE_VERSION=0.0.1
-$ curl -i -X GET \
-  "${MEMFAULT_LATEST_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=bbb-fw&current_version=${SOFTWARE_VERSION}" \
-  --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
-
-HTTP/1.1 200 OK
-
-content-type: application/json
-
-{
-  "artifacts": [
-    {
-      [...]
-      "url": "URL_FOR_OTA_PAYLOAD"
-    }
-  ],
-}
-
-```
-
-When a new payload has been found, you will get a HTTP response with a 200
-status code.
-
-If there are no updates available (such as when the device is already on the
-newest firmware) you will see a 204 (No Content) http status code in the
-response. We can try it out by retrying the query with `0.0.1` as the value for
-`current_version`:
-
-#### Example Response when Device is Up To Date
-
-```bash
-$ export SOFTWARE_VERSION=0.0.1
-$ curl -i -X GET  \
-  "${MEMFAULT_LATEST_URL_API_ROUTE}?device_serial=DEMOSERIAL&hardware_version=mp&software_type=bbb-fw&current_version=0.0.1" \
-  --header "Memfault-Project-Key: ${YOUR_PROJECT_KEY}"
-
-HTTP/1.1 204 NO CONTENT
-memfault-reason: latest
-[...]
-```
-
-  </TabItem>
-</LinuxOtaOptionsTabs>
+See [this example `/etc/fw_env.config` file][source-fwenv-config]. SWUpdate as
+well as `memfaultd`'s reboot reason tracking plugin depend on it.
 
 ### Rollback Release
 
@@ -373,3 +285,30 @@ under "Options" and select the "Abort Rollout" option.
 [4]: https://sbabic.github.io/swupdate/suricatta.html
 [5]: https://www.eclipse.org/hawkbit/apis/ddi_api/
 [7]: https://sbabic.github.io/swupdate/building-with-yocto.html
+[source-yocto-example]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault-example
+[source-meta-memfault]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault
+[source-memfaultd]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[source-memfaultd-swupdate-plugin]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/plugins/swupdate.c
+[source-swupdate-bbappends]:
+  https://github.com/memfault/memfault-linux-sdk/tree/master/meta-memfault-example/recipes-support/swupdate
+[source-fwenv-config]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-bsp/u-boot/files/fw_env.config
+[source-swupdate-defconfig]:
+  https://github.com/memfault/memfault-linux-sdk/blob/master/meta-memfault-example/recipes-support/swupdate/files/defconfig
+[yocto-homepage]: https://www.yoctoproject.org/
+[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-control-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[docs-memfault-device-info]:
+  /docs/linux/linux-getting-started-guide#add-a-memfault-device-info-executable-to-your-build
+[docs-webapp-ota-management]:
+  /docs/platform/ota#managing-ota-updates-with-memfault
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[source-swupdate-args]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-support/swupdate/files/09-swupdate-args
+[meta-swupdate-boards]: https://github.com/sbabic/meta-swupdate-boards
+[api-docs]: https://api-docs.memfault.com/
