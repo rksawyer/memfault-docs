@@ -1,0 +1,103 @@
+---
+title: July 2022
+---
+
+## Linux SDK 0.2.0
+
+Memfault extends its [features on embedded Linux](/docs/linux/introduction)
+toward basic fleet operations. You can now measure basic fleet-wide health
+metrics by tracking reboots and their cause at scale. Similar to Memfault’s
+[MCU](/docs/mcu/introduction) and [Android](/docs/android/introduction) SDKs,
+there is now a dedicated
+[Memfault Linux SDK 0.2.0 with source code](https://github.com/memfault/memfault-linux-sdk)
+including examples. The SDK repository comes with Docker images including QEMU
+support to simplify the first steps.
+
+![Documentation, Repository, and Project Wizard for Linux](/img/blog/2022-07-31-Linux-SDK.png)
+
+As part of the SDK, a new on-device agent `memfaultd` orchestrates the
+configuration of related components such as SWUpdate for OTA. It will act as a
+minimal yet central component in future releases for features such as metrics
+and crash reporting.
+
+There is also a new [Getting Started](/docs/linux/linux-getting-started-guide)
+section that guides users through the setup with Yocto, and the
+[reference documentation](/docs/linux/reference-memfaultd-configuration) covers
+more details.
+
+<!-- truncate -->
+
+## General
+
+- Added: Entries are now shown under
+  [Events Debug](https://app.memfault.com/organizations/-/projects/-/events)
+  when an invalid serial number is sent
+- Improved: Users can opt-out of email for alerts and issues separately via
+  [notification preferences](https://app.memfault.com/organizations/-/projects/-/settings)
+- Improved: Performance of Device Timeline
+- Improved: Various UI elements (Issue List on Device Details, consistent use of
+  issue type in lists, next available release of a device)
+- Improved: Documentation of
+  [alert frequency](/docs/platform/alerts/#notification-frequency) and
+  [file upload API endpoints](https://api-docs.memfault.com/#2d08c7d6-fc5e-4fc7-ac77-9d72e58ba7aa)
+- Fixed: Visual glitches (chart icons on Safari, truncated tooltips, overlapping
+  content in lists)
+- Fixed: Error when activating full releases via the Version Matrix
+- Fixed: Missing issue reasons on Dashboard
+- Fixed: Missing device serial numbers at Issues → Recent Traces
+- Fixed: Device search result no longer sorted by last seen
+- Fixed: Error when marking a metric as a device attribute when approaching
+  quota limits
+- Fixed: Error when trying to activate a non-staged release using memfault-cli
+- Changed: [Normalized Charts](/docs/platform/charts#chart-normalization) now
+  only consider active devices of a given population
+
+## MCU
+
+- Added: Published Python package
+  [mflt_compact_log](https://pypi.org/project/mflt-compact-log/) to decode
+  Memfault-flavored compact logs
+- Added: Published list of
+  [contributions](https://github.com/memfault/memfault-ios-cloud/pull/1/files)
+  to [memfault-ios-cloud](https://github.com/memfault/memfault-ios-cloud)
+- SDK versions
+  [0.31.3](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0313-and-sdk-0312---july-8-2022),
+  [0.31.4](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0314-and-sdk-0313---july-19-2022)
+  and
+  [0.31.5](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0315-and-sdk-0314---july-22-2022)
+  were released. Some highlights: \*\*\*\*
+  - Added: Support for Zephyr v3.1+ by conditionally compiling out Logger v1
+    code (and pre-release of nRF Connect SDK v2.0.99 and Zephyr > v3.1)
+  - Added: Support for deferring the initializing Memfault SDK to application
+    start on ESP32 port with new Kconfig
+    option: `CONFIG_MEMFAULT_AUTOMATIC_INIT`
+  - Added: Support for initializing Memfault earlier in the system startup for
+    diagnosing crashes in an early driver initialization on Zephyr port with new
+    Kconfig
+    options, `CONFIG_MEMFAULT_INIT_PRIORITY`/`CONFIG_MEMFAULT_INIT_LEVEL_POST_KERNEL`
+  - Fixed: Build warnings on NRF Connect SDK + Zephyr v3.1 (partially supported)
+  - Fixed: Backtraces for Zephyr `__ASSERT()` macro on aarch32/cortex_m.
+  - Fixed: compilation issue in the Dialog example app from the removal
+    of `memfault_demo_cli_cmd_print_chunk()` in Memfault SDK release v0.31.4.
+
+## Android
+
+- We did not publish a new version of the
+  [Android Bort AOSP SDK](https://github.com/memfault/bort) in July.
+
+## Linux
+
+- Updated: [Introduction page for Embedded Linux](/docs/linux/introduction)
+- Added: [Getting Started Guide](/docs/linux/linux-getting-started-guide) and
+  Reference pages for
+  [memfaultd Configuration](/docs/linux/reference-memfaultd-configuration/) and
+  [memfaultd CLI](/docs/linux/reference-memfaultd-cli)
+- First
+  [public SDK version 0.2.0](https://github.com/memfault/memfault-linux-sdk/blob/main/CHANGELOG.md)
+  following initial 0.1.0 was released. Some highlights:
+  - Added: On-device agent `memfaultd`
+    - Exhaustive configurability via settings
+    - Reporting reboot reasons
+    - Orchestrating SWUpdate for OTA
+    - Data communication only after user consent
+  - Added: Yocto layer for `memfaultd`
