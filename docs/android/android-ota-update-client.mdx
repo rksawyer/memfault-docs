@@ -59,6 +59,33 @@ screen, where they can read release notes, download, and apply the update.
 ![](/img/docs/android/update-available-min.png)
 ![](/img/docs/android/download-update-min.png)
 
+### Update Check API
+
+A broadcast `Intent` API is available, to request that the OTA update client
+checks for a new version (in addition to the regular scheduled checks). This can
+be used either over adb, or from another app on the device which holds the
+`BORT_CONTROL_PERMISSION`. Replace `your.bort.ota.app.id` with your Bort OTA
+application ID.
+
+Using `adb`:
+
+```
+adb shell am broadcast -a com.memfault.intent.action.OTA_CHECK_FOR_UPDATES -n your.bort.ota.app.id/com.memfault.bort.ota.lib.CheckForUpdatesReceiver
+```
+
+From another app:
+
+```kotlin
+Intent("com.memfault.intent.action.OTA_CHECK_FOR_UPDATES").apply {
+    component = ComponentName(
+        "your.bort.ota.app.id", // Whatever you have chosen for the Bort OTA application ID
+        "com.memfault.bort.ota.lib.CheckForUpdatesReceiver"
+    )
+}.also {
+    context.sendBroadcast(it)
+}
+```
+
 ## OTA Update Client architecture
 
 The OTA Update Client is included in the Bort SDK as a separate app. As with the
