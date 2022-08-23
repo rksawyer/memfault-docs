@@ -37,7 +37,7 @@ module.exports = {
                 {
                     to: "docs/platform/introduction",
                     activeBasePath: "docs/platform",
-                    label: "Web Application",
+                    label: "Web App",
                     position: "left",
                 },
                 {
@@ -49,7 +49,7 @@ module.exports = {
                 {
                     to: "docs/linux/introduction",
                     activeBasePath: "docs/linux",
-                    label: "Embedded Linux",
+                    label: "Linux",
                     position: "left",
                 },
                 {
@@ -63,7 +63,7 @@ module.exports = {
                  */
                 {
                     to: "https://api-docs.memfault.com",
-                    label: "REST API",
+                    label: "API",
                     position: "left",
                     target: "_blank",
                     rel: "noopener",
