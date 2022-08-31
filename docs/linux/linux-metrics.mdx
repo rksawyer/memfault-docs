@@ -1,0 +1,363 @@
+---
+id: linux-metrics
+title: Linux Metrics
+sidebar_label: Metrics
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+
+## Introduction
+
+The `collectd` plugin for `memfaultd` (see [the source
+code][source-memfaultd-collectd-plugin]) configures CollectD to regularly upload
+collected metrics to Memfault. These metrics:
+
+- Are shown on the [device timeline][docs-timeline].
+- Are available for use as [Timeseries][docs-timeseries] or
+  [Attributes][docs-attributes] metrics, aggregated across the entire fleet.
+- Can be used to create [Metric Charts][docs-metric-charts] and
+  [Alerts][docs-alerts].
+
+See [Metrics and Attributes](/docs/platform/metrics) for an introduction to
+Memfault terminology related to metrics and to learn how the features you'll set
+up here can be accessed in the Memfault Web App.
+
+## Prerequisites
+
+### The `memfaultd` daemon
+
+Follow the [getting-started guide][docs-linux-getting-started] to learn how to
+set this up for your device. A key function of `memfaultd` is to correctly
+configure and control CollectD to upload metrics to Memfault.
+
+:::tip
+
+Keep [`meta-memfault-example`][source-yocto-example] open as a reference
+implementation. Your integration should look similar to it once you're done
+following the steps in this tutorial.
+
+:::
+
+### Dependencies
+
+#### CollectD
+
+If you're using Yocto, the `meta-oe` layer includes [a recipe for
+`collectd`][source-collectd-recipe], so you may be able to just add `collectd`
+to your dependencies, e.g. by appending it to `IMAGE_INSTALL`. In our example
+project, we've opted for adding it to `MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS` in
+[`layer.conf`][source-layer-conf].
+
+[source-collectd-recipe]:
+  https://github.com/openembedded/meta-openembedded/tree/master/meta-oe/recipes-extended/collectd
+
+#### Optional: an application metrics client
+
+There are different ways to track application metrics using CollectD. We
+recommend using a [StatsD][statsd-homepage] client, but other mechanisms are
+expected to work equally well. StatsD clients can be configured to communicate
+with CollectD using [the StatsD plugin][collectd-plugin-statsd]. This will allow
+you to send application metrics through to Memfault. You can find a list of
+StatsD clients for a diversity of languages [in the StatsD
+repository][statsd-clients].
+
+In our example project, we've added StatsD clients as dependencies:
+
+- `statsd-c-client` in our C sample app:
+  - See [the corresponding `DEPENDS` addition][source-statsd-c-bb]
+  - See a [sample recipe for `statsd-c-client`][source-statsd-c-client-bb]
+- `python3-statsd` in our Python sample app:
+  - See [the corresponding `DEPENDS` addition][source-statsd-python-bb]
+
+[source-statsd-python-bb]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-memfault/statsd-sampleapp-c/statsd-sampleapp-c.bb
+[source-statsd-c-bb]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-memfault/statsd-sampleapp-c/statsd-sampleapp-c.bb
+[source-statsd-c-client-bb]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-memfault/statsd-c-client/statsd-c-client.bb
+[collectd-plugin-statsd]: https://collectd.org/wiki/index.php/Plugin:StatsD
+[statsd-homepage]: https://github.com/statsd/statsd
+[statsd-clients]:
+  https://github.com/statsd/statsd/blob/master/docs/client_implementations.md
+
+## Configuring CollectD
+
+We strongly recommend familiarizing yourself with [CollectD][collectd-homepage]
+and how it's configured in order to make the best use of the Memfault platform.
+
+The `memfaultd` daemon generates a configuration file, by default in
+`/tmp/collectd.conf`, with information about the device provided by
+[`memfault-device-info`][docs-memfault-device-info] (see the [getting-started
+guide][docs-linux-getting-started] for more information). Note that the path
+where this configuration file is generated [can be configured in
+`/etc/memfaultd.conf`][docs-configuration] using the
+`collectd_plugin.output_file` configuration key.
+
+A minimal configuration file to configure CollectD to post to Memfault looks
+like this:
+
+```conf
+# Your configuration here.
+
+Include "/tmp/collectd.conf" # Or the value of your collectd_plugin.output_file
+```
+
+It is important that the `Include` of the `memfaultd`-generated file is **the
+last line in your configuration**. This ensures each HTTP request that
+CollectD's `write_http` plugin performs to the Memfault backend contains the
+full set of configured metrics.
+
+If you inspect the generated `/tmp/collectd.conf` file, you'll find that it
+configures the `write_http` plugin to talk to Memfault, and also sets an
+`Interval` and a `FlushInterval`.
+
+:::note
+
+You _must not_ add a `LoadPlugin write_http` in your own config (either before
+or after `Include`ing the generated config file). One such line is included in
+the generated configuration. Subsequent `LoadPlugin` lines for the same plugin
+will have no effect.
+
+:::
+
+### Relevant `/etc/memfaultd.conf` settings
+
+The generated CollectD configuration can be controlled using the `collectd`
+section of `/etc/memfaultd.conf`. See [a full configuration reference
+here][docs-configuration].
+
+#### `collectd.interval_seconds`
+
+The `collectd.interval_seconds` setting in `/etc/memfaultd.conf` controls both
+`Interval` and `FlushInterval`. This means that you should not configure either
+setting in your own configuration file.
+
+In CollectD, the `Interval` setting regulates how often read plugins will
+attempt a reading by default (plugin instances may override this for their own
+metrics), and the `FlushInterval` setting for the `write_http` plugin controls
+how often CollectD will flush its cache and attempt to post metrics to Memfault.
+
+:::note
+
+The `FlushInterval` parameter to `write_http` is shared among all instances of
+the plugin. That means that if you have your own, it will flush at the
+Memfault-configured `FlushInterval`, too. This is a limitation of `write_http`.
+
+:::
+
+#### `collectd.write_http_buffer_size_kib`
+
+The default value of 64KiB gives CollectD plenty of space to fit a payload
+generated by our [recommended configuration](#recommended-configuration). A
+typical payload grows up to around 20KiB.
+
+You may want to fine-tune `write_http_buffer_size_kib` if you modify the
+recommended configuration. Bear in mind the interaction between this and
+`collectd.interval_seconds`: if the write buffer is full, CollectD will be
+forced to flush before an interval ends.
+
+#### `collectd.non_memfaultd_chain`
+
+See [Configuring additional chains][docs-metrics-chains].
+
+### Recommended configuration
+
+See [our recommended CollectD configuration in
+`meta-memfault-example`][source-recommended-collectd-conf]. This configuration
+makes use of standard plugins that enjoy special support on the Memfault
+platform. Copying this configuration over to your project will guarantee a good
+first experience.
+
+Note that as long as the generated configuration file `/tmp/collectd.conf` is
+included at the very bottom of your CollectD configuration, you're free to add
+your own directives before it, and in addition to the recommended settings.
+
+### Configuring additional chains
+
+See [CollectD chains][collectd-chains] for an introduction.
+
+#### Jumping to your custom chain after the `memfaultd`-generated chain
+
+By default, the `memfaultd`-generated chain will bottom out in a `Target stop`
+directive. You can change this final directive to instruct CollectD to jump to
+your own chain. To do this, set the value of `collectd.non_memfaultd_chain` in
+`/etc/memfaultd.conf` and add a chain with a matching name. See [a full
+configuration reference here][docs-configuration].
+
+#### On setting `PostCacheChain`
+
+The value of the `PostCacheChain` is set by the `memfaultd`-generated
+configuration. That means it's the first node of the `PostCacheChain`. If you
+change its value to something else, you need to make sure that your chains
+bottom out in a call to the `memfaultd`-generated chain. Please inspect
+`/tmp/collectd.conf` to see its identifier.
+
+## Set `enable_data_collection`
+
+By default, `enable_data_collection` is `false` (see the [default
+configuration][source-builtin-conf]). This is to enable asking end users for
+consent before collecting or transmitting any data to Memfault services.
+
+Once the end user has given their consent, you can enable data collection like
+so:
+
+```shell
+$ memfaultd --enable-data-collection
+```
+
+To disable it:
+
+```shell
+$ memfaultd --disable-data-collection
+```
+
+The `memfaultd` service will restart automatically whenever you run either of
+those commands.
+
+Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
+more information.
+
+## Application metrics
+
+First, make sure you've followed [the prerequisites section](#prerequisites) and
+installed a StatsD client for your application.
+
+Enable the `statsd` plugin in your `/etc/collectd.conf` (note that this is
+already included in the
+[recommended configuration](#recommended-configuration)):
+
+```
+LoadPlugin statsd
+```
+
+The [StatsD plugin][collectd-plugin-statsd] exposes a UDP port (by default
+`8125`). You'll need to configure your StatsD client to talk to it. Read on to
+see some examples.
+
+### Example: using C
+
+See [the full module in our example layer][statsd-c-example].
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <statsd-client.h>
+#include <unistd.h>
+
+#define MAX_LINE_LEN 200
+#define PKT_LEN 1400
+
+int main(int argc, char *argv[])
+{
+  statsd_link *link;
+
+  link = statsd_init_with_namespace("localhost", 8125, "mycapp");
+
+  char pkt[PKT_LEN] = {'\0'};
+  char tmp[MAX_LINE_LEN] = {'\0'};
+
+  statsd_prepare(link, "mygauge", 42, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+  strncat(pkt, tmp, PKT_LEN - 1);
+  statsd_send(link, pkt);
+
+  statsd_finalize(link);
+}
+```
+
+[statsd-c-example]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-memfault/statsd-sampleapp-c
+
+### Example: using Python
+
+See [the full module in our example layer][statsd-python-example].
+
+```python
+from statsd import StatsClient
+
+statsd = StatsClient(
+    host="localhost",
+    port=8125,
+    prefix="mypythonapp",
+)
+
+statsd.gauge("mygauge", 42)
+```
+
+## Testing your integration
+
+During the development phase, we recommend setting a low value (e.g. 60 seconds)
+for the `collectd.interval_seconds` setting in `/etc/memfaultd.conf`. Take a
+look at the [`/etc/memfaultd.conf` reference][docs-configuration] for more
+information.
+
+For changes in `/etc/memfaultd.conf` to take effect, you'll need to restart the
+`memfaultd` daemon:
+
+```sh
+$ systemctl restart memfaultd
+```
+
+The following section should help you figure out where you may expect data to be
+accessible in the Memfault Web Application.
+
+## Viewing Metrics in the Web Application
+
+<p>
+  To see detailed reports from a specific device, find the device in{" "}
+  <ProjectMagicLink path="/devices">
+    <b>Fleet -> Devices</b>
+  </ProjectMagicLink>
+  , and then open its <b>Timeline</b> tab.
+</p>
+
+<p>
+  Open{" "}
+  <ProjectMagicLink path="/metrics">
+    <b>Dashboards -> Metrics</b>
+  </ProjectMagicLink>{" "}
+  to create Metric Charts that monitor metrics at the fleet level by aggregating
+  the data from each device.
+</p>
+
+<p>
+  To receive notifications when your metrics exceed a certain threshold or meet
+  any complex set of criteria, you can set up Alerts. Navigate to{" "}
+  <ProjectMagicLink path="/alerts">
+    <b>Alerts</b>
+  </ProjectMagicLink>{" "}
+  using the main menu on the Memfault Web App.
+</p>
+
+[statsd-python-example]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-memfault/statsd-sampleapp-python
+[collectd-homepage]: https://collectd.org/
+[collectd-write-http]: https://collectd.org/wiki/index.php/Plugin:Write_HTTP
+[collectd-chains]: https://collectd.org/wiki/index.php/Chains
+[source-yocto-example]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example
+[source-meta-memfault]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault
+[source-memfaultd]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[source-recommended-collectd-conf]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example/recipes-extended/collectd/files/collectd.conf
+[source-layer-conf]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/layer.conf
+[source-memfaultd-collectd-plugin]:
+  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/plugins/collectd.c
+[source-builtin-conf]:
+  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
+[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-control-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[docs-memfault-device-info]:
+  /docs/linux/linux-getting-started-guide#add-a-memfault-device-info-executable-to-your-build
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-metrics]: /docs/platform/metrics
+[docs-timeseries]: /docs/platform/metrics#timeseries
+[docs-attributes]: /docs/platform/metrics#attributes
+[docs-timeline]: /docs/platform/introduction/#metrics
+[docs-metric-charts]: /docs/platform/charts#metric-charts
+[docs-alerts]: /docs/platform/alerts
+[docs-metrics-chains]: /docs/linux/linux-metrics#configuring-other-chains
