@@ -26,7 +26,8 @@ the Memfault cloud, enabling one or more of the following features:
 
 ## Useful links
 
-- The [source for the Memfault Linux SDK][source-sdk].
+- The [source for the Memfault Linux SDK][source-sdk]. Make sure to use the
+  [branch matching the Yocto release][source-sdk-branches] that you are using.
 - A [sample integration using Yocto][source-yocto-example].
 - [Reference: `memfaultd` Configuration][docs-configuration].
 - [Reference: `memfaultd` CLI][docs-cli].
@@ -34,7 +35,9 @@ the Memfault cloud, enabling one or more of the following features:
 ## Assumptions and dependencies
 
 - Currently, our SDK is centered around [Yocto][yocto-homepage] and is verified
-  to work on [`4.0 kirkstone`][yocto-kirkstone].
+  to work on these releases of Yocto:
+  - [`4.0 kirkstone`][yocto-kirkstone]
+  - [`3.1 dunfell`][yocto-dunfell]
 - Your project uses [`systemd`][systemd-homepage] as the init system.
 
 Optionally, as requirements of plugins:
@@ -345,21 +348,24 @@ more information.
 Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
 
 [source-sdk]: https://github.com/memfault/memfault-linux-sdk
+[source-sdk-branches]: https://github.com/memfault/memfault-linux-sdk/branches
 [source-yocto-example]:
-  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault-example
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
 [source-yocto-memfault-device-info-example]:
-  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-memfault/memfault-device-info/memfault-device-info.bb
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-memfault/memfault-device-info/memfault-device-info.bb
 [source-yocto-memfaultd-conf-example]:
-  https://github.com/memfault/memfault-linux-sdk/blob/main/meta-memfault-example/recipes-memfault/memfaultd/memfaultd.bbappend
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-memfault/memfaultd/memfaultd.bbappend
 [source-memfaultd]:
-  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
 [source-builtin-conf]:
-  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
 [source-meta-memfault]:
-  https://github.com/memfault/memfault-linux-sdk/tree/main/meta-memfault
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault
 [yocto-homepage]: https://www.yoctoproject.org/
 [yocto-kirkstone]:
   https://docs.yoctoproject.org/migration-guides/migration-4.0.html
+[yocto-dunfell]:
+  https://docs.yoctoproject.org/migration-guides/migration-3.1.html
 [docs-linux-ota]: /docs/linux/linux-releases-integration-guide
 [docs-hardware-version-software-version]:
   /docs/platform/software-version-hardware-version
