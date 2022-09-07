@@ -1,0 +1,145 @@
+---
+title: August 2022
+---
+
+## Linux SDK 0.3.0 – Metrics and Diagnostics Data
+
+Memfault's Linux support reaches another milestone: Devices can now report
+metrics and diagnostic data to measure the success of software updates (OTA) and
+to proactively diagnose anomalies before users even experience their effect. The
+[Memfault Linux SDK 0.3.0](https://github.com/memfault/memfault-linux-sdk) ships
+with a configurable set of
+[plugins for collectd](/docs/linux/linux-metrics#configuring-collectd) to obtain
+standard KPIs at the operating system level (e.g. available storage or RAM, CPU
+utilization, or network status and traffic). You can also use the SDK to
+[collect product-specific custom metrics via statsd](/docs/linux/linux-metrics#application-metrics).
+
+![Linux SDK 0.3.0 features](/img/blog/2022-08-31-Linux-SDK-0-3-0.png)
+
+When sent to the cloud, all telemetry data is being processed and distilled to
+fleet-wide [time-series metrics](/docs/platform/metrics#timeseries) (e.g. "was
+there an uptick in avg. CPU usage since the last version?"),
+[device attributes](/docs/platform/metrics#attributes) (e.g. “which devices at
+site B ran for more than 6 months already without reboot?"), and detailed
+per-device insights via the Timeline UI (e.g. “are there any anomalies on the
+network traffic that correlate with crashes reported for this device?").
+
+Combined with [Memfault's alerting feature](/docs/platform/alerts), operating
+your fleet of Linux devices is now easier than ever!
+
+## Improved Device Timeline
+
+Memfault’s Device Timeline provides a view for each device’s metrics, reboots
+and crashes to make debugging easier. With the recent performance improvements,
+Device Timeline now renders considerably more time-series metrics simultaneously
+and expandable “Panels” group relevant metrics together for ease of use (see
+_Value History_, _Foreground_, _Longwakes_ below).
+
+![Device Timeline Panels](/img/blog/2022-08-31-Device-Timeline.png)
+
+<!-- truncate -->
+
+## General
+
+- Added: Documentation of
+  [Issue De-duplication](/docs/platform/issue-management/#de-duplication-of-traces-into-issues)
+  and
+  [hiding Issues with no Traces](/docs/platform/issue-management/#automated-hiding-of-issues-with-zero-traces)
+- Added: Panels under Device Timeline to show relevant metrics together for
+  Android and Linux projects
+- Improved:
+  [Searching for Devices](https://app.memfault.com/organizations/-/projects/-/devices)
+  via [Timeseries Metrics](/docs/platform/metrics/#timeseries) and
+  [Attributes](/docs/platform/metrics/#attributes) now case insensitive
+- Improved: UI feedback when accessing a deleted Trace
+- Improved: [Memfault Docs search](/search/) shows Web App results above
+  Changelog
+- Fixed: [Devices](https://app.memfault.com/organizations/-/projects/-/devices/)
+  → Traces didn’t show most recent Traces when end date is set to “Today”
+- Fixed: Error message when using Memfault during an ongoing deployment of the
+  web application
+- Fixed: Error when loading the
+  [Issues](https://app.memfault.com/organizations/-/projects/-/issues) page when
+  symbol files are missing
+- Fixed: Various UI glitches and improvements (chart icons on Firefox, invisible
+  “past software versions” on Safari, Devices page opening with scroll state of
+  previous page, overflowed text in Release Details page, Active Devices chart
+  tooltip displays year)
+- Fixed: Some
+  [cohort list pages](https://app.memfault.com/organizations/-/projects/-/cohorts)
+  showing incorrect number of devices for some cohorts
+- Fixed: Error when retrieving issues via the
+  [Issues API](https://api-docs.memfault.com/#09a23663-b181-4d78-a5d1-89155edd5160)
+- Changed: Enforce daily Rate Limit for traces and other data points on Qualcomm
+  MCUs
+- Removed: Device Timeline page storing its configuration in the URL
+
+## MCU
+
+- Added: Option to restart failed coredump processing under
+  [Issues](https://app.memfault.com/organizations/-/projects/-/issues) → Queue
+  Status
+- Added: [Getting Started Guide](/docs/mcu/zephyr-guide) for Zephyr integrations
+- Fixed: Incomplete backtraces because of outdated GDB version
+- Fixed: Mangled C++ function names
+- SDK versions
+  [0.32.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0320-and-sdk-0315---aug-8-2022),
+  [0.32.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0321-and-sdk-0320---aug-8-2022),
+  [0.32.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0322-and-sdk-0321---aug-16-2022),
+  [0.33.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0330-and-sdk-0322---aug-18-2022),
+  [0.33.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0330-and-sdk-0331---aug-26-2022)
+  were released. Some highlights:
+  - Added:
+    [memfault_demo_shell](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/demo/src/memfault_demo_shell.c)
+    support for terminals that only emit CR for line endings
+  - Added: [Software watchdog](https://mflt.io/root-cause-watchdogs) reference
+    port for nRF5 SDK and
+    [example usage](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/nrf5/apps/memfault_demo_app)
+    in the demo app
+  - Added: Fallback to `printk` usage when no logging is enabled in Zepyhr port
+  - Added: Heartbeat metrics for heap and Wi-Fi performance tracking when using
+    the default port
+    for [CAT1A (PSoC™️ 6)](https://github.com/Infineon/mtb-pdl-cat1)
+  - Added:
+    [New example application](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/nrf-connect-sdk/nrf5)
+    for trying Memfault on nRF53 & nRF52
+  - Added: Option to print Zephyr backtrace output to console while also using
+    Memfault
+  - Improved: Support for upcoming Zephyr 3.2.0 (and also 3.1.0) with the newly
+    namespaced Zephyr include path
+  - Fixed:
+    [Heap stats free not checking in_use flag](https://github.com/memfault/memfault-firmware-sdk/issues/32).
+    (Thanks [@christophgreen](https://github.com/christophgreen) for reporting
+    it!)
+  - Fixed: Wrong level prefix when Zephyr Memfault log capture used
+  - Fixed: Memfault log capture issues (wrong log level prefix, capturing each
+    logged character as a separate line)
+  - Fixed: Error during the OTA download when using Memfault nRF Connect SDK
+    FOTA client
+  - Fixed: Reboot reason reported as “Unknown” when PSoC 6 is fully reset
+    instead of “Power On Reset”
+  - Changed: Memfault logs (e.g. `MEMFAULT_LOG_DEBUG()` etc.) are now routed to
+    the Zephyr logging infrastructure and output depends on the
+    `CONFIG_MEMFAULT_LOGGING_ENABLE` Kconfig option
+  - Removed: Support for Zephyr LTS release 1.14
+
+## Android
+
+- Fixed: Sporadic timeouts when processing some bug reports
+- We did not publish a new version of the
+  [Android Bort AOSP SDK](https://github.com/memfault/bort) in August.
+
+## Linux
+
+- Added: [Metrics](/docs/linux/linux-metrics) incl. grouping via Device Timeline
+- Added: Fleet-wide metric aggregations (sum, count, min, max, mean)
+- Improved: [Getting Started guide](/docs/linux/linux-getting-started-guide) now
+  shown after project creation
+- Improved: Documentation about
+  [Linux OTA](/docs/linux/linux-releases-integration-guide)
+- SDK version
+  [0.3.0](https://github.com/memfault/memfault-linux-sdk/blob/-/CHANGELOG.md#030---2022-08-31)
+  was released. Some highlights:
+  - Added: Support for metrics using `collectd`
+  - Added: [Documentation](/docs/linux/linux-metrics) for configuring `collectd`
+    and metric collection
