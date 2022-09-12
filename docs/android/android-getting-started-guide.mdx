@@ -259,6 +259,43 @@ adb shell am broadcast --receiver-include-background \
   --ez com.memfault.intent.extra.BORT_ENABLED true
 ```
 
+## Development Mode (since Bort 4.2.0)
+
+On `eng` and `userdebug` Android builds, Bort can be placed into development
+mode. This can be useful for validating the Bort integration, or testing new
+Custom Metrics.
+
+Once in development mode:
+
+- Random upload jitter is removed (this is helpful to see diagnostic information
+  in the Memfault dashboard immediately).
+- `mar` files are uploaded immediately (instead of waiting to be bundled in a
+  single upload, as it normally would).
+- Metrics collection can be triggered on-demand. This will trigger Bort to
+  collect `batterystats` and Custom Metrics - useful for validating new calls to
+  the [Reporting APIs](/docs/android/android-custom-metrics).
+- Device configuration update can also be requested on-demand. This will trigger
+  Bort to update settings from the Memfault server, including the fleet-sampling
+  configuration.
+
+To enable development mode (change `true` to `false` to disable):
+
+```bash
+./bort_cli.py dev-mode --bort-app-id your.app.id --enabled true
+```
+
+To request Metrics collection:
+
+```bash
+./bort_cli.py request-metrics --bort-app-id your.app.id
+```
+
+To request a Device Configuration update:
+
+```bash
+./bort_cli.py request-update-config --bort-app-id your.app.id
+```
+
 ## Upload a bug report
 
 Once the SDK has been enabled, you can manually trigger a bug report to be

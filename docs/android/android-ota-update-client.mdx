@@ -67,6 +67,12 @@ be used either over adb, or from another app on the device which holds the
 `BORT_CONTROL_PERMISSION`. Replace `your.bort.ota.app.id` with your Bort OTA
 application ID.
 
+Using the Bort CLI (since Bort 4.2.0):
+
+```
+bort_cli.py ota-check --bort-ota-app-id your.bort.ota.app.id
+```
+
 Using `adb`:
 
 ```
@@ -128,6 +134,24 @@ active. A Release can now be
 containing this device.
 
 ## Customizing the OTA Update Client
+
+### Applying OTA updates in the background
+
+By default, the OTA Update Client will create a notification (see above) when an
+update is available - which requires user interaction before the update is
+installed.
+
+From version 4.2.0, this behaviour can be changed to automatically apply updates
+in the background, by setting the `OTA_AUTO_INSTALL` flag in `bort.properties`:
+
+```
+OTA_AUTO_INSTALL=true
+```
+
+Additionally, if you need to customize the logic around when an OTA update
+should be automatically applied, then this can be defined in
+`AutoInstallRules.kt` by adding any custom rules to the
+`custom_canAutoInstallOtaUpdateNow` method.
 
 ### String translations
 
