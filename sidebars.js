@@ -78,6 +78,7 @@ module.exports = {
                         "mcu/coredump-elf-with-gdb",
                         "mcu/uploading-data-with-mqtt",
                         "mcu/sdk-submodule",
+                        "mcu/watchdogs",
                     ],
                 },
                 {

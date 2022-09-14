@@ -1,0 +1,118 @@
+---
+id: watchdogs
+title: Watchdog Instrumentation
+sidebar_label: Watchdog Instrumentation
+---
+
+import IntegrationCompletePrerequisite from "@site/src/pages/_partials/_integration-complete-prerequisite.mdx";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+<IntegrationCompletePrerequisite />
+
+This document describes the necessary integration details to capture coredumps
+when a Watchdog occurs.
+
+An example of a captured Watchdog crash below:
+
+![](/img/docs/mcu/watchdog-example.png)
+
+## Enabling a Watchdog Timer
+
+This guide assumes a Watchdog Timer is already present and enabled on the
+system. For some general background on Watchdog Timers and recommendations on
+how to use them, see this article:
+
+<https://interrupt.memfault.com/blog/firmware-watchdog-best-practices>
+
+## Instrumenting Watchdogs with Memfault
+
+When using the Memfault SDK, we recommend instrumenting the watchdog timer so a
+coredump will be captured when the watchdog trips.
+
+The fundamental technique is to use Memfault's
+[Watchdog interrupt handler](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.1/components/panics/src/memfault_fault_handling_arm.c#L286)
+to trap the interrupt when the watchdog fires- this provides the best backtrace
+result, since it uses the Memfault interrupt shim.
+
+To use it, make sure that the `MEMFAULT_EXC_HANDLER_WATCHDOG` Memfault SDK
+config is set to the name of the Watchdog interrupt handler registered in your
+interrupt vector table (this config is usually set in the
+`memfault_platform_config.h` header file), and there is no competing
+implementation.
+
+In order for the coredump save to complete, the chip will need to be configured
+to fire the interrupt for the Watchdog Timer, but not immediately reset.
+
+<!--
+
+This is really not recommended, since the backtrace won't be as nice as with the
+above technique. Leaving it for future reference only.
+
+```c
+void WDOG1_IRQHandler(void) {
+  // optionally, do one last feed here of the hardware watchdog in case more
+  // time is needed to ensure the coredump save can finish
+
+  // trigger a Memfault software watchdog
+  MEMFAULT_SOFTWARE_WATCHDOG();
+}
+```
+
+-->
+
+## Configuring Watchdog Timer Warning Threshold
+
+Depending on the particular chip, there's often a "warning" threshold that can
+be configured into the watchdog, which will trigger an interrupt some period
+before the watchdog reset occurs.
+
+For example, on the NXP RT1021 chip (from the
+[RT1020 Refernce Manual](https://www.mouser.com/pdfDocs/NXP_RT1020_RM.pdf)):
+
+![](/img/docs/mcu/watchdog-interrupt-rt1020.png)
+
+If available, be sure to set up the warning threshold at a sufficiently long
+timeout for the coredump saving to have enough time to finish (for example, if
+there are long flash page erase times that need to be accounted for).
+
+We typically recommend a relatively long timeout, such as 10 seconds, but be
+sure to consult the flash chip documentation to ensure enough time is reserved.
+
+If the hardware watchdog does not permit a "warning" threshold of sufficient
+time, it may instead make sense to set the hardware watchdog to a very long
+period, and use a timer peripheral interrupt to trigger the Memfault software
+watchdog.
+
+## Petting the Watchdog Prior to Coredump Save
+
+The actual writing of the coredump to the platform storage medium is the time
+consuming part of the coredump capture.
+
+One technique that may be useful is to apply one last reset of the watchdog
+timer (often called "petting" the watchdog) prior to the coredump save
+operation. The place to insert the watchdog timer reset is in this
+weakly-defined function:
+
+```c
+//! Called prior to invoking any platform_storage_[read/write/erase] calls upon crash
+//!
+//! @note a weak no-op version of this API is defined in memfault_coredump.c because many platforms will
+//! not need to implement this at all. Some potential use cases:
+//!   - re-configured platform storage driver to be poll instead of interrupt based
+//!   - give watchdog one last feed prior to storage code getting called it
+//! @return true if to continue saving the coredump, false to abort
+extern bool memfault_platform_coredump_save_begin(void);
+```
+
+## Sample Integrations
+
+Memfault provides several example implementations of software watchdogs, which
+can be used as-is or as a reference for your own implementation:
+
+- [Generic header and description for custom implementation](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/include/memfault/ports/watchdog.h)
+- [NRF5 SDK](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/nrf5_sdk/software_watchdog.c)
+- [SiLabs EMLIB](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/emlib/wdog_software_watchdog.c)
+- [Dialog DA1468x](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/dialog/da1468x/wdog_software_watchdog.c)
+- [STM32H7](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/stm32cube/h7/lptim_software_watchdog.c)
+- [Zephyr RTOS](https://github.com/memfault/memfault-firmware-sdk/blob/0.33.2/ports/zephyr/common/memfault_software_watchdog.c)
