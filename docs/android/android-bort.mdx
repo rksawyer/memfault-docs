@@ -198,10 +198,10 @@ SKIP_DOWNLOAD_SYSTEM_SETTINGS_JSON=1
 
 ### Bug report capture period
 
-The bort app periodically generates bug reports by scheduling a periodic task to
+The Bort app periodically generates bug reports by scheduling a periodic task to
 trigger the `MemfaultDumpstateRunner`.
 
-The bort app registers a handler (broadcast receiver) for the system boot event
+The Bort app registers a handler (broadcast receiver) for the system boot event
 as well as when the app itself is updated or installed. When either of these
 happens, the app will register the periodic task if one is not registered.
 
@@ -320,7 +320,7 @@ ADB, `bort_cli.py` provides a convenience command:
 By default, the SDK assumes it is running on a device that may contain
 Personally Identifiable Information (PII). As such, it will not run until it is
 explicitly told to do so (e.g. when user consent has been obtained). Once
-enabled, that value will be persisted in preferences. If the bort app's data is
+enabled, that value will be persisted in preferences. If the Bort app's data is
 cleared, this value must be set again.
 
 To enable the SDK, send an intent to the `ControlReceiver`. Note that the sender
@@ -443,3 +443,34 @@ For example, to place the SDK in the `system` partition, clone the SDK to
 ```shell script
 LC_ALL=c find . \( -type d -name .git -prune \) -o -type f -exec sed -i '' "s/vendor\/memfault\/bort/packages\/apps\/bort/g" {} +
 ```
+
+## Data Reporting Frequency
+
+There are two modes in which the Bort app can be configured to send data. The
+first is by bundling all data into a MAR (Memfault Archive file) file, or by
+sending each piece of data individually to Memfault as it's collected from the
+system.
+
+### Uploading MAR files
+
+When uploading data via MAR files, the Bort app collects diagnostic data for 2
+hours and then bundles it all together in a single MAR file and uploads it.
+
+Depending on the time at which data was collected from the system, it may take
+up to 2 hours for it to be sent to Memfault.
+
+:::info
+
+The use of MAR files is _required_ to use Memfault's _Fleet Sampling_ feature.
+
+:::
+
+### Uploading individual files
+
+:::info
+
+This method of uploading files from the Bort SDK is deprecated as of Bort 4.1
+
+:::
+
+This configuration would upload individual files to Memfault.
