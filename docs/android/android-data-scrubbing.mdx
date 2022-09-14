@@ -64,6 +64,23 @@ replaced with a hash of that string, rendering it obfuscated. Since it is
 replaced with a stable hash, you will still be able to see if the same string
 appears multiple times in the logs.
 
+## Custom Scrubbing Rules
+
+:::note
+
+Custom log scrubbing rules will only be applied on-device, to Caliper-collected
+log files (not to bugreports). This feature is available from Bort 4.2.0 onward.
+
+:::
+
+If there are specific types of data that should not be uploaded, then custom
+scrubbing rules may be defined in Bort. These are added in
+`CustomLogScrubber.kt` by customizing the `clean` method. This will be called
+for every log line collected by Caliper. The return value will be uploaded by
+Bort, in place of the input (by default, the input is returned directly, which
+has no effect). This is in addition to the other scrubbing rules mentioned
+above.
+
 ## Server-side vs On-device scrubbing
 
 Uploaded bug reports are _always_ scrubbed server-side, filtering traces and
