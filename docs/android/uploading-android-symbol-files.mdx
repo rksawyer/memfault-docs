@@ -1,28 +1,18 @@
 ---
-id: uploading-android-bugreports
-title: Uploading Android Bug Reports & Symbols
-sidebar_label: Uploading Android Bug Reports & Symbols
+id: uploading-android-symbol-files
+title: Uploading Android Symbol Files
+sidebar_label: Uploading Android Symbol Files
 ---
 
-## Using the Memfault UI to Upload
+import MemfaultCliInstallationCallout from "@site/src/pages/_partials/_memfault-cli-installation-callout.mdx";
 
-You may upload individual bug reports via the Memfault UI by navigating to the
-**Issues** page and selecting **Manual Upload**.
+To upload symbol files, the Memfault CLI must be used.
 
-![/binary-assets/manual-bug-report-upload.gif](/binary-assets/manual-bug-report-upload.gif)
+<MemfaultCliInstallationCallout />
 
-## Using the Memfault CLI tool to upload
+## Uploading Android OS symbol files
 
-The easiest way to upload Android Bug Report and/or symbol files is using the
-Memfault CLI tool.
-
-The rest of this guide assumes you have the Memfault CLI tool installed. If you
-have not installed it yet, please
-[follow the installation instructions](/docs/ci/install-memfault-cli).
-
-### Uploading Android OS symbol files
-
-While processing traces from a bugreport.zip, Memfault will attempt to provide
+While processing Traces from diagnostic data, Memfault will attempt to provide
 source file and line numbers for stackframes from native binaries. In order to
 do this, the symbol files for these native binaries need to be uploaded to
 Memfault.
@@ -38,8 +28,7 @@ different for your project. To test
 To upload all symbol files, run this command:
 
 ```bash
-$ memfault --email <EMAIL> --password <PASSWORD> --org <ORG_SLUG> \
-    --project <PROJ_SLUG> upload-aosp-symbols out/target/product/generic/symbols
+$ memfault upload-aosp-symbols out/target/product/generic/symbols
 ```
 
 It's best to hook this into Continuous Integration when a build is released for
@@ -60,7 +49,7 @@ INFO: /aosp/symbols/out/target/product/vsoc_x86/symbols/apex/com.android.adbd/li
 ... etc ...
 ```
 
-### Uploading Android App symbol & mapping files
+## Uploading Android App symbol & mapping files
 
 For traces in a bugreport.zip that originate from an Android app, Memfault will
 also attempt to provide source file and line numbers for stackframes from both
@@ -81,8 +70,7 @@ The easiest way to upload all required files in one go, is using the
 Android app build output directory:
 
 ```bash
-$ memfault --email <EMAIL> --password <PASSWORD> --org <ORG_SLUG> \
-    --project <PROJ_SLUG> upload-android-app-symbols \
+$ memfault upload-android-app-symbols \
     --build-variant release <APP_SOURCE_ROOT>/build
 ```
 
@@ -97,7 +85,7 @@ the required information directly. You can run
 `memfault upload-android-app-symbols --help` to get more information on the all
 the options.
 
-#### Proguard / R8 configuration
+### Proguard / R8 configuration
 
 If you are using Proguard / R8 minification/obfuscation, it is recommended to
 enable the `-keepattributes LineNumberTable` configuration option in your app's
@@ -112,32 +100,3 @@ enable the `-keepattributes LineNumberTable` configuration option in your app's
 Without this option, the generated `mapping.txt` file will _not_ contain enough
 information for Memfault to be able to fully deobfuscate stack traces from the
 app.
-
-### Uploading an Android bugreport.zip
-
-There are two ways to upload Android bugreports. One uses a user's email and
-password, and one uses the Memfault-Project-Key. Please refer to the
-[Authentication - HTTP API documentation](https://api-docs.memfault.com/?version=latest#authentication)
-section for more information about the different forms of authentication.
-
-To upload a bugreport.zip file that is located at, for example
-`/path/to/bugreport.zip`, run the appropriate command:
-
-#### Using an Email and Password / API Key
-
-```bash
-$ memfault --email <EMAIL> --password <PASSWORD or User-API-Key> --org <ORG_SLUG> \
-    --project <PROJ_SLUG> upload-bugreport /path/to/bugreport.zip
-```
-
-#### Using a Memfault-Project-Key
-
-```bash
-$ memfault --project-key <Memfault-Project-Key> upload-bugreport /path/to/bugreport.zip
-```
-
-## Uploading using the Memfault API
-
-Please consult the
-[HTTP API Upload documentation](https://api-docs.memfault.com/#2d08c7d6-fc5e-4fc7-ac77-9d72e58ba7aa)
-for details on how to upload files to Memfault.
