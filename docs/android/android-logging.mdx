@@ -1,0 +1,62 @@
+---
+id: android-logging
+title: Android Logging
+sidebar_label: Logging
+---
+
+Memfault [Caliper](android-bort#memfault-caliper) collects logs from every
+logcat buffer. Logs are uploaded when they overlap a trace event, and are
+associated with the trace.
+
+Log files collected by Caliper are scrubbed on-device before being uploaded. See
+[Data Scrubbing](android-data-scrubbing)
+
+:::info
+
+Logs can also be collected via bug reports - but this is not recommended.
+
+:::
+
+## Configuration
+
+Configure logging on the
+[Project Settings page under **Data Sources**](https://app.memfault.com/organizations/-/projects/-/settings/data-sources).
+
+![](/img/docs/android/android-logging-config.png)
+
+### Kernel Oopses
+
+Kernel Oopses are extracted from log files to create traces.
+
+## Caliper Logging Modes
+
+### Periodic
+
+The default behavior (available since Bort 3.3.0). Bort will collect logcat from
+all buffers at a regular interval (15 minutes).
+
+In the case of log buffer expiry (if log buffers are too small, or if the device
+has particularly spammy logging), it is possible that some logs may be missed.
+
+### Continuous
+
+:::info
+
+Continuous logging mode is a preview feature, available from Bort 4.3.0 onward.
+
+Any devices running an older version of Bort will continue to use Periodic mode
+even if **Continuous** is enabled under project settings.
+
+:::
+
+This mode is designed to avoid missing logs due to buffer expiry.
+
+The `MemfaultDumpster` system service continuously reads from all log buffers.
+`--wrap` mode is used, so that logs are only written to disk on buffer expiry or
+timeout (i.e. the service is not continuously writing logs to disk).
+
+The **Flush To Storage** setting controls the maximum period before logs are
+flushed to disk if no buffers have expired. This does not affect how log files
+are chunked for upload.
+
+Log upload works the same way as for **Periodic**.

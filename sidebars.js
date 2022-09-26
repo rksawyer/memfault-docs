@@ -115,6 +115,7 @@ module.exports = {
                 "android/uploading-android-symbol-files",
                 "android/android-reboot-events",
                 "android/custom-events",
+                "android/android-logging",
                 "android/android-builtin-metrics",
                 "android/android-custom-metrics",
                 "android/android-releases-integration-guide",
