@@ -8,8 +8,7 @@ sidebar_label: Issue Management
 
 When devices in your fleet upload diagnostics data to Memfault, the data is
 analyzed by Memfault. Any detected problems are converted into Traces. Similar
-Traces are logically grouped together into an Issue, based on the signature of
-the Trace.
+Traces are logically grouped into an Issue, based on the signature of the Trace.
 
 In other words, a Trace is a single occurrence of a problem and an Issue is a
 group of Traces manifesting the same problem.
@@ -28,7 +27,7 @@ created that seem similar to old ones but now appear as multiple Issues. In
 these instances, it's best to merge the issues so that all future Traces will be
 grouped into a single parent Issue.
 
-A similar occurrence can take place in a customers code base. Let's take the
+A similar occurrence can take place in a customer's code base. Let's take the
 example below, which shows two backtraces, A and B.
 
 ```
@@ -51,24 +50,42 @@ would likely be created. This is because the backtraces changed, and Memfault
 can not be 100% sure they are the same bug. The best practice is to merge the
 Issues in this scenario.
 
-## Issue states
+## Issue States
 
-An Issue can be in one of these states:
+There are four states an Issue can be in: Unresolved, Resolved, Merged, and
+Muted.
 
-| State      | Description                                                                                                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unresolved | The Issue has not yet been fixed                                                                                                                                             |
-| Resolved   | The Issue has been (considered to be) fixed                                                                                                                                  |
-| Merged     | The Issue has been merged into another Issue                                                                                                                                 |
-| Muted      | The Issue has not been fixed, but you want to hide it from the list of Unresolved Issues, you do not want to be alerted about it and it should not be automatically reopened |
+All Issues are Unresolved by default.
 
-## Manually changing Issue state
+A Resolved Issue is intended for Issues that are believed to be fixed. Memfault
+will automatically alert you of a regression if this Issue is seen on a later
+software version. See more below.
 
-The state of an Issue can be viewed an changed manually from the Issue's detail
-page. Navigate to Issues, optionally change the filter criteria. Then click the
-title to navigate to the Issue detail page.
+A Muted Issue is intended for Issues that are not intended to be fixed or are
+known and accepted behavior. Once an Issue is Muted, it will not reopen to
+Unresolved unless the Issue State is manually changed.
 
-Below the title of the Issue, you will find a button to change the state:
+Once an issue has been Resolved or Muted, it will no longer appear in the
+default Issue list filter named **Unresolved**. To see a list of unresolved and
+muted Issues, toggle the filter to **All**. If reopened either manually, or
+automatically in the case of a regression (see details below), the issue will
+again appear under Unresolved Issues in the Issue list.
+
+Memfault will continue to collect Traces of Resolved and Muted Issues. These
+traces will continue to populate Issue Charts in the Metrics Dashboard. Traces
+will also be available on the Device page under the Traces tab and on the Device
+Timeline.
+
+## Manually changing Issue States
+
+The state of an Issue can be viewed and changed manually from the Issue’s detail
+page. You can navigate to an Issue detail page by clicking on an Issue on the
+Issue page.
+
+Below the title of the Issue, you will find a button to change the state to
+either Resolved or Muted. The Issue can be Reopened at any time by clicking
+Reopen. Note the Reopen button will have a blue outline if the Issue has been
+resolved, and a red outline if the issue has been muted.
 
 <p align="center">
   <img
@@ -77,21 +94,11 @@ Below the title of the Issue, you will find a button to change the state:
   />
 </p>
 
-When the Issue is Unresolved, the button will say "Resolve" and clicking it will
-change the state to Resolved.
-
-When the Issue is Resolved or Muted, the button will say "Reopen". When it is
-Muted, the button will also have a red outline. Clicking it will change the
-state to Unresolved.
-
-To Mute an Issue, click the caret on the right side of the button and click
-"Mute".
-
 ## Automatic Issue reopening upon regression
 
 When Memfault receives a Trace from a greater Software Version compared to the
 last Software Version when the Issue was Resolved, it will automatically be
-changed to Unresolved and subscribed users will automatically be notified.
+changed to Unresolved, and subscribed users will automatically be notified.
 
 You can also "Mute" an issue if you never want it to reopen and keep it Resolved
 indefinitely or until you manually reopen it again.
