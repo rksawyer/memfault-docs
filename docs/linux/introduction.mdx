@@ -18,7 +18,7 @@ reason tracking, and in the future reporting crashes and logs.
 <p>
   <figure>
     <img
-      src="/img/docs/linux/sdk-overview-0.3.0.svg"
+      src="/img/docs/linux/sdk-overview-1.0.0.svg"
       alt="Overview of the Memfault Linux SDK"
     />
     <figcaption>
@@ -44,33 +44,26 @@ versions of our SDK makes the following assumptions:
 - It uses [`systemd`][systemd-homepage] as an init system.
 - It uses [SWUpdate][swupdate-homepage] for OTA (optional if you don't plan to
   integrate with OTA).
-- It uses [CollectD][collectd-homepage] for metrics (optional if you don't plan
+- It uses [collectd][collectd-homepage] for metrics (optional if you don't plan
   to integrate with Metrics).
 
 If your project diverges from these assumptions, please [get in
 touch][get-in-touch]. It will likely still work without major changes.
 
 [get-in-touch]: https://memfault.com/contact/
+[swupdate-homepage]: https://swupdate.org/
+[systemd-homepage]: https://systemd.io/
+[yocto-homepage]: https://www.yoctoproject.org/
 
 ## Getting Started
 
 Take a look at our [getting-started guide][docs-linux-getting-started] to set up
 your integration.
 
-OTA/Release Management is currently fully supported through an off-the-shelf
-integration with the SWUpdate agent. Read more about it in the [OTA integration
-guide][docs-ota].
-
-[systemd-homepage]: https://systemd.io/
-[swupdate-homepage]: https://swupdate.org/
-[yocto-homepage]: https://www.yoctoproject.org/
-[docs-ota]: /docs/linux/linux-releases-integration-guide
-
 ## Documentation and Features
 
 - Detailed documentation for the Memfault Linux SDK can be found in our online
-  docs: see the [introduction][docs-linux-introduction] and the [getting-started
-  guide][docs-linux-getting-started].
+  docs: see the [getting-started guide][docs-linux-getting-started].
 - Visit our [features overview][docs-platform] for a generic introduction to all
   the major features of the Memfault platform.
 
@@ -113,10 +106,20 @@ via [`statsd`][statsd-homepage].
 [docs-metrics]: /docs/linux/linux-metrics
 [statsd-homepage]: https://github.com/statsd/statsd
 
-### Reboot Reason Tracking, Crash Reports and Logs
+### Crash Reports
 
-These features are fully in the domain of `memfaultd`. Note that crash reports
-and logs are upcoming features, while reboot reason tracking is supported today.
+[Collect coredumps][docs-coredumps] and automatically upload them to the
+Memfault platform. Use Memfault's rich backtrace and trace analysis view in
+order to debug issues and keep your fleet's crashes under control. Make use of
+Memfault's deduplication features as well as advanced [Issue management and
+monitoring][docs-issue-management].
+
+[docs-coredumps]: /docs/linux/linux-coredumps
+[docs-issue-management]: /docs/platform/issue-management
+
+### Reboot Reason Tracking
+
+These features are fully in the domain of `memfaultd`.
 
 :::tip Get started
 

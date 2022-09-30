@@ -46,7 +46,7 @@ Optionally, as requirements of plugins:
   - [SWUpdate][swupdate-homepage] as an OTA updates client.
   - [U-Boot][u-boot-homepage], since SWUpdate depends on it.
 - For [Custom Metrics][docs-linux-metrics]:
-  - [CollectD][collectd-homepage] to collect and upload metrics.
+  - [collectd][collectd-homepage] to collect and upload metrics.
 
 ## Integration steps
 
@@ -160,9 +160,10 @@ make
 
 The available plugins are:
 
-- `plugin-swupdate`: used for [OTA management][docs-linux-ota].
-- `plugin-reboots`: used for reboot reason tracking.
-- `plugin-collectd`: used for collection of [metrics][docs-linux-metrics].
+- `plugin_swupdate`: used for [OTA management][docs-linux-ota].
+- `plugin_reboot`: used for reboot reason tracking.
+- `plugin_collectd`: used for collection of [metrics][docs-linux-metrics].
+- `plugin_coredump`: used for collection of [coredumps][docs-linux-coredumps].
 
 <LinuxBuildSystemOptionsTabs>
   <TabItem value={SYSTEM_YOCTO}>
@@ -172,20 +173,21 @@ included in the `memfaultd` build. For example, you can add a
 `memfaultd.bbappends` recipe with the following contents:
 
 ```
-PACKAGECONFIG := "plugin-swupdate plugin-reboots plugin-collectd"
+PACKAGECONFIG := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump"
 ```
 
 Alternatively, in your `local.conf` file:
 
 ```
-PACKAGECONFIG:pn-memfaultd := "plugin-swupdate plugin-reboots plugin-collectd"
+PACKAGECONFIG:pn_memfaultd := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump"
 ```
 
   </TabItem>
   <TabItem value={SYSTEM_OTHER}>
 
 The included plugins can be configured using the flags `-DENABLE_PLUGINS=1`
-alongside `-DPLUGIN_REBOOT=1`, `-DPLUGIN_SWUPDATE=1` and `-DPLUGIN_COLLECTD=1`.
+alongside `-DPLUGIN_REBOOT=1`, `-DPLUGIN_SWUPDATE=1`,`-DPLUGIN_COLLECTD=1` and
+`-DPLUGIN_COREDUMP=1`.
 
   </TabItem>
 </LinuxBuildSystemOptionsTabs>
@@ -326,7 +328,7 @@ $ memfaultd --disable-data-collection
 ```
 
 The `memfaultd` service will restart automatically whenever you run either of
-those commands.
+those commands if called with a value different from the current configuration.
 
 Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
 more information.
@@ -371,6 +373,7 @@ Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
   /docs/platform/software-version-hardware-version
 [docs-device-id]: /docs/platform/memfault-terminology#device-id
 [docs-linux-metrics]: /docs/linux/linux-metrics
+[docs-linux-coredumps]: /docs/linux/linux-coredumps
 [systemd-homepage]: https://systemd.io/
 [swupdate-homepage]: https://swupdate.org/
 [u-boot-homepage]: https://www.denx.de/wiki/U-Boot

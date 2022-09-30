@@ -59,6 +59,7 @@ Commands:
   upload-ota-payload          Upload a binary to be used for an OTA update.
   upload-symbols              [DEPRECATED] Upload symbols for an MCU or...
   upload-xed                  Upload an .xed or .xcd file for analysis.
+  upload-yocto-symbols        Upload symbols for a Yocto build.
 ```
 
 ### Authentication
@@ -75,16 +76,17 @@ commands require which forms of authentication.
 
 | Command                    | Organization Token | Email + Password | Email + API key | Project Key |
 | -------------------------- | :----------------: | :--------------: | :-------------: | :---------: |
-| deploy-release             |         ✅         |        ✅        |       ✅        |     ✅      |
+| deploy-release             |         ✅         |        ✅        |       ✅        |             |
 | post-chunk                 |                    |                  |                 |     ✅      |
 | upload-android-app-symbols |         ✅         |        ✅        |       ✅        |             |
 | upload-aosp-symbols        |         ✅         |        ✅        |       ✅        |             |
 | upload-bugreport           |         ✅         |        ✅        |       ✅        |     ✅      |
-| upload-mar                 |         ✅         |        ✅        |       ✅        |     ✅      |
 | upload-coredump            |         ✅         |        ✅        |       ✅        |     ✅      |
-| upload-xed                 |         ✅         |        ✅        |       ✅        |     ✅      |
+| upload-mar                 |         ✅         |        ✅        |       ✅        |     ✅      |
 | upload-mcu-symbols         |         ✅         |        ✅        |       ✅        |             |
 | upload-ota-payload         |         ✅         |        ✅        |       ✅        |             |
+| upload-xed                 |         ✅         |        ✅        |       ✅        |     ✅      |
+| upload-yocto-symbols       |         ✅         |        ✅        |       ✅        |             |
 
 #### Using Organization Auth Token
 

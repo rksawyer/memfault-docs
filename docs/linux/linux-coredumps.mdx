@@ -1,0 +1,295 @@
+---
+id: linux-coredumps
+title: Linux Coredumps
+sidebar_label: Coredumps
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+
+## Introduction
+
+By enabling coredump support with Memfault, the `memfaultd` daemon will
+automatically collect, preprocess and upload coredumps from your devices and
+send them to the Memfault platform. In turn, the Memfault platform acts as a
+remote analyzer for your coredump files and (using your project's debugging
+symbols) is able to display a rich view of a coredump, displaying backtraces for
+all threads, and allowing you to inspect state in full detail.
+
+From [`man core`][man-core]:
+
+> The default action of certain signals is to cause a process to terminate and
+> produce a core dump file, a file containing an image of the process's memory
+> at the time of termination. This image can be used in a debugger (e.g.,
+> gdb(1)) to inspect the state of the program at the time that it terminated. A
+> list of the signals which cause a process to dump core can be found in
+> signal(7).
+
+Additionally, Memfault takes care of grouping traces from coredumps into issues,
+[managing and deduplicating issues][docs-issue-management], and providing
+[metrics on issues][docs-issue-charts] and monitoring via
+[notifications][docs-notifications], granting you a clear image of how your
+fleet is behaving, as well as tight control over the success of your [OTA
+updates][docs-platform-ota].
+
+<ImageFigure
+  src="/img/docs/linux/linux-issue-detail-sleep-sigabrt.png"
+  alt="A Linux coredump as an issue on the Memfault Web App"
+  title="Linux coredump on Memfault"
+>
+  A Linux coredump as an issue on the Memfault Web App.
+</ImageFigure>
+
+[docs-issue-management]: /docs/platform/issue-management
+[docs-issue-charts]: /docs/platform/charts/#issue-charts
+[docs-notifications]: /docs/platform/notifications
+[docs-platform-ota]: /docs/platform/ota
+
+:::tip
+
+Keep [`meta-memfault-example`][source-yocto-example] open as a reference
+implementation. Your integration should look similar to it once you're done
+following the steps in this tutorial.
+
+:::
+
+## Prerequisites
+
+### The `memfaultd` daemon, built with `coredump_plugin`
+
+Follow the [getting-started guide][docs-linux-getting-started] to learn how to
+set this up for your device. A key function of `memfaultd` is to preprocess and
+upload coredumps to the Memfault platform. It does this via its
+`coredump_plugin`.
+
+`coredump_plugin` is enabled by default. Read more on [how to configure which
+plugins `memfaultd` builds with][docs-linux-control-plugins].
+
+### Linux kernel configuration
+
+Ensure that your Linux kernel is built with the following options enabled:
+
+- `CONFIG_COREDUMP=y` in order to enable coredump creation by the kernel
+- `CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y` in order to enable default mappings.
+  for processes. Specifically, Memfault requires:
+  - `bit 0`: dump anonymous private mappings,
+  - `bit 1`: dump anonymous shared mappings, and
+  - `bit 4`: (available since Linux 2.6.24) dump ELF headers.
+
+Read [`man core`][man-core] in order to learn more about these settings. We
+recommend reading the entirety of this `man` page if you're in need of basic
+understanding of how coredumps work in Linux.
+
+In order to confirm that your kernel is correctly configured, check out your
+project's configuration file in
+`tmp/work/[machine]/[kernelpackage]/[version]/build/.config`. For example:
+
+```
+tmp/work/raspberrypi3-poky-linux/linux-yocto/5.15.62+gitAUTOINC+59c8898d45_7cb30c5e95-r0/linux-raspberrypi3-standard-build/.config`
+```
+
+### `core_pattern` and `core_pipe_limit`
+
+The following files will be modified by `memfaultd` at runtime and must not be
+written to by any other process.
+
+- `/proc/sys/kernel/core_pattern` (see [`man core`][man-core])
+- `/proc/sys/kernel/core_pipe_limit` (see [`man core`][man-core])
+
+Make sure your Linux image does not contain any other services that may write to
+these files. To do this, check for the inclusion of other coredump handlers such
+as systemd (which can [act as a coredump handler when built with
+`-Dcoredump=true`][systemd-as-handler]), and check your `/etc/sysctl.d` drop-in
+directory for anything other than Memfault that may be setting
+`kernel.core_pattern` or `kernel.core_pipe_limit`.
+
+To check whether you've succeeded in letting `memfaultd` take care of these
+files, confirm that the contents of the `core_pattern` file reference the
+`memfault-core-handler` binary (see
+[Test your integration](#test-your-integration)).
+
+Note that `memfaultd` respects privacy settings and only sets `core_pattern`
+[if data collection is enabled](#set-enable_data_collection) at runtime.
+
+[systemd-as-handler]:
+  https://git.yoctoproject.org/poky/plain/meta/recipes-core/systemd/systemd_251.4.bb
+
+## Upload debugging symbols
+
+After a coredump was collected on the device, `memfaultd` will upload it to the
+Memfault Web App. To allow the Memfault Web App to reconstruct all details from
+such coredumps, you'll need to upload debugging symbols for each of the binaries
+in your Linux image. We recommend doing this as part of your build process
+(since this needs to be done for every version), either locally or ideally as
+part of continuous integration, in order to keep Memfault up to date with your
+build's newest debugging symbols.
+
+In order to facilitate this, we've added a Yocto-specific helper subcommand to
+the [Memfault CLI][docs-memfault-cli] (starting with version `0.11.0`):
+`memfault upload-yocto-symbols`. Before you use it, you'll need to update your
+base image to include the following, and then run a build:
+
+```
+# Support memfault-cli upload-yocto-symbols command
+DEPENDS:append = " elfutils-native"
+IMAGE_GEN_DEBUGFS = "1"
+IMAGE_FSTYPES_DEBUGFS = "tar.bz2"
+```
+
+Note that `IMAGE_FSTYPES_DEBUGFS` must match the `IMAGE_FSTYPE` of the image you
+pass to the command.
+
+Here's an example `memfault upload-yocto-symbols` invocation:
+
+```bash
+$ source oe-init-build-env
+$ memfault \
+    --org $YOUR_ORGANIZATION_SLUG \
+    --org-token $ORGANIZATION_AUTH_TOKEN \
+    --project $YOUR_PROJECT_SLUG upload-yocto-symbols \
+    --image tmp/deploy/images/raspberrypi3/base-image-raspberrypi3.tar.bz2
+```
+
+It's recommended that you run this command after having sourced the build
+environment script using `source oe-init-build-env`.
+
+<details>
+<summary>
+  If you can't do this, then you can pass the information needed from the build environment as
+  command-line arguments:
+</summary>
+
+- `--eu-unstrip-path`: path to a local `eu-unstrip` binary from
+  [elfutils][elfutils]. Note that one is available in
+  `tmp/sysroot-components/x86_64/elfutils-native` if you've added
+  `DEPENDS:append = " elfutils-native"` to your build.
+- `--package-debug-split-style`: your project's `PACKAGE_DEBUG_SPLIT_STYLE`. In
+  Poky, it defaults to `debug-with-srcpkg`. Read more about it [in the Yocto
+  reference][split-style].
+
+</details>
+
+[elfutils]: https://sourceware.org/elfutils/
+[split-style]:
+  https://docs.yoctoproject.org/ref-manual/variables.html#term-PACKAGE_DEBUG_SPLIT_STYLE
+
+If you're not using Yocto, you can replicate its behavior by using our [REST API
+to upload symbols][api-docs-upload-symbols].
+
+<p>
+  You can always upload symbol files individually using the Memfault Web
+  Application. Open <b>Software -> Symbol Files</b> and click on{" "}
+  <b>Upload Symbol File</b>, or simply{" "}
+  <ProjectMagicLink path="/symbol-files?new">
+    click on this deep link to the app
+  </ProjectMagicLink>
+  .
+</p>
+
+:::tip
+
+Read docs on [CI and authentication][docs-ci-auth] in order to obtain
+credentials that you can use in your build environment or in continuous
+integration.
+
+:::
+
+## Set `enable_data_collection`
+
+By default, `enable_data_collection` is `false` (see the [default
+configuration][source-builtin-conf]). This is to enable asking end users for
+consent before collecting or transmitting any data to Memfault services.
+
+Once the end user has given their consent, you can enable data collection like
+so:
+
+```shell
+$ memfaultd --enable-data-collection
+```
+
+To disable it:
+
+```shell
+$ memfaultd --disable-data-collection
+```
+
+The `memfaultd` service will restart automatically whenever you run either of
+those commands if called with a value different from the current configuration.
+
+Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
+more information.
+
+[source-builtin-conf]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
+
+## (Optional) Configure what's included in a coredump
+
+Currently, Memfault support for coredumps does not include custom filtering or
+selection of processes, memory regions or variables. These features are planned
+for a future release.
+
+We'd recommend waiting for a release of the Memfault Linux SDK with first-class
+support for coredump filtering, but if your team needs it now, the kernel does
+provide a certain degree of configurability:
+
+- Call `prctl(PR_SET_DUMPABLE, 0)` in order to declare a process as
+  non-dumpable. By default, processes _are_ dumpable. See
+  [`man prctl`][man-prctl] for more information.
+- Set the appropiate flags in `/proc/[pid]/coredump_filter` (see
+  [`man core`][man-core]).
+  - Note that in order to work properly with Memfault, `coredump_filter` needs
+    to include at least bits `0`, `1` and `4` (see [`man core`][man-core]).
+- Call `madvise(ptr, bytes, MADV_DONTDUMP)` (with `MADV_DONTDUMP` or
+  `MADV_DODUMP`) in order to declare certain memory regions as dumpable (or
+  non-dumpable). The effects of this syscall take precedence over the settings
+  in the `coredump_filter` for this file (see [`man madvise`][man-madvise] for
+  more information).
+
+[man-prctl]: https://man7.org/linux/man-pages/man2/prctl.2.html
+[man-madvise]: https://man7.org/linux/man-pages/man2/madvise.2.html
+
+## Test your integration
+
+In order to test your integration, you'll need to make your device produce a
+coredump for a process, for example, by sending `SIGABRT` to it:
+
+```bash
+$ kill -s SIGABRT $YOUR_PROCESS_PID
+```
+
+Additionally, you might want to check that the `core_pattern` file is being set
+correctly by `memfaultd` when it starts. Check that the output of this command
+includes `memfault-core-handler`:
+
+```bash
+$ cat /proc/sys/kernel/core_pattern
+```
+
+To see logs coming from `memfaultd`, run `journalctl`:
+
+```bash
+$ journalctl --unit memfaultd
+```
+
+<p>
+  If your integration is all set and you've{" "}
+  <a href="#set-enable_data_collection">enabled data collection</a>, you'll be
+  able to see a new issue pop up in{" "}
+  <ProjectMagicLink path="/issues?live">
+    your project's Issues page
+  </ProjectMagicLink>
+  .
+</p>
+
+[docs-linux-control-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[source-yocto-example]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
+[docs-memfault-cli]: /docs/ci/install-memfault-cli
+[docs-ci-auth]: /docs/ci/authentication
+[yocto-image-manifest]:
+  https://docs.yoctoproject.org/ref-manual/variables.html#term-IMAGE_MANIFEST
+[api-docs-upload-symbols]:
+  https://api-docs.memfault.com/#ba41ad9a-dd22-4dd4-a9c4-35c132afec9d
+[man-core]: https://man7.org/linux/man-pages/man5/core.5.html
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide

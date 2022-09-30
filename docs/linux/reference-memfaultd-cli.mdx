@@ -35,7 +35,7 @@ in `/etc/memfaultd.conf` extend the built-in configuration file.
 
 ```
 Base configuration (/etc/memfaultd.conf):
-  { "queue_size_kib": 1024, "data_dir": "\/media\/memfaultd", "refresh_interval_seconds": 3600, "enable_data_collection": false, "swupdate_plugin": { "input_file": "\/etc\/swupdate.cfg", "output_file": "\/tmp\/swupdate.cfg" }, "reboot_plugin": { "uboot_fw_env_file": "\/etc\/fw_env.config" }, "collectd_plugin": { "output_file": "\/tmp\/collectd.conf" }, "collectd": { "non_memfaultd_chain": "", "write_http_buffer_size": 65536, "interval_seconds": 3600 } }
+  { "queue_size_kib": 1024, "data_dir": "\/media\/memfaultd", "refresh_interval_seconds": 3600, "enable_data_collection": false, "swupdate_plugin": { "input_file": "\/etc\/swupdate.cfg", "output_file": "\/tmp\/swupdate.cfg" }, "reboot_plugin": { "uboot_fw_env_file": "\/etc\/fw_env.config" }, "collectd_plugin": { "footer_include_output_file": "/tmp/collectd-footer-include.conf", "header_include_output_file": "/tmp/collectd-header-include.conf", "interval_seconds": 3600, "non_memfaultd_chain": "", "write_http_buffer_size_kib": 64 }, "coredump_plugin": { "coredump_max_size_kib": 96000, "rate_limit_count": 5, "rate_limit_duration_seconds": 3600, "storage_max_usage_kib": 0, "storage_min_headroom_kib": 10240 } }
 
 Runtime configuration:
   { "enable_data_collection": true }
@@ -52,6 +52,7 @@ Plugin enabled:
   reboot
   swupdate
   collectd
+  coredump
 ```
 
 Note that plugins can be [opted out of][docs-control-memfaultd-plugins] at build

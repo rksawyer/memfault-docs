@@ -9,7 +9,7 @@ import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
 ## Introduction
 
 The `collectd` plugin for `memfaultd` (see [the source
-code][source-memfaultd-collectd-plugin]) configures CollectD to regularly upload
+code][source-memfaultd-collectd-plugin]) configures collectd to regularly upload
 collected metrics to Memfault. These metrics:
 
 - Are shown on the [device timeline][docs-timeline].
@@ -28,7 +28,7 @@ up here can be accessed in the Memfault Web App.
 
 Follow the [getting-started guide][docs-linux-getting-started] to learn how to
 set this up for your device. A key function of `memfaultd` is to correctly
-configure and control CollectD to upload metrics to Memfault.
+configure and control collectd to upload metrics to Memfault.
 
 :::tip
 
@@ -40,7 +40,7 @@ following the steps in this tutorial.
 
 ### Dependencies
 
-#### CollectD
+#### collectd
 
 If you're using Yocto, the `meta-oe` layer includes [a recipe for
 `collectd`][source-collectd-recipe], so you may be able to just add `collectd`
@@ -53,10 +53,10 @@ project, we've opted for adding it to `MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS` in
 
 #### Optional: an application metrics client
 
-There are different ways to track application metrics using CollectD. We
+There are different ways to track application metrics using collectd. We
 recommend using a [StatsD][statsd-homepage] client, but other mechanisms are
 expected to work equally well. StatsD clients can be configured to communicate
-with CollectD using [the StatsD plugin][collectd-plugin-statsd]. This will allow
+with collectd using [the StatsD plugin][collectd-plugin-statsd]. This will allow
 you to send application metrics through to Memfault. You can find a list of
 StatsD clients for a diversity of languages [in the StatsD
 repository][statsd-clients].
@@ -80,36 +80,40 @@ In our example project, we've added StatsD clients as dependencies:
 [statsd-clients]:
   https://github.com/statsd/statsd/blob/master/docs/client_implementations.md
 
-## Configuring CollectD
+## Configuring collectd
 
-We strongly recommend familiarizing yourself with [CollectD][collectd-homepage]
+We strongly recommend familiarizing yourself with [collectd][collectd-homepage]
 and how it's configured in order to make the best use of the Memfault platform.
 
-The `memfaultd` daemon generates a configuration file, by default in
-`/tmp/collectd.conf`, with information about the device provided by
+The `memfaultd` daemon generates two configuration files, by default in
+`/tmp/collectd-header-include.conf` and `/tmp/collectd-footer-include.conf`,
+with information about the device provided by
 [`memfault-device-info`][docs-memfault-device-info] (see the [getting-started
 guide][docs-linux-getting-started] for more information). Note that the path
 where this configuration file is generated [can be configured in
 `/etc/memfaultd.conf`][docs-configuration] using the
 `collectd_plugin.output_file` configuration key.
 
-A minimal configuration file to configure CollectD to post to Memfault looks
+A minimal configuration file to configure collectd to post to Memfault looks
 like this:
 
 ```conf
+Include "/tmp/collectd-header-include.conf" # Or the value of collectd_plugin.header_include_output_file
+
 # Your configuration here.
 
-Include "/tmp/collectd.conf" # Or the value of your collectd_plugin.output_file
+Include "/tmp/collectd-footer-include.conf" # Or the value of collectd_plugin.footer_include_output_file
 ```
 
-It is important that the `Include` of the `memfaultd`-generated file is **the
-last line in your configuration**. This ensures each HTTP request that
-CollectD's `write_http` plugin performs to the Memfault backend contains the
-full set of configured metrics.
+It is important that the `Include` of the `memfaultd`-generated files are the
+first and last statements in your collectd configuration. This ensures each HTTP
+request that collectd's `write_http` plugin performs to the Memfault backend
+contains the full set of configured metrics and is sent out at the correct
+interval.
 
-If you inspect the generated `/tmp/collectd.conf` file, you'll find that it
-configures the `write_http` plugin to talk to Memfault, and also sets an
-`Interval` and a `FlushInterval`.
+If you inspect the generated files, you'll find that they configure the
+`write_http` plugin to talk to Memfault, and also set an `Interval` and a
+`FlushInterval`.
 
 :::note
 
@@ -122,7 +126,7 @@ will have no effect.
 
 ### Relevant `/etc/memfaultd.conf` settings
 
-The generated CollectD configuration can be controlled using the `collectd`
+The generated collectd configuration can be controlled using the `collectd`
 section of `/etc/memfaultd.conf`. See [a full configuration reference
 here][docs-configuration].
 
@@ -132,10 +136,10 @@ The `collectd.interval_seconds` setting in `/etc/memfaultd.conf` controls both
 `Interval` and `FlushInterval`. This means that you should not configure either
 setting in your own configuration file.
 
-In CollectD, the `Interval` setting regulates how often read plugins will
+In collectd, the `Interval` setting regulates how often read plugins will
 attempt a reading by default (plugin instances may override this for their own
 metrics), and the `FlushInterval` setting for the `write_http` plugin controls
-how often CollectD will flush its cache and attempt to post metrics to Memfault.
+how often collectd will flush its cache and attempt to post metrics to Memfault.
 
 :::note
 
@@ -147,13 +151,13 @@ Memfault-configured `FlushInterval`, too. This is a limitation of `write_http`.
 
 #### `collectd.write_http_buffer_size_kib`
 
-The default value of 64KiB gives CollectD plenty of space to fit a payload
+The default value of 64KiB gives collectd plenty of space to fit a payload
 generated by our [recommended configuration](#recommended-configuration). A
 typical payload grows up to around 20KiB.
 
 You may want to fine-tune `write_http_buffer_size_kib` if you modify the
 recommended configuration. Bear in mind the interaction between this and
-`collectd.interval_seconds`: if the write buffer is full, CollectD will be
+`collectd.interval_seconds`: if the write buffer is full, collectd will be
 forced to flush before an interval ends.
 
 #### `collectd.non_memfaultd_chain`
@@ -162,24 +166,24 @@ See [Configuring additional chains][docs-metrics-chains].
 
 ### Recommended configuration
 
-See [our recommended CollectD configuration in
+See [our recommended collectd configuration in
 `meta-memfault-example`][source-recommended-collectd-conf]. This configuration
 makes use of standard plugins that enjoy special support on the Memfault
 platform. Copying this configuration over to your project will guarantee a good
 first experience.
 
 Note that as long as the generated configuration file `/tmp/collectd.conf` is
-included at the very bottom of your CollectD configuration, you're free to add
+included at the very bottom of your collectd configuration, you're free to add
 your own directives before it, and in addition to the recommended settings.
 
 ### Configuring additional chains
 
-See [CollectD chains][collectd-chains] for an introduction.
+See [collectd chains][collectd-chains] for an introduction.
 
 #### Jumping to your custom chain after the `memfaultd`-generated chain
 
 By default, the `memfaultd`-generated chain will bottom out in a `Target stop`
-directive. You can change this final directive to instruct CollectD to jump to
+directive. You can change this final directive to instruct collectd to jump to
 your own chain. To do this, set the value of `collectd.non_memfaultd_chain` in
 `/etc/memfaultd.conf` and add a chain with a matching name. See [a full
 configuration reference here][docs-configuration].
@@ -212,7 +216,7 @@ $ memfaultd --disable-data-collection
 ```
 
 The `memfaultd` service will restart automatically whenever you run either of
-those commands.
+those commands if called with a value different from the current configuration.
 
 Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
 more information.
