@@ -152,6 +152,10 @@ $ memfault \
 It's recommended that you run this command after having sourced the build
 environment script using `source oe-init-build-env`.
 
+Note that the `memfault upload-yocto-symbols` command does not upload the
+`tar.bz2` file directly: it extracts it to a temporary directory and generates
+unstripped copies of the binaries and their symbols.
+
 <details>
 <summary>
   If you can't do this, then you can pass the information needed from the build environment as
@@ -182,7 +186,11 @@ to upload symbols][api-docs-upload-symbols].
   <ProjectMagicLink path="/symbol-files?new">
     click on this deep link to the app
   </ProjectMagicLink>
-  .
+  . Note that the symbol files you upload here must be individual ELF files containing
+  both the program text as well as debugging symbols. The Yocto-generated debug image
+  (for example in `.tar.bz2` format) contains stripped binaries and (separately)
+  debug binaries. To upload them to Memfault, you'll need to use the Memfault CLI
+  as shown above.
 </p>
 
 :::tip
