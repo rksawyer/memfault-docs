@@ -10,7 +10,6 @@ module.exports = {
         {
             type: "category",
             label: "Web Application",
-            link: { type: "doc", id: "platform/introduction" },
             items: [
                 "platform/introduction",
                 "platform/memfault-terminology",
@@ -33,7 +32,6 @@ module.exports = {
         },
         {
             type: "category",
-            link: { type: "doc", id: "mcu/introduction" },
             label: "MCU Guides",
             items: [
                 "mcu/introduction",
@@ -106,7 +104,6 @@ module.exports = {
         {
             label: "Android Guides",
             type: "category",
-            link: { type: "doc", id: "android/introduction" },
             items: [
                 "android/introduction",
                 "android/android-getting-started-guide",
@@ -127,7 +124,6 @@ module.exports = {
         {
             label: "Linux Guides",
             type: "category",
-            link: { type: "doc", id: "linux/introduction" },
             items: [
                 "linux/introduction",
                 "linux/linux-getting-started-guide",
@@ -162,6 +158,7 @@ module.exports = {
         {
             label: "Best Practices",
             type: "category",
+            link: { type: "generated-index" },
             items: ["best_practices/metrics-for-battery-life"],
         },
         {
