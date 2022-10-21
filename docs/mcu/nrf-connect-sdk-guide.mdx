@@ -378,30 +378,30 @@ void some_periodic_task(void) {
 }
 ```
 
-#### Bluetooth
+#### Bluetooth Low Energy
 
 ##### Using the Memfault Diagnostic Service (MDS), nRF-Connect SDK v2.1.0+
 
 As of the v2.1.0 release of the nRF-Connect SDK, there is built-in support for
-the Memfault Diagnostic Service, which is a BLE GATT service designed to enable
-exporting Memfault data in a standardized way.
+the Memfault Diagnostic Service, which is a Bluetooth LE GATT service designed
+to enable exporting Memfault data in a standardized way.
 
 Nordic has detailed documentation on the Memfault Diagnostic service here:
 
 <https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.1.0/nrf/libraries/bluetooth_services/services/mds.html>
 
-There is also a sample application, "Bluetooth: Peripheral Memfault Diagnostic
-Service (MDS)", documented here:
+There is also a sample application, "Bluetooth LE: Peripheral Memfault
+Diagnostic Service (MDS)", documented here:
 
 <https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.1.0/nrf/samples/bluetooth/peripheral_mds/README.html>
 
-Nordic and Memfault provide the following BLE gateways for testing the MDS
-implementation:
+Nordic and Memfault provide the following Bluetooth LE gateways for testing the
+MDS implementation:
 
-- the Python MDS BLE gateway script, from the nRF-Connect SDK:
+- the Python MDS Bluetooth LE gateway script, from the nRF-Connect SDK:
   <https://github.com/nrfconnect/sdk-nrf/tree/v2.1.0/scripts/memfault>
 
-- a WebBluetooth browser-based tool, from Memfault: <https://mflt.io/mds>
+- a Web Bluetooth LE browser-based tool, from Memfault: <https://mflt.io/mds>
 
 - iOS and Android mobile applications and open-source libraries:
   - Android app:
@@ -411,7 +411,7 @@ implementation:
     <https://github.com/NordicSemiconductor/Android-Memfault-Library>
   - iOS library: <https://github.com/NordicSemiconductor/IOS-Memfault-Library>
 
-For a quick test, we recommend using the "Bluetooth: Peripheral Memfault
+For a quick test, we recommend using the "Bluetooth LE: Peripheral Memfault
 Diagnostic Service (MDS)" sample application and one of the mobile apps with a
 compatible mobile device.
 
