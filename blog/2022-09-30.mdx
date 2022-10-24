@@ -1,0 +1,132 @@
+---
+title: September 2022
+---
+
+## Linux SDK 1.0 with Coredump support
+
+[Memfault's Linux SDK](https://github.com/memfault/memfault-linux-sdk) reached
+version 1.0 when introducing
+[support for Coredumps](/docs/linux/linux-coredumps): In the event of a crash of
+any process on the system, `memfaultd` produces a memory dump that will be
+uploaded to Memfault for further processing to allow for
+[detailed debugging across the fleet](/docs/platform/introduction#debugging).
+Together with the already existing support for OTA, metrics, and reboot reasons,
+Memfault now offers all its essential features on Linux devices!
+
+![Linux SDK 1.0.0.png](/img/blog/2022-09-30-Linux-SDK-1-0-0.png)
+
+The [documentation of Memfault’s Linux SDK](/docs/linux/introduction) was
+extended even further to explain the integration steps as well as the growing
+number of configuration options.
+
+<!-- truncate -->
+
+## General
+
+- Added: Weekly view to Reboots chart
+- Added: Device counts to the project selector on the sidebar
+- Added:
+  [Issue filtering](https://app.memfault.com/organizations/-/projects/-/issues)
+  with multiple selection of Cohorts, Hardware and Software versions
+- Added: Cross-links to the Device Timeline and Device Search UI from various
+  pages
+- Improved: Documentation of
+  [managing OTA releases](/docs/platform/ota#managing-ota-updates-with-memfault)
+  and [Android Custom Events](/docs/android/custom-events/)
+- Improved: Various UI glitches and improvements (More readable timestamps under
+  Device Details → Log Files, UI feedback when accessing an issue with no
+  traces, indication when a software version was last seen, preventing
+  misconfigured Issue Charts)
+- Improved: [memfault-cli](/docs/ci/install-memfault-cli) uses consistently
+  follows precedence for
+  [authentication method](/docs/ci/install-memfault-cli/#authentication) for all
+  commands
+- Fixed: Device search via Custom Attributes, Time-Series Metrics or Reboot
+  Reasons returned an empty result set in some scenarios
+- Fixed: Timeouts when deleting a cohort with more than 10.000 devices
+- Fixed: Threads details can be copied under Device Details → State
+- Fixed: Search results returning no metrics under
+  [Settings → Metrics](https://app.memfault.com/organizations/-/projects/-/settings/metrics)
+- Fixed: Sporadic refresh of the Device Details page if it has
+  [linked device(s)](/docs/platform/inspecting-a-device/#linked-devices)
+- Fixed: Error when creating
+  [Device Sets](/docs/platform/projects-and-fleets/#device-sets) with historical
+  data filter
+- Fixed: Error when accessing certain pages on Safari that are date-dependent
+- Fixed: Error when loading a log file under Device Details page
+- Fixed: Filter panel of Merged Issues resets after the selection of first
+  filter
+- Fixed: Error when accessing a release created via
+  [memfault-cli](/docs/ci/install-memfault-cli)
+
+## MCU
+
+- Improved: `build_id` is shown under
+  [Events Debug](https://app.memfault.com/organizations/-/projects/-/events) if
+  a symbol file is missing
+- Fixed: Package header error in
+  [memfault-ios-cloud](https://github.com/memfault/memfault-ios-cloud/pull/2)
+  (Thanks [@cbeaversen](https://github.com/cbeaversen) for reporting it!)
+- SDK versions
+  [0.33.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0331-and-sdk-0332---sept-7-2022),
+  [0.33.3](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0332-and-sdk-0333---sept-14-2022),
+  [0.33.4](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0333-and-sdk-0334---sept-15-2022)
+  were released. Some highlights:
+  - Added: A debug cli test command to the
+    [nRF-Connect SDK port](https://github.com/memfault/memfault-firmware-sdk/tree/master/ports/zephyr/ncs)
+    for printing the OTA URL
+  - Added: A call to `LOG_PANIC()` before running the Memfault Zephyr fault
+    handler, to flush any deferred logs before the reboot
+  - Added: Handling thread abort in the Zephyr task stack capture hook
+  - Fixed: Error about undefined references to `log_output_*` functions if
+    logging (CONFIG_LOG) is disabled. (Thanks
+    [@balaji-nordic](https://github.com/balaji-nordic) for reporting it!)
+
+## Android
+
+- Improved: Navigation to previous/next log files at Device Details → Logs
+- Bort version
+  [4.2.0](https://github.com/memfault/bort/blob/4.2.0/CHANGELOG.md#v420---september-14th-2022)
+  was released. Some highlights:
+  - Added: Support for
+    [Android 12L](https://developer.android.com/about/versions/12/12L) and
+    [Android 13](https://developer.android.com/about/versions/13).
+  - Added:
+    [Development Mode](/docs/android/android-getting-started-guide/#development-mode-since-bort-420)
+    to make the integration and testing experience easier.
+  - Added: C/C++ API for reporting custom metrics.
+  - Added: Support for
+    [auto-installing OTA updates in the background](/docs/android/android-ota-update-client/#applying-ota-updates-in-the-background)
+  - Added: Support for
+    [custom log scrubbing rules](/docs/android/android-data-scrubbing/#custom-scrubbing-rules)
+  - Added: OTA update check task to the Bort CLI
+  - Improved: Bort build speed and Java/Kotlin warnings during compilation
+  - Changed: Device will reboot after applying an A/B update
+  - Fixed: Custom metric collection on some devices running Qualcomm QSSI
+    Android 12 build
+
+## Linux
+
+- Added: Download option for ELF files under
+  [Issues](https://app.memfault.com/organizations/-/projects/-/issues)
+- Added: `upload-yocto-symbols` command to `memfault-cli` for upload of symbol
+  files
+- Added:
+  [Yocto version 3.1 “Dunfell”](https://wiki.yoctoproject.org/wiki/Releases)
+  support to `memfault-cli` (previously only supported
+  [Yocto 4.0 "Kirkstone"](https://github.com/memfault/memfault-linux-sdk/tree/kirkstone))
+- SDK versions
+  [0.3.1](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#031---2022-09-05)
+  and
+  [1.0.0](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#100---2022-09-28)
+  were released. Some highlights:
+  - Added:
+    [Support for collecting and uploading the coredumps to Memfault](/docs/linux/linux-coredumps/)
+  - Added: Support for
+    [Yocto version 3.1 “Dunfell”](https://wiki.yoctoproject.org/wiki/Releases)
+  - Changed: The update in the format of `/etc/memfaultd.conf` introduces
+    [breaking changes](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#changed)
+  - Changed: Main branch was replaced with two branches that support
+    [Yocto 3.1 "Dunfell”](https://github.com/memfault/memfault-linux-sdk/tree/dunfell)
+    and
+    [Yocto 4.0 "Kirkstone"](https://github.com/memfault/memfault-linux-sdk/tree/kirkstone)
