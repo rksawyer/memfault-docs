@@ -308,6 +308,23 @@ Requirements for this directory are:
 - That it is writable to by `memfaultd`.
 - That its data persists after firmware upgrades.
 
+Your `data_dir` will be read from or written to for the following reasons:
+
+- It will be read every [`refresh_interval_seconds`][docs-configuration], in
+  order to check the status of the queue,
+- written to whenever an event occurs that we track in that queue, such as
+  reboot events and when a coredump is captured (see [Linux
+  Coredumps][docs-linux-coredumps]), and
+- written to whenever configuration is changed at runtime, for example by using
+  `memfaultd --{enable,disable}-data-collection` (see
+  ["Set `enable_data_collection`"](#set-enable_data_collection)).
+
+Note that the [`collectd_plugin.interval_seconds`][docs-configuration] does not
+affect reads or writes to `data_dir`, unless you've configured collectd to write
+there, too. By default, collectd will store metrics in memory.
+
+See our [configuration reference][docs-configuration] for more context.
+
 ### Set `enable_data_collection`
 
 By default, `enable_data_collection` is `false` (see the [default
