@@ -1,66 +1,333 @@
 ---
 id: metrics-for-battery-life
-title: Metrics for Battery Life
-sidebar_label: Metrics for Battery Life
+title: Tracking Battery Life with Memfault
+sidebar_label: Tracking Battery Life
 ---
 
-## Understanding Battery Life at Scale
+Memfault believes that the expected and the actual battery life of devices are
+two of the most important reliability metrics for devices that are not connected
+directly to power sources. Unfortunately, understanding and predicting battery
+life trends and regressions with thousands to millions of devices in the field
+is _hard_.
 
-<!-- TODO
+In this guide, we will walk through the benefits of tracking battery life with
+Memfault, how to understand and predict battery life for a single device as well
+as across an entire fleet of devices, and finally talk through common pitfalls
+when monitoring battery life.
 
-- state-of-health (some battery chargers / PMICs compute this)
-- charge cycles or coulomb counting for watching battery wear
-- tracking device temperature in combination with battery discharge stats, since
-  the two are often correlated
+## Tracking Battery Life with Memfault
 
--->
-
-Understanding battery life expectations, trends, and regressions with thousands
-to millions of devices in the field is _hard_.
-
-In this guide, we will walk through common pitfalls and best practices for
-accurately tracking the battery life in your fleet.
-
-### Pitfall #1 - Sending Current Battery Life Sporadically
-
-A firmware could be configured to send up battery life information at a
-non-standard interval. It may be whenever it connects to Wi-Fi, when it's within
-Bluetooth range of a cell phone, or when it's asked by a remote server for
-information.
-
-In this information report, a device would usually send the current battery life
-percentage according to a pre-determined curve or a millivolt reading.
-
-This type of information is perfect when looking at a single device's history of
-battery life, but that is about it. From these individual reports, and sporadic
-reports at that, a battery life drop might be missed entirely, such as in the
-chart below:
+By using Memfault's device SDKs and the heartbeat metrics, the difficulties of
+monitoring battery life will become a problem of the past. Memfault provides two
+main benefits when it comes to monitoring battery life: the ability to view a
+single device's battery status over time, and the ability to understand battery
+trends across an entire fleet of devices.
 
 <p align="center">
   <img
-    width="500"
-    src="/img/docs/best-practices/battery-scattered-data-points.svg"
-    alt="Battery life drop during period of time"
+    width="700"
+    src="/img/docs/best-practices/battery-life-overview.png"
+    alt="Memfault metric for battery charge level drop"
   />
 </p>
 
-When only taking into account the four captured data points, the battery life
-looks like it drops at a normal rate. However, there was a large drop in the
-middle.
+The above view shows a device-level view of battery life over time. This view is
+best for customer support teams responding to customer issues around battery
+life and for engineers trying to determine the root causes for poor battery life
+on a single device.
 
-### Pitfall #2 - Ignoring Charging Status
+<p align="center">
+  <img
+    width="700"
+    src="/img/docs/best-practices/battery-life-comparison.png"
+    alt="Memfault metric for battery charge level drop"
+  />
+</p>
 
-Another common issue with reporting battery life information from devices is
-that the power state is ignored. Battery life statistics that are used in
-aggregations should not be taken into account if a device is currently plugged
-in or charging.
+The above view shows the average battery life drop per hour of all devices in a
+fleet between software versions 1.0.0 and 1.0.1. Even though small, there is a
+larger battery life drop on average for software version 1.0.1, which could
+signal a regression in firmware!
+
+The above examples give you a quick idea of the capabilities of Memfault. Let's
+begin on how to get started digging into battery life on your devices using
+Memfault.
+
+## Steps to Track Battery Life
+
+### Android
+
+If you are using the [Bort SDK](/docs/android/android-bort), the relevant
+battery metrics are automatically reported and you can skip down to...
+
+### MCU & Linux
+
+Two metrics need to be recorded within the MCU or Linux firmware to ensure that
+you can reliably track battery life at a device and fleet level. These two
+metrics are the charge level, or
+[state of charge](https://en.wikipedia.org/wiki/State_of_charge), of a device at
+the end of a heartbeat interval, and the charge level drop over the course of a
+heartbeat interval, where the heartbeat interval is a consistent, fixed interval
+of time.
+
+#### Current Battery Charge Level
+
+This value represents the current charge level of the battery in the system.
+This value should be linearly normalized between 0 and 10,000.
+
+A value of -1 should be sent when the battery charge level can not be obtained
+or is known to be invalid.
+
+:::info
+
+This value should be based on a linear scale. Millivolts should not be sent.
+
+:::
+
+##### Setup Within Memfault
+
+- It is recommended to use the name `Battery_ChargeLevel` for this metric name.
+- **Range** should be set to 0 - 10,000.
+- **Ignore** should be set to -1.
+- **Attribute** should be enabled, and the **Write Policy** should be set to
+  Writeable.
+- **Time Series** should be disabled.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/battery-charge-level-metric.png"
+    alt="Memfault metric for battery charge level drop"
+  />
+</p>
+
+##### Example Metric Recordings
+
+- To report a battery charge level of 50%, record 5,000.
+- To report a battery charge level of 50 mAh out of a 500 mAh capacity battery,
+  record 1,000.
+- If the battery charge level could not be acquired or it is known to be
+  invalid, record -1.
+
+#### Battery Level Drop Over Interval
+
+This value represents the amount the battery charge level dropped within the
+heartbeat interval, normalized between 0 to 10,000. This can also be interpreted
+as the first derivative of the
+[current battery charge level](#current-battery-charge-level).
+
+This metric _should report an invalid reading of -1_ if a charger or other power
+source was connected at any point during the heartbeat interval.
+
+A value of -1 should be sent when the battery charge level drop can not be
+obtained, is known to be invalid, or happens to be negative.
+
+##### Setup Within Memfault
+
+- It is recommended to use the name `Battery_ChargeLevelDrop` for this metric
+  name.
+- **Range** should be set to 0 - 10,000.
+- **Ignore** should be set to -1.
+- **Attribute** should be disabled.
+- **Time Series** should be enabled.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/battery-charge-level-drop-metric.png"
+    alt="Memfault metric for battery charge level drop"
+  />
+</p>
+
+##### Example Metric Recordings
+
+- To report a drop from 87% to 84% over the course of the heartbeat interval,
+  report 300.
+- To report a battery charge level drop of 10 mAh out of a 500 mAh capacity
+  battery, record 2000.
+- If the battery charge level drop could not be acquired or it is known to be
+  invalid or negative, record -1.
+
+#### Implementing Battery Metrics in Code
+
+Below is C pseudocode that can be used to track the current
+[battery charge level](#current-battery-charge-level) and
+[battery charge level drop](#battery-level-drop-over-interval) over a given
+heartbeat interval.
+
+```c
+// Stores the battery charge level from the start of the heartbeat interval
+static int32_t s_battery_charge_level_previous;
+
+// Tracks whether a charger was connected during the heartbeat interval
+static bool s_battery_charger_event_during_interval;
+
+// Called at the start of a heartbeat interval
+static void prv_device_metrics_start_heartbeat() {
+    // Sets the battery percentage at the start of the interval
+    s_battery_charge_level_previous = battery_get_current_pct();
+
+    // Determine whether a charger is connected at this exact moment.
+    // If the charger is connected during the hour, this should be
+    // updated by the battery/charging module too.
+    s_battery_charger_event_during_interval = battery_get_charger_connected();
+}
+
+// Calculate and record the drop in battery charge over the heartbeat interval
+static void prv_metrics_heartbeat_record_battery_info() {
+    // Charge level normalized between 0 and 10,000
+    const int32_t battery_charge_level = battery_charge_level_get();
+
+    // Subtract current charge level from previous charge level to get
+    // a drop in battery charge level normalized between 0 and 10,000
+    const int32_t battery_charge_drop = battery_charge_level - s_battery_charge_level_previous;
+
+    const bool report_battery_drop = (s_charger_connected_during_hour || battery_charge_drop < 0);
+
+    if (report_battery_drop) {
+        memfault_metrics_heartbeat_set_signed(
+            MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevelDrop),
+            battery_charge_drop
+        );
+    } else {
+        // Don't report this metric during hours with charging events
+        // Make sure to set up -1 as the value to ignore in the Memfault service
+        memfault_metrics_heartbeat_set_signed(
+            MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevelDrop),
+            -1
+        );
+    }
+
+    // Also record the current battery charge level
+    memfault_metrics_heartbeat_set_signed(
+        MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevel),
+        battery_charge_level
+    );
+}
+```
+
+## Analyzing Battery Life for a Single Device
+
+Viewing an individual device's battery life over time is usually the first step
+during a customer support or engineering debugging session when trying to
+diagnose poor battery performance.
+
+In Memfault, a device's battery life can be found under **Devices** then
+**Timeline**.
+
+The Memfault application also shows other important metrics alongside battery
+life, which might point out correlations between battery charge drops and other
+events, such as the screen backlight being on, the Wi-Fi radio being stuck in a
+particular state, or the CPU not sleeping enough.
+
+### Android
+
+For Android devices, you can navigate to the **Device Timeline** tab in the
+application and view the "Battery Level" metric to view the battery charge level
+over time.
+
+<p align="center">
+  <img
+    width="700"
+    src="/img/docs/best-practices/android-battery-level-timeline.png"
+    alt="Memfault Android metric for battery charge level drop"
+  />
+</p>
+
+### MCU & Embedded Linux
+
+For MCU & Embedded Linux devices, you can navigate to the **Device Timeline**
+tab in the application and view the specific battery metrics that your devices
+are configured to send. If this guide was followed, the metric would be called
+`Battery_ChargeLevel`.
+
+<p align="center">
+  <img
+    width="700"
+    src="/img/docs/best-practices/mcu-battery-level-timeline.png"
+    alt="Memfault MCU & Embedded Linux metric for battery charge level"
+  />
+</p>
+
+## Analyzing Battery Life for a Fleet of Devices
+
+A requirement of battery-operated devices is that they meet a minimum expected
+battery life. If a smartwatch promised to last 7 days under normal usage, it
+should ideally last 7 days or more in real-world environments.
+
+Fleet-wide battery trends can also be easily analyzed within Memfault.
+
+### Android
+
+For Android projects and devices, a metric
+`battery_discharge_rate_pct_per_hour_avg` is created automatically. It
+represents the battery charge level drop per hour represented as a percentage.
+Below, we create a chart for this metric.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/android-battery-discharge-rate-per-hour.png"
+    alt="Android discharge rate per hour metric chart"
+  />
+</p>
+
+In the next section, we'll talk about how to use this chart.
+
+### MCU & Embedded Linux
+
+For MCU & Embedded Linux projects, we receive the metric representing the
+battery charge level drop over the course of the heartbeat interval for all
+devices. Below, we create a chart for this metric.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/mcu-battery-charge-level-drop-chart.png"
+    alt="Android discharge rate per hour metric chart"
+  />
+</p>
+
+In the next section, we'll talk about how to use this chart.
+
+## Predicting Expected Battery Life
+
+Once we have the average drop in the battery charge level over time, we can
+easily calculate the number of hours of battery life that our devices should
+expect on average!
+
+For our calculations below, we'll assume that all heartbeat intervals are _one
+hour_.
+
+$$
+Projected\ \#\ Hours\ of\ Battery\ Life = \frac{100}{Average\ Battery\ Charge\ Drop\ Per\ Hour}
+$$
+
+For example, if the average battery charge drop per hour was 1.2.
+
+$$
+\frac{100}{2.2} = 45.5\ hours\ of\ expected\ battery\ life
+$$
+
+## Common Battery Life Pitfalls
+
+Here are some common pitfalls with monitoring battery life that many of us at
+Memfault have struggled with in the past. We hope you don't make the same
+mistakes with this knowledge.
+
+### Ignoring Charging Status During Heartbeat Interval
+
+A common issue with reporting battery life information from devices is that the
+power state is ignored. Battery life statistics that are used in aggregations
+should not be taken into account if a device is currently plugged in or
+charging.
 
 For example, the chart below shows the battery life of a device over a span of
 time:
 
 <p align="center">
   <img
-    width="500"
+    width="600"
     src="/img/docs/best-practices/battery-life-drop.svg"
     alt="Battery life drop during period of time"
   />
@@ -77,97 +344,79 @@ connected to a charger. It might report 100% for 3 days, and these calculations
 should not be taken into account when determining battery life calculations for
 a fleet of devices.
 
-### A Better Way
+### Sending Current Battery Life Sporadically
 
-Memfault recommends capturing two data points per heartbeat interval: the
-current battery percentage and, more importantly, the battery drain over a fixed
-interval.
+Firmware could be configured to send up battery life information at a
+non-standard interval. It may be whenever it connects to Wi-Fi, when it's within
+Bluetooth range of a cell phone, or when it's asked by a remote server for
+information.
 
-For example, if the battery dropped from 97% to 94% over an hour, then the
-device would report 3% as the battery life drain for that hour. It might also be
-more useful to scale out the battery percentage to be more granular, such as
-0-1000 to represent 0-100%.
+In this information report, a device would usually send the current battery life
+percentage according to a pre-determined curve or a millivolt reading.
 
-There are a few benefits of this approach that might not be immediately obvious:
+This type of information is decent when looking at a single device's history of
+battery life, but that is about it. From these individual reports, and sporadic
+reports at that, a battery life drop might be missed entirely, such as in the
+chart below:
 
-1. If an interval has a charging event, it can be thrown out or marked to be
-   excluded from aggregations.
-2. The calculation of average battery life drain per hour can be easily
-   computed. This enables quick battery life estimations and projects, even with
-   fleet sizes well into the millions.
-3. Devices that are only online sporadically can still send battery life
-   information to help compute statistics since the battery life drain is
-   recorded every heartbeat interval and these heartbeats can be persisted and
-   sent upon request.
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/battery-scattered-data-points.svg"
+    alt="Battery life drop during period of time"
+  />
+</p>
 
-Below are some example implementations on how to capture these two metrics
-Memfault recommends.
+When only taking into account the four captured data points, the battery life
+looks like it drops at a normal rate. However, there was a large drop in the
+middle.
 
-#### Current Battery Life Implementation
+### Not Waiting For Battery Measure to Settle
 
-Track the current battery percentage or current mV reading from the battery.
+Batteries are quirky devices, and we don't have perfect tools at our disposal to
+get accurate readings from them at all times. Often, the voltage from the
+battery is used to come up with a guess as to the charge level of the battery.
 
-```c
-static void prv_device_metrics_end_heartbeat(bool is_flushing) {
-    // Set to our BatteryLifeDrain metric
-    device_metrics_set(kDeviceMetricId_BatteryLifePct, battery_get_current_pct());
-}
-```
+Reading the voltage works well if the battery draw has been stable and continues
+to be stable, but the battery may experience a voltage drop during a sudden high
+current draw, such as the backlight being turned on or a vibration motor
+suddenly activating.
 
-where `battery_get_current_pct()` is assumed to be the function in the
-customer's firmware that would fetch the current battery percentage.
-
-#### Battery Life Drain Implementation
-
-Calculate the battery drain over a consistent, fixed interval of time, such as
-an hour or a day, ignoring hours in which a power event took place.
-
-```c
-// Stores the battery percentage from the start of the heartbeat interval
-static int32_t s_previously_recorded_battery_pct;
-static bool s_charger_connected_during_hour;
-
-static void prv_device_metrics_start_heartbeat(bool is_flushing) {
-    // Sets the battery percentage at the start of the interval
-    s_previously_recorded_battery_pct = battery_get_current_pct();
-    // Determine whether a charger is connected at this exact moment.
-    // If the charger is connected during the hour, this should be
-    // updated by the battery/charging module too.
-    s_charger_connected_during_hour = battery_get_charger_connected();
-}
-
-static void prv_device_metrics_end_heartbeat(bool is_flushing) {
-    if (s_charger_connected_during_hour) {
-        // Don't report a metric during hours with a charging event
-        return;
-    }
-
-    // Calculates the drop in percentage over the heartbeat interval
-    const int32_t current_battery_pct = battery_get_current_pct();
-    const int32_t battery_delta = current_battery_pct - s_previously_recorded_battery_pct;
-
-    // Set to our BatteryLifeDrain metric
-    device_metrics_set(kDeviceMetricId_BatteryLifeDrain, battery_delta);
-}
-```
-
-## Predicting Expected Battery Life
-
-Need some more information here.
-
-$$
-Projected\ \#\ Days\ of\ Battery\ Life = 100 \div \frac{total\ battery\ percent\ drained\ over\ all \ heartbeats}{total\ \#\ of\ heartbeats}
-$$
+In these situations, you need to be extra careful to avoid using the battery
+charge level reading during an event of a voltage drop. To mitigate this, it is
+advised to take a handful of samples at both the start and end of heartbeat
+intervals, each sample being a few seconds apart. Of these samples, the outliers
+can be discarded or all samples can be averaged to come up with a more stable
+reading.
 
 ## Preventing Battery Life Regressions
 
-The only real way to do this is to have a set of devices running production-like
-firmware in a production-like environment because it is impossible to run
-devices and firmware through the entire matrix of environmental conditions to
-understand real-world power usage.
+The only real way to prevent battery life regressions reliably and quickly is to
+measure the metrics mentioned above on devices in a production environment on
+production firmware. It is impossible to run devices and firmware through the
+entire matrix of environmental conditions to understand real-world power usage.
 
 This means that if a company makes a wearable device and it's shipped all over
 the world, it should be tested internally with a variety of Android and iOS
 phones, versions, connectivity interference, and usage patterns, but it should
 be understood that this will only be a small subset of the environments the
 device will experience.
+
+The only proper way to understand battery life is to push out an update to a
+small percentage of the fleet of devices, maybe 1%, and gather data. Below, we
+are comparing an existing firmware, 1.0.0, with a new firmware that has recently
+begun rolling out to devices, 1.1.0.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/best-practices/battery-life-regression.png"
+    alt="Battery life drop during period of time"
+  />
+</p>
+
+We can quickly see that the battery charge level drop on 1.1.0 is, on average,
+_much worse_ than on 1.0.0. If this was unexpected, this is a regression!
+
+This release should be pulled and more investigation needs to be done to
+understand the root cause for the new battery life drain behavior.
