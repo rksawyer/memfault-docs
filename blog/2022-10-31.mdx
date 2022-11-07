@@ -1,0 +1,79 @@
+---
+title: October 2022
+---
+
+## Tracking Battery Life Best Practices
+
+Two of the most important IoT reliability metrics are the expected and the
+actual battery life for devices. Understanding and predicting trends for battery
+life and detecting regressions with thousands to millions of devices in the
+field is a challenging problem that
+[Memfault recently published advice and product improvements for.](/docs/best_practices/metrics-for-battery-life/)
+
+![tracking_battery_life_best_practices.png](/img/blog/2022-10-31-Tracking-Battery-Life-Best-Practices.png)
+
+The combination of metric charts, device timeline, and the recently added
+documentation with
+[code samples](/docs/best_practices/metrics-for-battery-life/#implementing-battery-metrics-in-code)
+help with understanding battery life of MCU, Linux or Android devices.
+
+<!-- truncate -->
+
+## General
+
+- Added:
+  [Documentation of best practices for battery life tracking](/docs/best_practices/metrics-for-battery-life)
+- Added: Timezone picker for selecting custom timezones
+- Improved: UI glitches and improvements (More readable timestamps under Device
+  Details → Log Files, error prompt to prevent misconfigured Issue Charts)
+- Fixed: Introduction pages linking to themselves on [Memfault Docs](/)
+- Fixed: Timeouts when loading the Received Traces charts on the
+  [Dashboard](https://app.memfault.com/organizations/-/projects/-/overview)
+- Fixed: Pending software version of a device was not updated after configuring
+  a new deployment
+- Fixed: Empty metric charts when a formerly non-timeseries metric is used in
+  the chart
+
+## MCU
+
+- SDK version
+  [0.33.5](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0334-and-sdk-0335---oct-19-2022)
+  was released. Some highlights:
+  - Added:
+    [Example Zephyr application](https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/zephyr/qemu)
+    targeting the QEMU board
+  - Added: Support for
+    [ESP-IDF v4.2.3](https://github.com/espressif/esp-idf/releases/tag/v4.2.3)
+  - Added: Configuration option for setting the ESP-IDF HTTP client timeout
+    value
+  - Improved:
+    [nRF9160 example application](https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/nrf-connect-sdk/nrf9160)
+    to build and run correctly with
+    [nRF-Connect SDK v2.1.0](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/releases/release-notes-2.1.0.html)
+  - Fixed: Compilation for the
+    [ESP32-S3](https://www.espressif.com/en/products/socs/esp32-s3)
+
+## Android
+
+- Added: Creation of kernel oops traces from `last_kmsg`
+- Improved: OTA link expiry window increased to 6hr (previously 1hr) for more
+  reliable downloads on slow internet connections
+- SDK version
+  [4.3.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v430---october-18th-2022)
+  was released. Some highlights:
+  - Added: [logging mode “continuous”](/docs/android/android-logging/) as
+    alternative capture strategy on the device
+  - Added:
+    [On-device scrubbing of tombstone files](/docs/android/android-data-scrubbing/)
+  - Improved:
+    [Built-in metrics for storage](/docs/android/android-builtin-metrics/#storage-usage)
+    (changed from `storage.primary.` to `storage.data.`)
+  - Fixed: Potential OTA app crash due to a race condition
+
+## Linux
+
+- Added:
+  [Documentation of when reads and writes happen to Linux SDK `data_dir`](/docs/linux/linux-getting-started-guide#configure-a-persistent-storage-directory-for-memfaultd)
+- We did not publish a new version of the
+  [Memfault Linux SDK](https://github.com/memfault/memfault-linux-sdk) in
+  October.
