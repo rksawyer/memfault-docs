@@ -17,9 +17,12 @@ enables a different set of features in the Memfault app.
 ## Defining a Metric
 
 Metrics [can be added manually](#from-the-memfault-app) but are also created
-automatically when devices report them from the field. Here are some useful
-links if you're looking to enable Metrics collection from your devices using our
-SDKs:
+automatically when devices report them from the field.
+
+### Automatically from Memfault's SDK
+
+Here are some useful links if you're looking to enable Metrics collection from
+your devices using our SDKs:
 
 - for MCU: [Collecting Device Metrics using our MCU SDK](/docs/mcu/metrics-api)
 - for Android:
@@ -293,3 +296,13 @@ click on the Metrics tab. Clicking on an individual metric opens the edit window
 where settings can be adjusted, including how the metric counts against quotas:
 
 ![Memfault Metric editing](/img/docs/platform/metric-edit-min.png)
+
+## Archiving & Unarchiving Metrics
+
+<!-- prettier-ignore -->
+If a metric is no longer needed, it can be archived by navigating to <ProjectSettingsMetricsPath />,
+clicking on the specific metric, and then clicking **Archive**.
+
+To unarchive a metric, scroll to the bottom of the list of metrics, click on
+**Show archived metrics**, and click **Restore** next to the metric you would
+like to restore.
