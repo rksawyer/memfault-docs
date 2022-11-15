@@ -135,9 +135,6 @@ IMAGE_GEN_DEBUGFS = "1"
 IMAGE_FSTYPES_DEBUGFS = "tar.bz2"
 ```
 
-Note that `IMAGE_FSTYPES_DEBUGFS` must match the `IMAGE_FSTYPE` of the image you
-pass to the command.
-
 Here's an example `memfault upload-yocto-symbols` invocation:
 
 ```bash
@@ -146,8 +143,12 @@ $ memfault \
     --org $YOUR_ORGANIZATION_SLUG \
     --org-token $ORGANIZATION_AUTH_TOKEN \
     --project $YOUR_PROJECT_SLUG upload-yocto-symbols \
-    --image tmp/deploy/images/raspberrypi3/base-image-raspberrypi3.tar.bz2
+    --image tmp/deploy/images/raspberrypi3/base-image-raspberrypi3.tar.bz2 \
+    --dbg-image tmp/deploy/images/raspberrypi3/base-image-raspberrypi3-dbg.tar.bz2
 ```
+
+Supported formats are `.tar`, `.tar.bz2`, `.tar.gz` and `.tar.xz`. The format of
+`--image` may differ from that of `--dbg-image`.
 
 It's recommended that you run this command after having sourced the build
 environment script using `source oe-init-build-env`.
