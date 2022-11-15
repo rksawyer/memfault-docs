@@ -1,13 +1,13 @@
 ---
 id: reboot-reason-tracking
-title: Reboot Reason Tracking
+title: MCU Reboot Reason Tracking
 sidebar_label: Reboot Reason Tracking
 ---
 
 import IntegrationCompletePrerequisite from "@site/src/pages/_partials/_integration-complete-prerequisite.mdx";
 
 There are many reasons a device may reboot in the field — whether it be due to a
-crash, a brown out, or a firmware update.
+crash, a brownout, or a firmware update.
 
 Within the Memfault UI, reboot events are displayed for each device as well as
 summarized in the main "Overview" dashboard:
@@ -66,3 +66,13 @@ void ota_finalize_and_reboot(void) {
   // [... logic to reboot the MCU ...]
 }
 ```
+
+### Reboot Reason IDs
+
+The full list of reboot reason values can be found in the source file
+[`reboot_reason_types.h`][reboot_reason_types.h] or in [this
+reference][docs-reboot-reason-ids].
+
+[docs-reboot-reason-ids]: /docs/platform/reference-reboot-reason-ids
+[reboot_reason_types.h]:
+  https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/reboot_reason_types.h

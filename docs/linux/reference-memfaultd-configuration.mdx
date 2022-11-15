@@ -31,6 +31,7 @@ A [full configuration example can be found in the source directory of
     "output_file": "/tmp/swupdate.cfg"
   },
   "reboot_plugin": {
+    "last_reboot_reason_file": "/media/last_reboot_reason",
     "uboot_fw_env_file": "/etc/fw_env.config"
   },
   "collectd_plugin": {
@@ -91,14 +92,16 @@ file.
 ```json
 {
   "reboot_plugin": {
+    "last_reboot_reason_file": "/media/last_reboot_reason",
     "uboot_fw_env_file": "/etc/fw_env.config"
   }
 }
 ```
 
-| Field               | Description                                                                                                                                                                             | Recommended value    |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `uboot_fw_env_file` | Path to a valid `fw_env.config` file. Needed for `memfaultd`'s reboot reason tracking plugin. Read [about `libubootenv`][source-libubootenv] and see [an example][source-fwenv-config]. | `/etc/fw_env.config` |
+| Field                     | Description                                                                                                                                                                                                                                                         | Recommended value    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `last_reboot_reason_file` | The path where `memfaultd`'s reboot reason tracking plugin will attempt to find the [device-specific reboot reason][docs-reboot-reason-tracking-device-specific]. If the file does not exist, `memfaultd` will interpret this as "no device specific reason known". | _Project-specific_   |
+| `uboot_fw_env_file`       | Path to a valid `fw_env.config` file. See [the SWUpdate dependency of Reboot Reason Tracking][docs-reboot-reason-tracking-swupdate] for more information. Read [about `libubootenv`][source-libubootenv] and see [an example][source-fwenv-config].                 | `/etc/fw_env.config` |
 
 ### `collectd_plugin`
 
@@ -174,6 +177,10 @@ periodically (see the top-level `refresh_interval_seconds`).
 [collectd-chains]: https://collectd.org/wiki/index.php/Chains
 [docs-metrics-chains]: /docs/linux/linux-metrics#configuring-other-chains
 [docs-metrics-interval]: /docs/linux/linux-metrics#collectd-interval-seconds
+[docs-reboot-reason-tracking-swupdate]:
+  /docs/linux/reboot-reason-tracking#swupdate-configuration
+[docs-reboot-reason-tracking-device-specific]:
+  /docs/linux/reboot-reason-tracking#device-specific
 [docs-write-http]: https://collectd.org/wiki/index.php/Plugin:Write_HTTP
 [source-builtin-conf]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf

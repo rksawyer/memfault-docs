@@ -28,6 +28,15 @@ module.exports = {
                 "platform/sso",
                 "platform/jira-integration",
                 /* "platform/bulk-device-upload", */
+                {
+                    label: "Reference",
+                    type: "category",
+                    link: {
+                        type: "doc",
+                        id: "platform/reference-reboot-reason-ids",
+                    },
+                    items: ["platform/reference-reboot-reason-ids"],
+                },
             ],
         },
         {
@@ -130,6 +139,7 @@ module.exports = {
                 "linux/linux-releases-integration-guide",
                 "linux/linux-metrics",
                 "linux/linux-coredumps",
+                "linux/reboot-reason-tracking",
                 {
                     label: "Reference",
                     type: "category",

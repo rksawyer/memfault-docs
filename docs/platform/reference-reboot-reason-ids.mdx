@@ -1,0 +1,99 @@
+---
+id: reference-reboot-reason-ids
+title: "Reference: Reboot Reason IDs"
+sidebar_label: "Reboot Reason IDs"
+---
+
+This page documents identifiers for different reboot reasons. For more
+information about reboot reason tracking, check out one of these pages:
+
+- [Reboot Reason Tracking (MCU Guide)][docs-mcu-reboot-reason-tracking]
+- [Reboot Reason Tracking (Android Guide)][docs-android-reboot-reason-tracking]
+- [Reboot Reason Tracking (Linux Guide)][docs-linux-reboot-reason-tracking]
+
+The table also lists the enum names from the [reboot_reason_types.h file of the
+MCU SDK][reboot_reason_types.h].
+
+[docs-mcu-reboot-reason-tracking]: /docs/mcu/reboot-reason-tracking
+[docs-android-reboot-reason-tracking]: /docs/android/android-reboot-events
+[docs-linux-reboot-reason-tracking]: /docs/linux/reboot-reason-tracking
+
+## Normal Reboot Reasons
+
+| Name            | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h] | Notes                                                              |
+| --------------- | ------------ | -------- | ------------------------------------- | ------------------------------------------------------------------ |
+| Unspecified     | 0            | 0x0000   | `kMfltRebootReason_Unknown`           |                                                                    |
+| User Shutdown   | 1            | 0x0001   | `kMfltRebootReason_UserShutdown`      |                                                                    |
+| User Reset      | 2            | 0x0002   | `kMfltRebootReason_UserReset`         |                                                                    |
+| Firmware Update | 3            | 0x0003   | `kMfltRebootReason_FirmwareUpdate`    |                                                                    |
+| Low Power       | 4            | 0x0004   | `kMfltRebootReason_LowPower`          | Software shut down due to the battery level being too low.         |
+| Debugger Halted | 5            | 0x0005   | `kMfltRebootReason_DebuggerHalted`    |                                                                    |
+| Button Reset    | 6            | 0x0006   | `kMfltRebootReason_ButtonReset`       |                                                                    |
+| Power On Reset  | 7            | 0x0007   | `kMfltRebootReason_PowerOnReset`      |                                                                    |
+| Software Reset  | 8            | 0x0008   | `kMfltRebootReason_SoftwareReset`     |                                                                    |
+| Deep Sleep      | 9            | 0x0009   | `kMfltRebootReason_DeepSleep`         | CPU went through a full reboot due to exit from lowest power state |
+| Pin Reset       | 10           | 0x000A   | `kMfltRebootReason_PinReset`          | CPU reset pin was toggled                                          |
+
+## Error Reboot Reasons
+
+| Name                    | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h]   | Notes                                                                                                                                               |
+| ----------------------- | ------------ | -------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unexpected Reset        | 32768        | 0x8000   | `kMfltRebootReason_UnknownError`        | Can be used to flag an unexpected reset path, i.e the CPU reset without any reboot logic getting invoked.                                           |
+| Assert                  | 32769        | 0x8001   | `kMfltRebootReason_Assert`              |                                                                                                                                                     |
+| Watchdog _(Deprecated)_ | 32770        | 0x8002   | `kMfltRebootReason_WatchdogDeprecated`  | Deprecated in favor of HardwareWatchdog & SoftwareWatchdog. This way, the amount of watchdogs not caught by software can be easily tracked.         |
+| Brownout Reset          | 32771        | 0x8003   | `kMfltRebootReason_BrownOutReset`       |                                                                                                                                                     |
+| Nmi                     | 32772        | 0x8004   | `kMfltRebootReason_Nmi`                 | Non-Maskable Interrupt.                                                                                                                             |
+| Hardware Watchdog       | 32773        | 0x8005   | `kMfltRebootReason_HardwareWatchdog`    | More details about nomenclature in https://mflt.io/root-cause-watchdogs                                                                             |
+| Software Watchdog       | 32774        | 0x8006   | `kMfltRebootReason_SoftwareWatchdog`    | More details about nomenclature in https://mflt.io/root-cause-watchdogs                                                                             |
+| Clock Failure           | 32775        | 0x8007   | `kMfltRebootReason_ClockFailure`        | A reset triggered due to the CPU losing a stable clock. This can happen, for example, if power to the clock is cut or the lock for the PLL is lost. |
+| Kernel Panic            | 32776        | 0x8008   | `kMfltRebootReason_KernelPanic`         | A software reset triggered when the OS or RTOS end-user code is running on top of identifies a fatal error condition.                               |
+| Firmw Update Error      | 32777        | 0x8009   | `kMfltRebootReason_FirmwareUpdateError` | A reset triggered when an attempt to upgrade to a new OTA image has failed and a rollback to a previous version was initiated.                      |
+
+## ARM-specific Error Reboot Reasons
+
+### Bus Faults
+
+| Name        | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h] |
+| ----------- | ------------ | -------- | ------------------------------------- |
+| Bus Fault   | 37120        | 0x9100   | `kMfltRebootReason_BusFault`          |
+| Ibuserr     | 37121        | 0x9101   |                                       |
+| Preciserr   | 37122        | 0x9102   |                                       |
+| Impreciserr | 37123        | 0x9103   |                                       |
+| Unstkerr    | 37124        | 0x9104   |                                       |
+| Stkerr      | 37125        | 0x9105   |                                       |
+| Lsperr      | 37126        | 0x9106   |                                       |
+| Bfarvalid   | 37127        | 0x9107   |                                       |
+
+### Memory Faults
+
+| Name      | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h] |
+| --------- | ------------ | -------- | ------------------------------------- |
+| Mem Fault | 37376        | 0x9200   | `kMfltRebootReason_MemFault`          |
+| Iaccviol  | 37377        | 0x9201   |                                       |
+| Daccviol  | 37378        | 0x9202   |                                       |
+| Munstkerr | 37379        | 0x9203   |                                       |
+| Mstkerr   | 37380        | 0x9204   |                                       |
+| Mlsperr   | 37381        | 0x9205   |                                       |
+| Mmarvalid | 37382        | 0x9206   |                                       |
+
+### Usage Faults
+
+| Name        | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h] |
+| ----------- | ------------ | -------- | ------------------------------------- |
+| Usage Fault | 37632        | 0x9300   | `kMfltRebootReason_UsageFault`        |
+| Undefinstr  | 37633        | 0x9301   |                                       |
+| Invstate    | 37634        | 0x9302   |                                       |
+| Invpc       | 37635        | 0x9303   |                                       |
+| Nocp        | 37636        | 0x9304   |                                       |
+| Unaligned   | 37637        | 0x9305   |                                       |
+| Divbyzero   | 37638        | 0x9306   |                                       |
+
+### Misc.
+
+| Name       | ID (decimal) | ID (hex) | [MCU SDK enum][reboot_reason_types.h] | Notes                                                                                              |
+| ---------- | ------------ | -------- | ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Hard Fault | 37888        | 0x9400   | `kMfltRebootReason_HardFault`         |                                                                                                    |
+| Lockup     | 37889        | 0x9401   | `kMfltRebootReason_Lockup`            | A reset which is triggered when the processor faults while already executing from a fault handler. |
+
+[reboot_reason_types.h]:
+  https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/reboot_reason_types.h

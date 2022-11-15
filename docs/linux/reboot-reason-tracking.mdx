@@ -1,0 +1,333 @@
+---
+id: reboot-reason-tracking
+title: Linux Reboot Reason Tracking
+sidebar_label: Reboot Reason Tracking
+---
+
+## Introduction
+
+There are many reasons a device may reboot in the field — whether it be due to a
+kernel panic, a user reset, or a firmware update.
+
+Within the Memfault UI, reboot events are displayed for each device as well as
+summarized in the main "Overview" dashboard:
+
+<ImageFigure
+  src="/img/docs/linux/reboot-reason-chart.png"
+  alt="Reboots chart in the 'Overview' dashboard of the Memfault Web App"
+  title="Reboots chart"
+>
+  Reboots chart in the "Overview" dashboard of the Memfault Web App.
+</ImageFigure>
+
+In this guide we will walk through how to use the
+[reboot reason tracking module (`plugin_reboot`)](https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/plugins/reboot)
+from the [Memfault Linux SDK][memfault-linux-sdk] to collect this data.
+
+:::tip
+
+Keep [`meta-memfault-example`][source-yocto-example] open as a reference
+implementation. Your integration should look similar to it once you're done
+following the steps in this tutorial.
+
+:::
+
+## Prerequisites
+
+### The `memfaultd` daemon, built with `plugin_reboot`
+
+Follow the [getting-started guide][docs-linux-getting-started] to learn how to
+set this up for your device. A key function of `memfaultd` is to detect,
+classify and upload reboot events to the Memfault platform. It does this via its
+`plugin_reboot`.
+
+`plugin_reboot` is enabled by default. Read more on [how to configure which
+plugins `memfaultd` builds with][docs-linux-control-plugins].
+
+### Linux kernel `pstore` / `ramoops` configuration
+
+The detection of kernel panics as a reboot reason depends on the so called
+`ramoops` subsystem and `pstore` filesystem. From the [Linux kernel admin
+guide][ramoops-guide]:
+
+> Ramoops is an oops/panic logger that writes its logs to RAM before the system
+> crashes. It works by logging oopses and panics in a circular buffer. Ramoops
+> needs a system with persistent RAM so that the content of that area can
+> survive after a restart.
+
+The `pstore` is a RAM-backed filesystem that persists across reboots.
+
+The easiest way to enable the `pstore` in your kernel when using Yocto is via
+the `KERNEL_FEATURES` bitbake variable and add the [pstore kernel
+feature][yocto-kernel-feature-pstore]. To get finer-grained control over how the
+`pstore` is configured, you can instead use [its Kconfig
+options][pstore-kconfig] directly.
+
+We also recommend adding the [debug-panic-oops kernel
+feature][yocto-kernel-feature-debug-panic-oops] to enable a kernel panic when an
+"oops" is encountered:
+
+```
+KERNEL_FEATURES:append = " cgl/features/pstore/pstore.scc cfg/debug/misc/debug-panic-oops.scc"
+```
+
+In the `meta-memfault-example` QEMU integration, the `KERNEL_FEATURES` approach
+is taken, see [these lines of code][meta-memfault-example-kernel-features].
+
+Next, you will need to specify what region of RAM to use. There are several ways
+of doing this. The recommended way is to use a Device Tree binding. Please
+consult [this section on `ramoops` parameters in the Linux kernel admin
+guide][ramoops-parameters] for more details.
+
+Lastly, it's possible to [configure the kernel to always dump the kmsg logs
+using `printk.always_kmsg_dump`][kernel-always-kmsg-dump]. This is expected to
+be _disabled_ (the default).
+
+:::note
+
+Note that [in the `meta-memfault-example` QEMU
+integration][meta-memfault-example-ramoops-cmdline], we are deviating from the
+recommendation of using a Device Tree binding. The `ramoops.*` kernel command
+line arguments are used instead. The reason for this is that QEMU typically
+auto-generates a Device Tree on-the-fly and extending it is more complicated.
+
+:::
+
+[ramoops-guide]:
+  https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/ramoops.rst
+[yocto-kernel-feature-pstore]:
+  https://git.yoctoproject.org/yocto-kernel-cache/tree/cgl/features/pstore
+[yocto-kernel-feature-debug-panic-oops]:
+  https://git.yoctoproject.org/yocto-kernel-cache/tree/cfg/debug/misc
+[pstore-kconfig]:
+  https://github.com/torvalds/linux/blob/master/fs/pstore/Kconfig
+[meta-memfault-example-kernel-features]:
+  https://github.com/memfault/memfault-linux-sdk/search?q=KERNEL_FEATURES
+[ramoops-parameters]:
+  https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/ramoops.rst#setting-the-parameters
+[meta-memfault-example-ramoops-cmdline]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-bsp/u-boot/files/0003-memfault_boot-boot-commands.patch#L1-L7
+[kernel-always-kmsg-dump]:
+  https://github.com/torvalds/linux/blob/833477fce7a14d43ae4c07f8ddc32fa5119471a2/Documentation/admin-guide/kernel-parameters.txt#L4444-L4448
+
+### Systemd configuration
+
+The `memfaultd` daemon will take care of cleaning up `/sys/fs/pstore` after a
+reboot of the system (but only if the reboot reason tracking plugin,
+`plugin_reboot`, is enabled).
+
+Often, [systemd-pstore.service] is configured to carry out this task. This would
+conflict with `memfaultd` performing this task. Therefore,
+[systemd-pstore.service] has to be disabled. This service is [automatically
+excluded][systemd-bbappend] when including the `meta-memfault` layer.
+
+Note that `memfaultd` does not provide functionality (yet) to archive pstore
+files (like [systemd-pstore.service] can). If this is necessary for you, the
+work-around is to create a service that performs the archiving and runs before
+`memfaultd.service` starts up.
+
+[systemd-pstore.service]:
+  https://www.freedesktop.org/software/systemd/man/systemd-pstore.service.html
+[systemd-bbappend]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-core/systemd/systemd_%25.bbappend
+
+### SWUpdate configuration
+
+The Memfault SDK relies on the SWUpdate OTA agent to download and install OTA
+updates. The reboot plugin can detect when a reboot is due to an OTA update
+being installed. This depends on a feature of SWUpdate called ["update
+transaction and status marker"][swupdate-status-marker]. In a nutshell, SWUpdate
+writes the status of the pending OTA update to a bootloader environment variable
+just before the system shuts down. The reboot plugin will attempt to read this
+variable and will apply the "Firmware Update" reboot reason, if applicable.
+
+For this to work, SWUpdate need to be configured correctly:
+
+1. SWUpdate's [update transaction and status marker][swupdate-status-marker]
+   (`bootloader_transaction_marker`) must be enabled (the default).
+2. It must be configured to use U-Boot.
+3. The configured "fw env" file must match the `reboot_plugin.uboot_fw_env_file`
+   key in memfaultd.conf.
+4. It must use the bootloader (U-Boot) to store the update state in a variable
+   called `ustate` (this is the default).
+
+The relevant parts of a correctly configured `defconfig` look like this:
+
+```
+CONFIG_UBOOT=y
+# Must match reboot_plugin.uboot_fw_env_file in memfaultd.conf:
+CONFIG_UBOOT_FWENV="/etc/fw_env.config"
+CONFIG_BOOTLOADER_DEFAULT_UBOOT=y
+CONFIG_UPDATE_STATE_CHOICE_BOOTLOADER=y
+CONFIG_UPDATE_STATE_BOOTLOADER="ustate"
+```
+
+:::note
+
+In case you decide not to [use SWUpdate for OTA][docs-ota], you can use
+[the `last_reboot_reason_file` API (described in the next section)](#device-specific)
+to associate the "Firmware Update" reason to a reboot after your OTA agent has
+installed an update.
+
+:::
+
+[swupdate-status-marker]:
+  https://sbabic.github.io/swupdate/sw-description.html#update-transaction-and-status-marker
+
+## Reboot Reason Classification
+
+### Built-in reboot reasons
+
+There are only a few reboot reasons that memfaultd can determine with confidence
+for all embedded Linux devices out-of-the-box:
+
+| Reason          | Description                                                                               | Information Source          |
+| --------------- | ----------------------------------------------------------------------------------------- | --------------------------- |
+| Kernel Panic    | The Linux kernel crashed                                                                  | `pstore` / `ramoops`        |
+| Firmware Update | The device rebooted because of an OTA update. Note: requires [integrating OTA][docs-ota]. | U-Boot environment variable |
+| User Reset      | "Graceful" shutdown of the system                                                         | `systemd` state             |
+
+### Device-specific reboot reasons {#device-specific}
+
+There are many more types of reboots for which the detection can only be
+implemented in device-specific ways.
+
+For example, an SoC may have special hardware to detect power brownouts. There
+is no "standard" way to read brownout detection state in Linux.
+
+Another example: a device's software may contain logic to decide that the device
+needs to shut down or reset, e.g. because the battery has dropped below a
+certain point, or because the user pressed a button.
+
+To track reboot reasons which the Memfault SDK cannot possibly know how to
+detect, the SDK provides a way to extend the reboot reason classification, via
+the `last_reboot_reason_file`.
+
+#### The `last_reboot_reason_file` API
+
+The location of this file can be configured using the
+`reboot_plugin.last_reboot_reason_file` key in `memfaultd.conf`. Take a look at
+the [`/etc/memfaultd.conf` reference][docs-configuration] for more information.
+
+During the startup of the system, `memfaultd` will attempt to read this file. If
+the `last_reboot_reason_file` file exists, it is expected to contain the decimal
+[reboot reason ID][docs-reboot-reason-ids] that corresponds to the _last_ reboot
+that occurred. If the file does not exist, `memfaultd` will interpret this as
+"no device specific reason known". After reading the file, `memfaultd` will
+immediately unlink the file.
+
+There are 2 points during a boot cycle where your software may write to this
+file:
+
+- **During system start-up, _before_ `memfaultd` starts:** this is the time to
+  check external reason sources, for example, the brownout detection registers
+  of the SoC. Make sure to clear the original source (e.g. the SoC's detection
+  registers), after having written the reboot reason to the
+  `last_reboot_reason_file`. You also need to make sure that this code runs
+  _before_ `memfaultd` starts. The recommended way to do is to add
+  [`Before=memfaultd.service` to your `systemd` unit
+  configuration][systemd-before]. In the flowchart below, the yellow box
+  indicate when this code may be run.
+- **During system shut-down:** for controlled, "expected" shutdowns and resets
+  (such as the earlier example of a device's software deciding to shut down due
+  to a low battery level), it usually makes most sense to write to the
+  `last_reboot_reason_file` during the shut-down sequence. At this point, it
+  does not matter whether the `last_reboot_reason_file` gets written before or
+  after `memfaultd` shuts down, because it does not touch nor read the file
+  during shutdown. In the flowchart below, the green boxes indicate when this
+  code may be run (pick one).
+
+#### Reboot Reason IDs
+
+The full list of reboot reason values can be found in [this
+reference][docs-reboot-reason-ids].
+
+#### Example
+
+The example below shows what a snippet of a Python application may look like
+which handles shutting down the device when the battery level goes below 10%.
+When this happens, `"4"`, the [reboot reason ID for "Low
+Power"][docs-reboot-reason-ids], is written to the `/media/last_reboot_reason`
+file before it shuts down the device:
+
+```python
+# This function is run periodically to check the battery level:
+def check_battery_level():
+    level_percent = battery.read_level()
+    if level_percent < 10:
+        with open("/media/last_reboot_reason", "w") as file:
+            file.write("4")  # 4 == "Low Power"
+        shutdown_gracefully()
+    # ...
+```
+
+### Reboot Reason Precedence
+
+As described in the previous sections, there are multiple sources of information
+where reboot reasons may come from. In case there are multiple reasons found,
+this order of precedence is used:
+
+1. `pstore`/`ramoops` (Kernel Panic)
+2. `last_reboot_reason_file`
+3. Other built-in reboot reason detection sources: SWUpdate/U-Boot OTA state
+   (Firmware Update) or `systemd` shutdown state (User Reset)
+
+If none of the sources determined a reason for a reboot, "Unspecified" will be
+used as the reason.
+
+:::note
+
+To aid debugging, `memfaultd` will log the source of the reboot reason that was
+used as well as any sources found that provided a reason, but got discarded
+because another source took precedence over it:
+
+```
+$ journalctl -u memfaultd
+Nov 15 09:15:36 qemuarm64 systemd[1]: Starting memfaultd daemon...
+Nov 15 09:15:36 qemuarm64 memfaultd[184]: reboot:: Using reboot reason ButtonReset (0x0006) from custom source for boot_id 847c0502-9f47-43d0-b58d-7029b30f9cd0
+Nov 15 09:15:36 qemuarm64 memfaultd[184]: reboot:: Discarded reboot reason UserReset (0x0002) from internal source for boot_id 847c0502-9f47-43d0-b58d-7029b30f9cd0
+...
+```
+
+:::
+
+### Enqueuing & Upload
+
+Once `memfaultd` determines the reboot reason, it will enqueue a reboot event
+for upload to the Memfault cloud. Note that uploading does not happen
+immediately. Instead, the queue of events is uploaded periodically. See the
+[`memfaultd.conf` configuration key
+`refresh_interval_seconds`][docs-configuration] for more information.
+
+:::note Rate Limiting
+
+Ingestion of Reboots Events may be
+[rate-limited](/docs/platform/rate-limiting#reboot-events).
+
+:::
+
+### Process Flow
+
+The flowchart below documents the process of reboot reason tracking and puts all
+the topics discussed together.
+
+<ImageFigure
+  src="/img/docs/linux/reboot-reason-classification-flowchart.png"
+  alt="Flowchart of the Reboot Reason Classification by memfaultd"
+  title="Reboots Reason Classification"
+>
+  Flowchart of the Reboot Reason Classification by memfaultd.
+  {/* source: https://whimsical.com/linux-sdk-reboot-reasons-flowchart-4AoG7cAzbC1DMCw5F9w2X3 */}
+</ImageFigure>
+
+[docs-ota]: /docs/linux/linux-releases-integration-guide
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-reboot-reason-ids]: /docs/platform/reference-reboot-reason-ids
+[memfault-linux-sdk]: https://github.com/memfault/memfault-linux-sdk
+[docs-linux-control-plugins]:
+  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[source-yocto-example]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
+[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[systemd-before]:
+  https://www.freedesktop.org/software/systemd/man/systemd.unit.html#Before=
