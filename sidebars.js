@@ -127,7 +127,7 @@ module.exports = {
                 "android/android-releases-integration-guide",
                 "android/android-ota-update-client",
                 "android/android-data-scrubbing",
-                // "android/android-multi-device-support",
+                "android/android-multi-device-support",
             ],
         },
         {
