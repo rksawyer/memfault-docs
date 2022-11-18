@@ -113,6 +113,15 @@ Note that `memfaultd` respects privacy settings and only sets `core_pattern`
 [systemd-as-handler]:
   https://git.yoctoproject.org/poky/plain/meta/recipes-core/systemd/systemd_251.4.bb
 
+### Extend `LICENSE_FLAGS_ACCEPTED`
+
+Since `memfaultd` and `memfaultd-core-handler` both have a commercial license,
+you'll need to add an exception for them, for example in your `local.conf`:
+
+```
+LICENSE_FLAGS_ACCEPTED:append = " commercial_memfaultd commercial_memfault-core-handler"
+```
+
 ## Upload debugging symbols
 
 After a coredump was collected on the device, `memfaultd` will upload it to the
