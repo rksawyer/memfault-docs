@@ -297,12 +297,23 @@ where settings can be adjusted, including how the metric counts against quotas:
 
 ![Memfault Metric editing](/img/docs/platform/metric-edit-min.png)
 
-## Archiving & Unarchiving Metrics
+## Archiving & Restoring Metrics
 
 <!-- prettier-ignore -->
 If a metric is no longer needed, it can be archived by navigating to <ProjectSettingsMetricsPath />,
-clicking on the specific metric, and then clicking **Archive**.
+clicking on the specific metric, and then clicking the **Archive** button.
 
-To unarchive a metric, scroll to the bottom of the list of metrics, click on
+To restore a metric, scroll to the bottom of the list of metrics, click on
 **Show archived metrics**, and click **Restore** next to the metric you would
 like to restore.
+
+## Troubleshooting
+
+### A Metric already exists with the same name
+
+When attempting to create a Metric and one with the same name already exists,
+regardless of whether it is active or archived, an error will take place.
+
+Contact us at <a href="mailto:support@memfault.com">support@memfault.com</a> if
+you need to re-create the metric with exactly the same name (often in the case
+of changing the Metric type).
