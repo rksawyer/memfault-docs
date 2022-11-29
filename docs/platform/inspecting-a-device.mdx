@@ -44,3 +44,105 @@ different information depending on your device, please see the pages for
 [MCU devices](../mcu/introduction.mdx),
 [Android devices](../android/introduction.mdx) and
 [Linux devices](../linux/introduction.mdx) for more details.
+
+## Custom Data Recordings
+
+In some projects, devices already capture additional data in custom formats
+which can be useful to analyze when debugging issues, for example, trace data,
+proprietary coredumps, non-standard logs. Memfault allows this arbitrary
+information to be bundled as a "Custom Data Recording" (CDR).
+
+CDRs allow you to collect custom data for specific events happening on your
+device. Data sent via the CDR API can be of any format, which is then visualized
+and downloadable from the Device Timeline. To enable this, each CDR is bundled
+with metadata when uploaded:
+
+- [**Reason**](#cdr-reason) - This describes what was the cause/reason for
+  sending the CDR. Limited to 100 different unique values.
+- [**MIME types**](#cdr-mime-types) - One or more MIME types describing the
+  contents of the CDR.
+- **Duration** - The amount of time the CDR represents (can be 0).
+- **Start Time** [Optional] - When the capture began. Defaults to the API
+  server's current time in UTC minus the CDR's duration.
+
+Some example use cases of CDRs are:
+
+- Collecting debug data using a proprietary format
+- Capturing UI heatmaps
+- Recording screenshots of a device when errors occur to better understand what
+  a user was seeing or doing just before a crash
+- Adding test reports for devices in a hardware-in-the-loop test set up
+- ...
+
+For each unique reason given to a CDR, a swimlane is created on the timeline.
+Clicking or hovering over a timeline entry will give you the metadata of the CDR
+as well as the option to download the data for further analysis.
+
+![Screenshot showing basic custom data recording use case](/img/docs/platform/custom-data-recording.png)
+
+### CDR Reason {#cdr-reason}
+
+In principle, the reason fields is a free-form string field. A project can only
+have 100 different CDR reasons. Our recommendation is to treat the reason as an
+"enum" and use only a small set of static values. In the Device Timeline, all
+CDRs with the same reason are shown in the same swimlane.
+
+Some examples: for a connected device with a display, we might want to capture
+the modem logs when it disconnects. We could be using `Modem Disconnect` for the
+reason field. Aside of that, we may also want to capture a screenshot image
+after a crash happened (and the user gave consent to upload a screenshot). Here,
+we'll use the reason `User Feedback Post Crash` as the reason.
+
+In the future, Memfault will also extend the Device Search to enable searching
+for devices having CDRs with a given (set of) reasons.
+
+### CDR MIME types {#cdr-mime-types}
+
+Memfault uses the MIME types array provided to infer the best visualization to
+use in the Timeline. The MIME types in the array are expected to be ordered by
+specificity (most specific first). The visualization for the most-specific but
+supported MIME type will be used by the Timeline.
+
+:::note
+
+When using proprietary MIME types, we recommend using one of the types in the
+[table below](#cdr-supported-visualizations) as the last entry (fallback) in the
+MIME types list.
+
+:::
+
+For example, for the modem logs CDR from the connected device we talked about in
+the previous section, we may be using a MIME types list of:
+`application/vnd.acme-inc.modem-trace.v2`, `application/vnd.tcpdump.pcap`,
+`application/octet-stream`.
+
+The first and most-specific MIME type is
+`application/vnd.acme-inc.modem-trace.v2`. This is a self-coined (not
+[IANA-registered][iana-mime-types]), vendor-specific MIME type, as indicated by
+the `vnd.` prefix.
+
+The modem logs happen to be recorded in a format that is a superset of the pcap
+format. Therefore, we use `application/vnd.tcpdump.pcap` as the second MIME type
+in the list. This is the [official IANA-registered][iana-mime-types] type for a
+pcap file (Wireshark dump).
+
+Lastly, `application/octet-stream` is used in the MIME types list. This type is
+essentially means "application specific binary data".
+
+Even though Memfault does not have a Timeline visualizer for pcap data, let
+alone the vendor-specific format extensions to pcap, it might be added some day
+in the future. It also helps to identify the format of the payload when
+downloading it from the device timeline. For this reason, we recommended using
+an accurate list of MIME types.
+
+### Supported CDR visualizations {#cdr-supported-visualizations}
+
+| MIME type                      | Description | Visualization                                                                     |
+| ------------------------------ | ----------- | --------------------------------------------------------------------------------- |
+| `text/*`                       | Text        | Coming soon: a preview of the text contents in the popover of the CDR.            |
+| `text/markdown`                | Markdown    | Coming soon: a preview of the Markdown contents in the popover of the CDR.        |
+| `application/json`, `*/*+json` | JSON data   | Coming soon: a preview of the JSON contents in the popover of the CDR.            |
+| `application/octet-stream`     | Binary data | Coming soon: a preview of the contents in a hex viewer in the popover of the CDR. |
+
+[iana-mime-types]:
+  https://www.iana.org/assignments/media-types/media-types.xhtml
