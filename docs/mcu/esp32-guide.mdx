@@ -3,6 +3,7 @@ id: esp32-guide
 title: ESP32 ESP-IDF Integration Guide
 sidebar_label: ESP32 ESP-IDF
 description: Integrate Memfault on the ESP32 ESP-IDF platform.
+toc_max_heading_level: 4
 ---
 
 import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
@@ -199,7 +200,7 @@ partition CSV file". Optionally, you can edit the sdkconfig file directly
 
 ### Implement Changes for Your Project to Incorporate Memfault
 
-#### _Metrics and Trace Definitions_
+#### Metrics and Trace Definitions
 
 The [device metrics](/docs/mcu/metrics-api) and
 [trace event](/docs/mcu/trace-events) subsystems require configuration files to
@@ -207,7 +208,7 @@ be added to your include path (`memfault_metrics_heartbeat_config.def` &
 `memfault_trace_reason_user_config.def`, respectively). Because you copied them
 to your `main` directory these files' locations should be known to CMake.
 
-#### _memfault_platform_get_device_info()_
+#### `memfault_platform_get_device_info()`
 
 When a panic occurs, information is collected to uniquely identify the device
 and version of software running. Update the implementation of the function
@@ -236,18 +237,27 @@ void memfault_platform_get_device_info(sMemfaultDeviceInfo *info) {
 }
 ```
 
-#### _g_mflt_http_client_config_
+#### Configure Memfault Project Key
 
-Copy your Project Key and add the following to `memfault_platform_port.c`:
+The project key is set via a Kconfig variable, `MEMFAULT_PROJECT_KEY`.
 
-```c
-// memfault_platform_port.c
-// [...]
+In ESP-IDF this can be set in a few different places:
 
-sMfltHttpClientConfig g_mflt_http_client_config = {
-  .api_key = "<YOUR_PROJECT_KEY>",
-};
-```
+- add a line to `sdkconfig.defaults`:
+
+  ```c
+  CONFIG_MEMFAULT_PROJECT_KEY="your-project-key"
+  ```
+
+- set it in `sdkconfig`, either via `idf.py menuconfig` or by directly editing
+  the file
+
+- set it into an extra sdkconfig file, for example
+  `sdkconfig.memfault_project_key`, and include the file when building:
+
+  ```bash
+  $ idf.py build -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.memfault_project_key"
+  ```
 
 ### Regenerate sdkconfig and recompile
 
