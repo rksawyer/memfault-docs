@@ -90,3 +90,18 @@ import mfltLogo from "@site/assets/memfault-logo-full-dark@2x.png";
 >
 </ImageFigure>
 ```
+
+### Diagrams
+
+Diagrams should be implemented in Figma, and the source link must be included
+where the diagram is used.
+
+Usually a diagram will have a Figma Frame around it in the Figma editor; if you
+select the frame, you will get a URL that will link directly to it. Add a
+comment like so:
+
+```markdown
+<!-- Doc source: https://www.figma.com/file/GQIimU8iOtCrxGrdE6RxL3/Memfault-SDK-Architecture?node-id=808%3A10&t=2xgYRnOsaxVM51AB-0 -->
+
+![](/img/docs/platform/ota-example.svg)
+```
