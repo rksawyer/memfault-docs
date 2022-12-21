@@ -171,7 +171,10 @@ module.exports = {
             label: "Best Practices",
             type: "category",
             link: { type: "generated-index" },
-            items: ["best_practices/metrics-for-battery-life"],
+            items: [
+                "best_practices/metrics-for-battery-life",
+                "best_practices/low-bandwidth-devices",
+            ],
         },
         {
             label: "Troubleshooting",
