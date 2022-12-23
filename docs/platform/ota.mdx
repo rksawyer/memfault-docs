@@ -221,6 +221,23 @@ An example:
   />
 </p>
 
+### Allowing Downgrades
+
+For Delta Releases, downgrades are currently not supported.
+
+For Full Releases, downgrades are disallowed by default. This is to prevent a
+device from downgrading to a version that is known to be erroneous. It is
+possible to override this on a per-Cohort basis, using the _"Disable Version
+Checking"_ Cohort setting:
+
+<p align="center">
+  <img
+    width="700"
+    src="/img/docs/platform/ota/cohort-version-checking-disabled.png"
+    alt="cohort-version-checking-disabled"
+  />
+</p>
+
 ## Managing OTA Updates with Memfault
 
 The Memfault application contains OTA-related features in several of its views.
