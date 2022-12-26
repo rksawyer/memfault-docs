@@ -5,10 +5,9 @@ title: September 2022
 ## Linux SDK 1.0 with Coredump support
 
 [Memfault's Linux SDK](https://github.com/memfault/memfault-linux-sdk) reached
-version 1.0 when introducing
-[support for Coredumps](/docs/linux/linux-coredumps): In the event of a crash of
-any process on the system, `memfaultd` produces a memory dump that will be
-uploaded to Memfault for further processing to allow for
+version 1.0 when introducing [support for Coredumps](/docs/linux/coredumps): In
+the event of a crash of any process on the system, `memfaultd` produces a memory
+dump that will be uploaded to Memfault for further processing to allow for
 [detailed debugging across the fleet](/docs/platform/introduction#debugging).
 Together with the already existing support for OTA, metrics, and reboot reasons,
 Memfault now offers all its essential features on Linux devices!
@@ -121,7 +120,7 @@ number of configuration options.
   [1.0.0](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#100---2022-09-28)
   were released. Some highlights:
   - Added:
-    [Support for collecting and uploading the coredumps to Memfault](/docs/linux/linux-coredumps/)
+    [Support for collecting and uploading the coredumps to Memfault](/docs/linux/coredumps/)
   - Added: Support for
     [Yocto version 3.1 “Dunfell”](https://wiki.yoctoproject.org/wiki/Releases)
   - Changed: The update in the format of `/etc/memfaultd.conf` introduces

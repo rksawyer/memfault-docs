@@ -36,9 +36,9 @@ following the steps in this tutorial.
 
 ### The `memfaultd` daemon, built with `plugin_reboot`
 
-Follow the [getting-started guide][docs-linux-getting-started] to learn how to
-set this up for your device. A key function of `memfaultd` is to detect,
-classify and upload reboot events to the Memfault platform. It does this via its
+Follow the [integration guide][docs-linux-integration] to learn how to set this
+up for your device. A key function of `memfaultd` is to detect, classify and
+upload reboot events to the Memfault platform. It does this via its
 `plugin_reboot`.
 
 `plugin_reboot` is enabled by default. Read more on [how to configure which
@@ -237,6 +237,20 @@ file:
   during shutdown. In the flowchart below, the green boxes indicate when this
   code may be run (pick one).
 
+#### Rebooting with a reason
+
+To save a device-specific reboot reason and immediately reboot you can use
+[`memfaultctl`][docs-memfaultctl].
+
+```console
+# memfaultctl reboot --reason <reboot reason integer>
+```
+
+[docs-memfaultctl]: /docs/linux/reference-memfaultctl-cli
+
+This command simply writes the reboot reason in the `last_reboot_reason_file`
+and then runs the `reboot` command.
+
 #### Reboot Reason IDs
 
 The full list of reboot reason values can be found in [this
@@ -320,14 +334,31 @@ the topics discussed together.
   {/* source: https://whimsical.com/linux-sdk-reboot-reasons-flowchart-4AoG7cAzbC1DMCw5F9w2X3 */}
 </ImageFigure>
 
-[docs-ota]: /docs/linux/linux-releases-integration-guide
+## Test your integration
+
+You can easily test your integration with the `memfaultctl reboot <reason>`
+command. It accepts an [integer reboot reason][docs-reboot-reason-ids] (defaults
+to 0 `UNKNOWN_REASON`), will save the reason and reboot the system (using the
+`reboot`command).
+
+```
+# memfaultctl reboot --reason 4    # Low Power reboot
+```
+
+After reboot, to immediately flush the reboot event to Memfault, you can use:
+
+```
+# memfaultctl sync
+```
+
+[docs-ota]: /docs/linux/ota
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration
 [docs-reboot-reason-ids]: /docs/platform/reference-reboot-reason-ids
 [memfault-linux-sdk]: https://github.com/memfault/memfault-linux-sdk
 [docs-linux-control-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [source-yocto-example]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
-[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-integration]: /docs/linux/integration-guide
 [systemd-before]:
   https://www.freedesktop.org/software/systemd/man/systemd.unit.html#Before=

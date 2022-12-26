@@ -137,11 +137,22 @@ module.exports = {
             type: "category",
             items: [
                 "linux/introduction",
-                "linux/linux-getting-started-guide",
-                "linux/linux-releases-integration-guide",
-                "linux/linux-metrics",
-                "linux/linux-coredumps",
-                "linux/reboot-reason-tracking",
+                "linux/quickstart",
+                "linux/integration-guide",
+                {
+                    type: "category",
+                    link: {
+                        type: "generated-index",
+                        slug: "linux/subsystem-guides",
+                    },
+                    label: "Subsystem Guides",
+                    items: [
+                        "linux/ota",
+                        "linux/metrics",
+                        "linux/coredumps",
+                        "linux/reboot-reason-tracking",
+                    ],
+                },
                 {
                     label: "Reference",
                     type: "category",
@@ -151,10 +162,10 @@ module.exports = {
                     },
                     items: [
                         "linux/reference-memfaultd-configuration",
-                        "linux/reference-memfaultd-cli",
+                        "linux/reference-memfaultctl-cli",
                     ],
                 },
-                "linux/linux-memfault-hawkbit-comparison",
+                "linux/memfault-hawkbit-comparison",
             ],
         },
         {

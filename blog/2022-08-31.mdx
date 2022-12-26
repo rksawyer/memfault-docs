@@ -9,10 +9,10 @@ metrics and diagnostic data to measure the success of software updates (OTA) and
 to proactively diagnose anomalies before users even experience their effect. The
 [Memfault Linux SDK 0.3.0](https://github.com/memfault/memfault-linux-sdk) ships
 with a configurable set of
-[plugins for collectd](/docs/linux/linux-metrics#configuring-collectd) to obtain
+[plugins for collectd](/docs/linux/metrics#configuring-collectd) to obtain
 standard KPIs at the operating system level (e.g. available storage or RAM, CPU
 utilization, or network status and traffic). You can also use the SDK to
-[collect product-specific custom metrics via statsd](/docs/linux/linux-metrics#application-metrics).
+[collect product-specific custom metrics via statsd](/docs/linux/metrics#application-metrics).
 
 ![Linux SDK 0.3.0 features](/img/blog/2022-08-31-Linux-SDK-0-3-0.png)
 
@@ -131,15 +131,14 @@ _Value History_, _Foreground_, _Longwakes_ below).
 
 ## Linux
 
-- Added: [Metrics](/docs/linux/linux-metrics) incl. grouping via Device Timeline
+- Added: [Metrics](/docs/linux/metrics) incl. grouping via Device Timeline
 - Added: Fleet-wide metric aggregations (sum, count, min, max, mean)
-- Improved: [Getting Started guide](/docs/linux/linux-getting-started-guide) now
-  shown after project creation
-- Improved: Documentation about
-  [Linux OTA](/docs/linux/linux-releases-integration-guide)
+- Improved: [Getting Started guide](/docs/linux/integration-guide) now shown
+  after project creation
+- Improved: Documentation about [Linux OTA](/docs/linux/ota)
 - SDK version
   [0.3.0](https://github.com/memfault/memfault-linux-sdk/blob/-/CHANGELOG.md#030---2022-08-31)
   was released. Some highlights:
   - Added: Support for metrics using `collectd`
-  - Added: [Documentation](/docs/linux/linux-metrics) for configuring `collectd`
-    and metric collection
+  - Added: [Documentation](/docs/linux/metrics) for configuring `collectd` and
+    metric collection

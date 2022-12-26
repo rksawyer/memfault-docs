@@ -17,3 +17,11 @@
 /docs/platform/device-attributes /docs/platform/metrics#device-attributes
 /docs/mcu/self-serve/* /docs/mcu/embedded-self-serve/:splat
 /docs/best_practices/* /docs/best-practices/:splat
+
+# Renamed some pages for the Linux SDK
+/docs/linux/linux-getting-started-guide /docs/linux/integration-guide
+/docs/linux/linux-releases-integration-guide /docs/linux/ota
+/docs/linux/linux-coredumps /docs/linux/coredumps
+/docs/linux/linux-metrics /docs/linux/metrics
+/docs/linux/linux-memfault-hawkbit-comparison /docs/linux/memfault-hawkbit-comparison
+/docs/linux/reference-memfaultd-cli /docs/linux/reference-memfaultctl-cli

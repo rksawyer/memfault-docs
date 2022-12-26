@@ -1,5 +1,5 @@
 ---
-id: linux-metrics
+id: metrics
 title: Linux Metrics
 sidebar_label: Metrics
 ---
@@ -26,9 +26,9 @@ up here can be accessed in the Memfault Web App.
 
 ### The `memfaultd` daemon
 
-Follow the [getting-started guide][docs-linux-getting-started] to learn how to
-set this up for your device. A key function of `memfaultd` is to correctly
-configure and control collectd to upload metrics to Memfault.
+Follow the [integration guide][docs-linux-integration] to learn how to set this
+up for your device. A key function of `memfaultd` is to correctly configure and
+control collectd to upload metrics to Memfault.
 
 :::tip
 
@@ -206,13 +206,13 @@ Once the end user has given their consent, you can enable data collection like
 so:
 
 ```shell
-$ memfaultd --enable-data-collection
+$ memfaultctl enable-data-collection
 ```
 
 To disable it:
 
 ```shell
-$ memfaultd --disable-data-collection
+$ memfaultctl disable-data-collection
 ```
 
 The `memfaultd` service will restart automatically whenever you run either of
@@ -288,6 +288,19 @@ statsd = StatsClient(
 statsd.gauge("mygauge", 42)
 ```
 
+## Custom Device Attributes
+
+The `memfaultctl` command provides an easy way to set a device-specific
+attribute with the `write-attributes` command.
+
+```console
+# memfaultctl write-attributes APP_VERSION=1.4.2 ACTIVATED=true
+```
+
+Refer to [`memfaultctl write-attributes` documentation][docs-write-attributes].
+
+[docs-write-attributes]: /docs/linux/reference-memfaultctl-cli#write-attributes
+
 ## Testing your integration
 
 During the development phase, we recommend setting a low value (e.g. 60 seconds)
@@ -352,11 +365,11 @@ accessible in the Memfault Web Application.
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/plugins/collectd.c
 [source-builtin-conf]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
-[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-integration]: /docs/linux/integration-guide
 [docs-linux-control-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [docs-memfault-device-info]:
-  /docs/linux/linux-getting-started-guide#add-a-memfault-device-info-executable-to-your-build
+  /docs/linux/integration-guide#add-a-memfault-device-info-executable-to-your-build
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration
 [docs-metrics]: /docs/platform/metrics
 [docs-timeseries]: /docs/platform/metrics#timeseries
@@ -364,4 +377,4 @@ accessible in the Memfault Web Application.
 [docs-timeline]: /docs/platform/introduction/#metrics
 [docs-metric-charts]: /docs/platform/charts#metric-charts
 [docs-alerts]: /docs/platform/alerts
-[docs-metrics-chains]: /docs/linux/linux-metrics#configuring-other-chains
+[docs-metrics-chains]: /docs/linux/metrics#configuring-other-chains

@@ -1,0 +1,137 @@
+---
+id: quickstart
+title: Quick Start
+sidebar_label: Quick Start
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+
+This tutorial will use a Docker container to walk you through building a Yocto
+image with the Memfault SDK. This image is based on Poky, Yocto's reference
+distribution.
+
+If you already have your own Yocto-based distribution, we recommend following
+our [integration guide][integration-guide] to learn how to add the Memfault SDK.
+
+[integration-guide]: /docs/linux/integration-guide/
+
+## Build and Run Linux with Memfault SDK
+
+### Create a Memfault Project
+
+Go to [app.memfault.com](https://app.memfault.com) and from the "Select a
+Project" dropdown, click on "Create Project". Once you're done, you can find a
+project key, referenced as `YOUR_PROJECT_KEY` in this document, in the Project
+settings page.
+
+### Checkout the Memfault Linux SDK
+
+Checkout the [Memfault Linux SDK][sdk] on your computer.
+
+The instructions on this guide are compatible with Linux and macOS (Intel and
+Apple Silicon). Windows users should be able to follow along with minimal
+adjustments.
+
+[sdk]: https://github.com/memfault/memfault-linux-sdk/blob/-/
+
+### Create a Docker container to build with Yocto
+
+We provide a [`Dockerfile`][dockerfile] and a [`run.sh`][run.sh] script to
+create a container.
+
+```
+$ cd /path/to/memfault-linux-sdk/docker
+$ MEMFAULT_PROJECT_KEY=<YOUR_PROJECT_KEY> ./run.sh -b
+```
+
+### Build your Yocto-based image
+
+This project is configured to build an image for the `arm64` architecture on a
+QEMU (emulated) machine.
+
+To build the image, run:
+
+```
+$ bitbake memfault-image
+```
+
+This will take a long time the first time. Yocto will cache compilation results
+and future builds will be much faster. We use named Docker volumes to persist
+source code and build artifacts beyond the container lifetime.
+
+:::tip
+
+If Docker seems to hang for a long time (build output not updating, CPU usage
+low) you may have run out of available space allocated to Docker. Check the
+Docker console for limits on system resources.
+
+:::
+
+[dockerfile]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/docker/Dockerfile
+[run.sh]: https://github.com/memfault/memfault-linux-sdk/blob/-/docker/run.sh
+
+### Run the image with QEMU
+
+To start QEMU and run the image you have just built, we provide a convenient
+shortcut:
+
+```
+$ q # Run image in QEMU
+// Linux boots
+
+login: root
+```
+
+:::tip
+
+The `q` shortcut executes our own [`runqemu.py`][runqemu] which is very similar
+to `runqemu qemuarm64 slirp nographic` in newer Yocto distributions.
+
+We maintain compatibility with older versions of Yocto in which `runqemu` did
+not support the dual-copy SWUpdate setup that we use here. This is why we
+provide our own.
+
+:::
+
+[runqemu]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/test-scripts/runqemu.py
+
+### Inspect the integration
+
+Login as `root` and make sure to enable data-collection (disabled by default).
+
+```
+# memfaultctl enable-data-collection
+```
+
+You can now use `memfaultctl` to generate events on the device. They will appear
+in your&nbsp;<ProjectMagicLink path="/"><b>Dashboard</b></ProjectMagicLink>.
+
+```
+# memfaultctl trigger-coredump
+# memfaultctl write-attributes QUICK_START=COMPLETE
+# memfaultctl reboot --reason 4 # Reboot with "Low-Battery Reason"
+```
+
+:::tip
+
+Keep in mind that to save bandwidth `memfaultd` queues events and does not
+upload them immediately. To flush the queue more often you can use [developer
+mode][developer-mode] and/or `memfaultctl sync`.
+
+:::
+
+[developer-mode]: /docs/linux/reference-memfaultctl-cli#developer-mode
+
+## Next steps
+
+For more information on how this Docker instance is setup, refer to our [README
+in the meta-memfault-example][readme-docker].
+
+To add Memfault SDK to your own Yocto distribution, read our [integration
+guide][integration-guide].
+
+[readme-docker]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
+[integration-guide]: /docs/linux/integration-guide

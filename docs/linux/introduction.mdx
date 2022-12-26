@@ -10,15 +10,16 @@ your fleet.
 
 ## Overview
 
-The Memfault Linux SDK consists of a combination of existing open-source
-software and a daemon [`memfaultd`][source-memfaultd] that orchestrates and
-configures it. It also implements additional features such as tracking of reboot
-reason tracking, and in the future reporting crashes and logs.
+To provide core Memfault platform features, the Memfault Linux SDK relies on
+well-established, battle-tested open-source software. The daemon `memfaultd`
+implements Memfault-specific features and also acts as a configuration agent.
+`memfaultctl` is a command line utility to adjust `memfaultd` configuration and
+trigger specific events for testing purposes.
 
 <p>
   <figure>
     <img
-      src="/img/docs/linux/sdk-overview-1.0.0.svg"
+      src="/img/docs/linux/sdk-overview.svg"
       alt="Overview of the Memfault Linux SDK"
     />
     <figcaption>
@@ -28,17 +29,20 @@ reason tracking, and in the future reporting crashes and logs.
   </figure>
 </p>
 
-To provide core Memfault platform features, the Memfault Linux SDK relies on
-well-established, battle-tested open-source software. The daemon `memfaultd`
-implements Memfault-specific features and also acts as a configuration agent.
+<!--  Original image source:
+  https://www.figma.com/file/GQIimU8iOtCrxGrdE6RxL3/Memfault-SDK-Architecture?node-id=0%3A1&t=UOnjl2U5w3vvUt1j-0
+-->
+
+Our Linux SDK (just as MCU and Android) is distributed in [source
+form][source-memfaultd].
 
 [source-memfaultd]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
 
 ## Prerequisites
 
-Even though support for a broader diversity of setups is planned, this first
-versions of our SDK makes the following assumptions:
+Even though support for a broader diversity of setups is planned, the SDK makes
+the following assumptions:
 
 - Your project uses [Yocto][yocto-homepage] as a build system.
 - It uses [`systemd`][systemd-homepage] as an init system.
@@ -57,21 +61,39 @@ touch][get-in-touch]. It will likely still work without major changes.
 
 ## Getting Started
 
-Take a look at our [getting-started guide][docs-linux-getting-started] to set up
-your integration.
+### Quick Start
+
+We provide a Docker based Yocto builder pre-configured to build Poky (Yocto
+reference distribution) with Memfault SDK and run it inside QEMU. This is the
+easiest way to experiment with our SDK. Follow our [Quick Start
+Guide][quickstart] to run the SDK in a few easy steps.
+
+[quickstart]: /docs/linux/quickstart/
+
+### Integration
+
+Integrating the SDK inside your own Yocto based distribution is described in our
+[integration guide][docs-integration-guide].
+
+[source-docker]: https://github.com/memfault/memfault-linux-sdk/blob/-/docker
 
 ## Documentation and Features
 
-- Detailed documentation for the Memfault Linux SDK can be found in our online
-  docs: see the [getting-started guide][docs-linux-getting-started].
-- Visit our [features overview][docs-platform] for a generic introduction to all
-  the major features of the Memfault platform.
+If you are not familiar with Memfault, we recommend visiting our [features
+overview][docs-platform] for a generic introduction to all the major features of
+the Memfault platform.
 
+Detailed documentation for each feature of the Memfault Linux SDK can be found
+in our [subsystem guides][subsystem-guides].
+
+[subsystem-guides]: /docs/linux/subsystem-guides
 [docs-platform]: /docs/platform/introduction/
 [docs-linux-introduction]: /docs/linux/introduction
-[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-integration-guide]: /docs/linux/integration-guide
 
-An integration example can be found under
+### Yocto Integration Example
+
+A complete Yocto integration example can be found under
 [`/meta-memfault-example`][source-yocto-example]. The central part of the SDK
 lives in a Yocto layer in [`/meta-memfault`][source-meta-memfault].
 
@@ -87,7 +109,7 @@ endpoint compatible with the [hawkBit DDI API][hawkbit-ddi]. Various clients are
 available, but `memfaultd` supports [SWUpdate][swupdate-homepage] out of the box
 and is able to configure it to talk to our hawkBit DDI-compatible endpoint.
 
-[docs-ota]: /docs/linux/linux-releases-integration-guide
+[docs-ota]: /docs/linux/ota
 [hawkbit-homepage]: https://www.eclipse.org/hawkbit/
 [hawkbit-ddi]: https://www.eclipse.org/hawkbit/apis/ddi_api/
 [swupdate-homepage]: https://swupdate.org/
@@ -103,7 +125,7 @@ traffic). You can also use the SDK to collect product-specific custom metrics
 via [`statsd`][statsd-homepage].
 
 [collectd-homepage]: https://collectd.org/
-[docs-metrics]: /docs/linux/linux-metrics
+[docs-metrics]: /docs/linux/metrics
 [statsd-homepage]: https://github.com/statsd/statsd
 
 ### Crash Reports
@@ -114,7 +136,7 @@ order to debug issues and keep your fleet's crashes under control. Make use of
 Memfault's deduplication features as well as advanced [Issue management and
 monitoring][docs-issue-management].
 
-[docs-coredumps]: /docs/linux/linux-coredumps
+[docs-coredumps]: /docs/linux/coredumps
 [docs-issue-management]: /docs/platform/issue-management
 
 ### Reboot Reason Tracking
@@ -124,14 +146,18 @@ one to collect why devices are rebooting in the field (whether it be due to a
 crash, kernel panic or a firmware update). [Summaries and
 aggregates][docs-charts] can then be viewed from the Memfault web application.
 
-These features are fully in the domain of `memfaultd`.
+These features are fully in the domain of Memfault Linux SDK.
 
-:::tip Get started
+:::tip Next Steps
 
-Take a look at our [getting-started guide][docs-linux-getting-started] to set up
-your integration.
+Take a look at our [Quick Start guide][quickstart] to start using the SDK with a
+demo image.
+
+Or read our [Integration guide][docs-integration] to add Memfault SDK to an
+existing Linux distribution.
 
 :::
 
 [docs-charts]: /docs/platform/charts
 [docs-linux-reboot-reason-tracking]: /docs/linux/reboot-reason-tracking
+[docs-integration]: /docs/linux/integration-guide

@@ -1,7 +1,7 @@
 ---
-id: linux-getting-started-guide
-title: Getting Started
-sidebar_label: Getting Started
+id: integration-guide
+title: Integration Guide
+sidebar_label: Integration Guide
 ---
 
 import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
@@ -29,8 +29,9 @@ the Memfault cloud, enabling one or more of the following features:
 - The [source for the Memfault Linux SDK][source-sdk]. Make sure to use the
   [branch matching the Yocto release][source-sdk-branches] that you are using.
 - A [sample integration using Yocto][source-yocto-example].
-- [Reference: `memfaultd` Configuration][docs-configuration].
-- [Reference: `memfaultd` CLI][docs-cli].
+- Reference documentation for:
+  - `memfaultd` [Configuration file][docs-configuration].
+  - [`memfaultctl` CLI][docs-memfaultctl].
 
 ## Assumptions and dependencies
 
@@ -75,7 +76,8 @@ Among its responsibilities are:
 - Controlling whether data is allowed to be collected (e.g. by user consent)
   from a device or not.
 - Interacting with and configuring subsystems such as SWUpdate and collectd.
-- Providing configuration access via [CLI][docs-cli].
+- Providing configuration access via [memfaultctl][docs-memfaultctl]
+  (`memfaultctl` is a symbolic link to `memfaultd`).
 
 `memfaultd` is required for integration.
 
@@ -316,7 +318,7 @@ Your `data_dir` will be read from or written to for the following reasons:
   reboot events and when a coredump is captured (see [Linux
   Coredumps][docs-linux-coredumps]), and
 - written to whenever configuration is changed at runtime, for example by using
-  `memfaultd --{enable,disable}-data-collection` (see
+  `memfaultctl {enable,disable}-data-collection` (see
   ["Set `enable_data_collection`"](#set-enable_data_collection)).
 
 Note that the [`collectd_plugin.interval_seconds`][docs-configuration] does not
@@ -335,13 +337,13 @@ Once the end user has given their consent, you can enable data collection like
 so:
 
 ```shell
-$ memfaultd --enable-data-collection
+$ memfaultctl enable-data-collection
 ```
 
 To disable it:
 
 ```shell
-$ memfaultd --disable-data-collection
+$ memfaultctl disable-data-collection
 ```
 
 The `memfaultd` service will restart automatically whenever you run either of
@@ -385,20 +387,21 @@ Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
   https://docs.yoctoproject.org/migration-guides/migration-4.0.html
 [yocto-dunfell]:
   https://docs.yoctoproject.org/migration-guides/migration-3.1.html
-[docs-linux-ota]: /docs/linux/linux-releases-integration-guide
+[docs-linux-ota]: /docs/linux/ota
 [docs-hardware-version-software-version]:
   /docs/platform/software-version-hardware-version
 [docs-device-id]: /docs/platform/memfault-terminology#device-id
-[docs-linux-metrics]: /docs/linux/linux-metrics
-[docs-linux-coredumps]: /docs/linux/linux-coredumps
+[docs-linux-metrics]: /docs/linux/metrics
+[docs-linux-coredumps]: /docs/linux/coredumps
 [systemd-homepage]: https://systemd.io/
 [swupdate-homepage]: https://swupdate.org/
 [u-boot-homepage]: https://www.denx.de/wiki/U-Boot
 [collectd-homepage]: https://collectd.org/
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration
-[docs-cli]: /docs/linux/reference-memfaultd-cli
+[docs-memfaultd]: /docs/linux/reference-memfaultd-configuration
+[docs-memfaultctl]: /docs/linux/reference-memfaultctl-cli
 [docs-control-memfaultd-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [source-meta-swupdate]: https://github.com/sbabic/meta-swupdate
 [source-collectd-recipe]:
   https://github.com/openembedded/meta-openembedded/tree/master/meta-oe/recipes-extended/collectd

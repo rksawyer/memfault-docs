@@ -8,8 +8,76 @@ import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
 
 Useful links:
 
-- [Reference: `memfaultd` CLI][docs-cli].
+- [Reference: `memfaultctl` CLI][docs-memfaultctl].
 - [Source for `memfaultd`][source-memfaultd].
+
+## Basic Usage
+
+Running `memfaultd --help` prints the following:
+
+```
+Usage: memfaultd [OPTION]...
+
+      --config-file <file>       : Configuration file
+      --daemonize                : Daemonize process
+      --enable-data-collection   : Enable data collection, will restart the main memfaultd service
+      --disable-data-collection  : Disable data collection, will restart the main memfaultd service
+  -h, --help                     : Display this help and exit
+  -s, --show-settings            : Show settings
+  -v, --version                  : Show version information
+```
+
+The `--config-file` path defaults to `/etc/memfaultd.conf`. The settings you add
+in `/etc/memfaultd.conf` extend the [built-in configuration
+file][source-builtin-conf].
+
+:::tip
+
+As of v1.2.0, we recommend using [`memfaultctl`][docs-memfaultctl] to
+enable/disable data collection and view current settings.
+
+`--(enable|disable)-data-collection` and `--show-settings` are still present on
+`memfaultd` for backwards compatibility but will be removed in a future major
+version of the SDK.
+
+:::
+
+## Usage in a `systemd` service
+
+:::tip
+
+The [`meta-memfault` Yocto layer][source-meta-memfault] already includes a
+service file, so you don't need to add one if you're using `meta-memfault`.
+
+:::
+
+You can use the `--daemonize` flag for this. See this example, taken from the
+[`meta-memfault` layer][source-memfaultd-service]:
+
+```systemd
+[Unit]
+Description=memfaultd daemon
+After=local-fs.target network.target
+Before=swupdate.service collectd.service
+
+[Service]
+Type=forking
+PIDFile=/run/memfaultd.pid
+ExecStart=/usr/bin/memfaultd --daemonize
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The `Before=` parameter is there to ensure `memfaultd` starts before
+`swupdate.service` as well as `collectd.service`. The configuration files used
+by these daemons are generated (at least partly) by `memfaultd` at startup, and
+need to be present before the respective services start.
+
+If you're not using [OTA][docs-ota] or [Metrics][docs-metrics], you may remove
+the corresponding part of the `Before=` parameter. You may also wish to [opt out
+of building the plugins with `memfaultd`][docs-control-memfaultd-plugins].
 
 ## `/etc/memfaultd.conf`
 
@@ -21,6 +89,7 @@ A [full configuration example can be found in the source directory of
   "queue_size_kib": 1024,
   "refresh_interval_seconds": 3600,
   "enable_data_collection": false,
+  "enable_dev_mode": false,
   "software_version": "<YOUR_SOFTWARE_VERSION>",
   "software_type": "<YOUR_SOFTWARE_TYPE>",
   "project_key": "<YOUR_PROJECT_KEY>",
@@ -61,6 +130,7 @@ file.
 | `queue_size_kib`           | Size of `$data_dir/queue` in kibibytes.                                                                                                                                                            | 1024                                      |
 | `refresh_interval_seconds` | The frequency (in seconds) with which `memfaultd` will attempt to flush its queue and post it to Memfault. Note that a recovery system with exponential back-off is in place for network failures. | 3600                                      |
 | `enable_data_collection`   | Whether `memfaultd` should collect and post data to Memfault by default. Read more [here][docs-enable-data-collection].                                                                            | `false` (ask for user consent first)      |
+| `enable_dev_mode`          | Change memfaultd default settings for development. Read more [here][docs-enable-dev-mode].                                                                                                         | `false` (only use in development)         |
 | `base_url`                 | The base URL to Memfault's device API.                                                                                                                                                             | `https://device.memfault.com`             |
 | `software_version`         | The current version of your software. Read more [here][docs-software-version].                                                                                                                     | _Project-specific_                        |
 | `software_type`            | The current version of your software. Read more [here][docs-software-type].                                                                                                                        | _Project-specific_                        |
@@ -119,8 +189,8 @@ file.
 
 | Field                        | Description                                                                                                                                           | Recommended value                   |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `footer_include_output_file` | Generated by `memfaultd`. Needs [to be `Include`d in the main `collectd.conf`][source-collectd-conf-example] as the last statement.                   | `/tmp/collectd-footer-include.conf` |
-| `header_include_output_file` | Generated by `memfaultd`. Needs [to be `Include`d in the main `collectd.conf`][source-collectd-conf-example] as the first statement.                  | `/tmp/collectd-header-include.conf` |
+| `footer_include_output_file` | Generated by `memfaultd`. Needs [to be `Include`d in the main `collectd.conf`][collectd-configuration] as the last statement.                         | `/tmp/collectd-footer-include.conf` |
+| `header_include_output_file` | Generated by `memfaultd`. Needs [to be `Include`d in the main `collectd.conf`][collectd-configuration] as the first statement.                        | `/tmp/collectd-header-include.conf` |
 | `non_memfaultd_chain`        | An optional [collectd chain][collectd-chains] to jump to after the Memfault-generated chain. Read more [here][docs-metrics-chains].                   | _Project-specific_                  |
 | `write_http_buffer_size_kib` | Size of the collectd in-memory write buffer. Read more [here][docs-metrics-interval].                                                                 | 64                                  |
 | `interval_seconds`           | Governs collectd's `Interval` and the `FlushInterval` setting of the [`write_http` plugin][docs-write-http]. Read more [here][docs-metrics-interval]. | 3600                                |
@@ -130,6 +200,7 @@ file.
 ```json
 {
   "coredump_plugin": {
+    "compression": "gzip",
     "coredump_max_size_kib": 96000,
     "rate_limit_count": 5,
     "rate_limit_duration_seconds": 3600,
@@ -144,6 +215,7 @@ To configure the location where coredumps are stored during processing, see
 
 | Field                                      | Description                                                                                    | Recommended value  |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------ |
+| `compression`                              | Compression to use when storing on disk and uploading to Memfault (`none` or `gzip`).          | `gzip`             |
 | `coredump_max_size_kib`                    | The maximum size of a coredump that can be processed.                                          | 96000              |
 | `rate_limit_count`<sup>\*</sup>            | The maximum amount of coredumps to process in a given period of `rate_limit_duration_seconds`. | 5<sup>\*</sup>     |
 | `rate_limit_duration_seconds`<sup>\*</sup> | A window in which a maximum of `rate_limit_count` coredumps can be processed.                  | 3600<sup>\*</sup>  |
@@ -175,8 +247,12 @@ Finally, the coredump is added to the upload queue. This queue is serviced
 periodically (see the top-level `refresh_interval_seconds`).
 
 [collectd-chains]: https://collectd.org/wiki/index.php/Chains
-[docs-metrics-chains]: /docs/linux/linux-metrics#configuring-other-chains
-[docs-metrics-interval]: /docs/linux/linux-metrics#collectd-interval-seconds
+[collectd-configuration]: /docs/linux/metrics#configuring-collectd
+[docs-memfaultctl]: /docs/linux/reference-memfaultctl-cli
+[docs-metrics]: /docs/linux/metrics
+[docs-metrics-chains]: /docs/linux/metrics#configuring-additional-chains
+[docs-metrics-interval]: /docs/linux/metrics#collectdinterval_seconds
+[docs-ota]: /docs/linux/ota
 [docs-reboot-reason-tracking-swupdate]:
   /docs/linux/reboot-reason-tracking#swupdate-configuration
 [docs-reboot-reason-tracking-device-specific]:
@@ -184,25 +260,27 @@ periodically (see the top-level `refresh_interval_seconds`).
 [docs-write-http]: https://collectd.org/wiki/index.php/Plugin:Write_HTTP
 [source-builtin-conf]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
-[source-collectd-conf-example]:
-  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd/builtin.conf
 [docs-enable-data-collection]:
-  /docs/linux/linux-getting-started-guide#set-enable_data_collection
+  /docs/linux/integration-guide#set-enable_data_collection
+[docs-enable-dev-mode]: /docs/linux/reference-memfaultctl-cli#developer-mode
 [docs-software-type]:
   /docs/platform/software-version-hardware-version#software-type
 [docs-software-version]:
   /docs/platform/software-version-hardware-version#software-version
 [docs-data-dir]:
-  /docs/linux/linux-getting-started-guide#configure-a-persistent-storage-directory-for-memfaultd
+  /docs/linux/integration-guide#configure-a-persistent-storage-directory-for-memfaultd
 [docs-control-memfaultd-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
-[swupdate-cfg-docs]:
-  https://sbabic.github.io/swupdate/swupdate.html#command-line-parameters
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [source-libubootenv]: https://github.com/sbabic/libubootenv
-[docs-cli]: /docs/linux/reference-memfaultd-cli
 [source-memfaultd]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[source-memfaultd-service]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd.service
+[source-meta-memfault]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault
 [source-swupdate-args]:
-  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-support/swupdate/files/09-swupdate-args
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-support/swupdate/files/09-swupdate-args.in
 [source-fwenv-config]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-bsp/u-boot/files/fw_env.config
+[swupdate-cfg-docs]:
+  https://sbabic.github.io/swupdate/swupdate.html#command-line-parameters

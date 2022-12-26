@@ -5,18 +5,18 @@ title: May 2022
 ### Memfault OTA for Embedded Linux
 
 Memfault’s over-the-air update service is now
-[available on Embedded Linux with SWUpdate](/docs/linux/linux-releases-integration-guide)
-via the [hawkBit DDI](/docs/linux/linux-memfault-hawkbit-comparison). This makes
-all Memfault OTA management and hosting features such as cohorts, staged
-rollouts, full vs. delta releases, and a scalable global CDN available to Linux
-devices that utilize one of the most popular update agents. Memfault also added
-support for forced (non-interactive) updates – invaluable for delivering
-security updates to embedded IoT devices.
+[available on Embedded Linux with SWUpdate](/docs/linux/ota) via the
+[hawkBit DDI](/docs/linux/memfault-hawkbit-comparison). This makes all Memfault
+OTA management and hosting features such as cohorts, staged rollouts, full vs.
+delta releases, and a scalable global CDN available to Linux devices that
+utilize one of the most popular update agents. Memfault also added support for
+forced (non-interactive) updates – invaluable for delivering security updates to
+embedded IoT devices.
 
 ![Memfault ❤️ Linux.png](/img/blog/2022-05-31-MemfaultHeartLinux.png)
 
 To communicate with SWUpdate clients,
-[Memfault acts as a hawkBit update server](/docs/linux/linux-memfault-hawkbit-comparison).
+[Memfault acts as a hawkBit update server](/docs/linux/memfault-hawkbit-comparison).
 It implements the Direct Device Integration API enabling other on-device agents
 such as [RAUC (via hawkBit client)](https://github.com/rauc/rauc-hawkbit) to
 deliver and install software remotely as well.
@@ -71,6 +71,5 @@ deliver and install software remotely as well.
 
 ## Linux
 
-- Added:
-  [API endpoint for hawkBit](/docs/linux/linux-memfault-hawkbit-comparison)
+- Added: [API endpoint for hawkBit](/docs/linux/memfault-hawkbit-comparison)
   (including support for forced vs. soft releases)

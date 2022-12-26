@@ -1,0 +1,196 @@
+---
+id: reference-memfaultctl-cli
+title: "Reference: memfaultctl CLI"
+sidebar_label: "memfaultctl CLI"
+---
+
+Useful links:
+
+- [Reference: `memfaultd` Configuration][docs-configuration].
+- [Source for `memfaultctl`][source-memfaultd].
+
+## Basic Usage
+
+Running `memfaultctl --help` prints the following:
+
+```console
+# memfaultctl -h
+Usage: memfaultctl [OPTION] <COMMAND> ...
+
+  -c <config file>                           : Use configuration file
+  -h                                         : Display this help and exit
+  -v                                         : Show version information
+
+Commands:
+  enable-data-collection                     : Enable data collection and restart memfaultd
+  disable-data-collection                    : Disable data collection and restart memfaultd
+  enable-dev-mode                            : Enable developer mode and restart memfaultd
+  disable-dev-mode                           : Disable developer mode and restart memfaultd
+  reboot [--reason <n>]                      : Register reboot reason and call 'reboot'
+  request-metrics                            : Flush collectd metrics to Memfault now
+  show-settings                              : Show memfaultd settings
+  sync                                       : Flush memfaultd queue to Memfault now
+  trigger-coredump [segfault|divide-by-zero] : Trigger a coredump and immediately reports it to Memfault (defaults to segfault)
+  write-attributes <VAR1=VAL1 ...>           : Write device attribute(s) to Memfaultd
+
+```
+
+The `--config-file` path defaults to `/etc/memfaultd.conf`. The settings you add
+in `/etc/memfaultd.conf` extend the built-in configuration file.
+
+## Developer mode
+
+Enabling developer mode will change some settings of `memfaultd` to make
+development and testing easier:
+
+- Coredumps will not be rate-limited on device. All crashes will be reported to
+  Memfault immediately (queue is processed immediately);
+- `write-attributes` events will be flushed immediately to Memfault.
+
+To enable developer mode, use `memfaultctl enable-dev-mode`. This setting will
+be persisted across reboots. To disable developer mode, use
+`memfaultctl disable-dev-mode`.
+
+## `memfaultctl` commands
+
+### `enable-data-collection`
+
+Call this command when your user has given consent to the collection of usage
+and performance information.
+
+This setting is persisted across reboots and updates. To turn of collection, use
+`memfaultctl disable-data-collection`.
+
+### `enable-dev-mode`
+
+Call this command to enable developer mode (see [above][developer-mode]) on this
+system.
+
+This setting is persisted across reboots and updates. To disable developer mode,
+use `memfaultctl disable-dev-mode`.
+
+[developer-mode]: /docs/linux/reference-memfaultctl-cli#developer-mode
+
+### `reboot`
+
+This command will write the provided reboot reason to the
+`last_reboot_reason_file` and restart the machine with the `reboot` command.
+
+Example:
+
+```
+# memfaultctl reboot --reason 4
+```
+
+Refer to our [list of reboot reasons][reboot-reasons].
+
+[reboot-reasons]: /docs/platform/reference-reboot-reason-ids
+
+### `request-metrics`
+
+This command will restart `collectd` (to trigger a data collection event) and
+then send a `SIGUSR1` to flush the metrics to Memfault.
+
+### `show-settings`
+
+Prints the current configuration of `memfaultd`.
+
+Example:
+
+```console
+# memfaultctl show-settings
+Base configuration (/etc/memfaultd.conf):
+  { "queue_size_kib": 1024, "data_dir": "\/media\/memfault", "refresh_interval_seconds": 3600, "enable_data_collection": false, "enable_dev_mode": false, "software_version": "0.0.1", "software_type": "main", "project_key": "INSERT_PROJECT_KEY_HERE", "base_url": "https:\/\/device.memfault.com", "swupdate_plugin": { "input_file": "\/etc\/swupdate.cfg", "output_file": "\/tmp\/swupdate.cfg" }, "reboot_plugin": { "last_reboot_reason_file": "\/media\/last_reboot_reason", "uboot_fw_env_file": "\/etc\/fw_env.config" }, "collectd_plugin": { "header_include_output_file": "\/tmp\/collectd-header-include.conf", "footer_include_output_file": "\/tmp\/collectd-footer-include.conf", "non_memfaultd_chain": "", "write_http_buffer_size_kib": 64, "interval_seconds": 3600 }, "coredump_plugin": { "coredump_max_size_kib": 96000, "rate_limit_count": 5, "rate_limit_duration_seconds": 3600, "storage_min_headroom_kib": 10240, "storage_max_usage_kib": 0 } }
+
+Runtime configuration:
+  { }
+
+Device configuration from memfault-device-info:
+  MEMFAULT_DEVICE_ID=qemu-tester
+  MEMFAULT_HARDWARE_VERSION=qemuarm64
+
+VERSION=dev
+GIT COMMIT=unknown
+
+Plugin enabled:
+  attributes
+  reboot
+  swupdate
+  collectd
+  coredump
+
+```
+
+### `sync`
+
+Immediately process `memfaultd` queue.
+
+`memfaultd` stores events in a queue and only processes it at a fixed interval
+(by default 1 hour - see [`refresh_interval_seconds`][docs-refresh-interval]).
+Use `memfaultctl sync` to force `memfaultd` to immediately send all events to
+Memfault.
+
+[docs-refresh-interval]:
+  /docs/linux/reference-memfaultd-configuration#top-level-etcmemfaultdconf-configuration
+
+### `trigger-coredump`
+
+This command will force an immediate coredump which will be captured by
+`memfaultd` and immediately uploaded to Memfault. Use this command to verify
+that the Memfault SDK is configured properly and that [your symbols have been
+uploaded][upload-symbols].
+
+Example:
+
+```
+$ memfaultctl trigger-coredump
+```
+
+### `write-attributes`
+
+Use this command to create or update [device attributes][attributes]. You can
+provide multiple attributes in one call.
+
+```console
+# memfaultctl write-attributes APP_VERSION=1.4.2 ACTIVATED=true
+```
+
+Attributes uploaded with this command can only be used as device attributes and
+not as time series metrics in Memfault. Refer to our [metrics][docs-metrics]
+guide to upload application-specific
+
+The Memfault SDK does not attempt to avoid unnecessary calls. Every call to this
+command will eventually trigger a network request. You should avoid setting the
+same value repeatedly as this would increase network usage.
+
+[docs-metrics]: /docs/linux/metrics#application-metrics
+
+#### Attribute types
+
+`memfaultctl` will try to guess the type of the attributes:
+
+- `true`/`false` are converted to boolean values;
+- Numbers are converted to float values;
+- Anything else is uploaded as a string.
+
+To force `memfaultctl` to treat the value as a string, you can enclose the value
+with double-quote. You will typically need to escape the double quotes so they
+are not removed by the shell:
+
+```
+# memfaultctl write-attributes APP_VERSION=\\"1.4\\"
+```
+
+#### Queueing
+
+In developer mode, attributes are flushed immediately to Memfault. Otherwise,
+they are stored in the queue and processed with other events.
+
+Use `memfaultctl sync` to force an immediate synchronization of the attributes.
+
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-memfaultd]: /docs/linux/reference-memfaultd-configuration
+[source-memfaultd]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault/recipes-memfault/memfaultd/files/memfaultd
+[upload-symbols]: /docs/linux/coredumps
+[attributes]: /docs/platform/metrics

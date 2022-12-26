@@ -1,5 +1,5 @@
 ---
-id: linux-releases-integration-guide
+id: ota
 title: Embedded Linux OTA Integration Guide
 sidebar_label: OTA Management
 ---
@@ -44,9 +44,9 @@ For any given device, neither of these pieces of information should ever change.
 
 ### The `memfaultd` daemon
 
-We strongly recommend integrating `memfaultd` first. Follow the [getting-started
-guide][docs-linux-getting-started] to learn how to set this up for your device.
-A key function of `memfaultd` is to correctly configure and control SWUpdate.
+We strongly recommend integrating `memfaultd` first. Follow the [integration
+guide][docs-linux-integration] to learn how to set this up for your device. A
+key function of `memfaultd` is to correctly configure and control SWUpdate.
 
 While we recommend using `memfaultd` to automate OTA configuration and benefit
 from more advanced Memfault features, Memfault OTA may be used without it. This
@@ -73,8 +73,21 @@ page in the Memfault UI and copy/paste the token from the "Project Key" section.
 ### (Optional) Memfault CLI Tool
 
 Releases can be managed either from the Memfault web UI or via the
-[memfault cli tool](https://docs.memfault.com/docs/ci/install-memfault-cli). In
-this tutorial we will make use of the CLI client which can be installed via pip:
+[memfault cli tool](https://docs.memfault.com/docs/ci/install-memfault-cli).
+
+:::tip
+
+Memfault CLI tool (`memfault-cli`) is a Python utility that is meant to be
+installed on development machines and CI infrastructure, not on the target
+device. It interacts with Memfault API.
+
+It is different from `memfaultctl`, which interacts with `memfaultd`. As a
+small, native binary, it is optimized to run on embedded devices.
+
+:::
+
+In this tutorial we will make use of the CLI client which can be installed via
+pip:
 
 ```bash
 $ pip3 install memfault-cli
@@ -322,11 +335,11 @@ with a value that'll work for your project on production.
 [source-swupdate-defconfig]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-support/swupdate/files/defconfig
 [yocto-homepage]: https://www.yoctoproject.org/
-[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-integration]: /docs/linux/integration-guide
 [docs-linux-control-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [docs-memfault-device-info]:
-  /docs/linux/linux-getting-started-guide#add-a-memfault-device-info-executable-to-your-build
+  /docs/linux/integration-guide#add-a-memfault-device-info-executable-to-your-build
 [docs-webapp-ota-management]:
   /docs/platform/ota#managing-ota-updates-with-memfault
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration

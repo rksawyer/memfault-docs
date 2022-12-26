@@ -1,5 +1,5 @@
 ---
-id: linux-coredumps
+id: coredumps
 title: Linux Coredumps
 sidebar_label: Coredumps
 ---
@@ -56,10 +56,9 @@ following the steps in this tutorial.
 
 ### The `memfaultd` daemon, built with `plugin_coredump`
 
-Follow the [getting-started guide][docs-linux-getting-started] to learn how to
-set this up for your device. A key function of `memfaultd` is to preprocess and
-upload coredumps to the Memfault platform. It does this via its
-`plugin_coredump`.
+Follow the [integration guide][docs-linux-integration] to learn how to set this
+up for your device. A key function of `memfaultd` is to preprocess and upload
+coredumps to the Memfault platform. It does this via its `plugin_coredump`.
 
 `plugin_coredump` is enabled by default. Read more on [how to configure which
 plugins `memfaultd` builds with][docs-linux-control-plugins].
@@ -162,9 +161,17 @@ Supported formats are `.tar`, `.tar.bz2`, `.tar.gz` and `.tar.xz`. The format of
 It's recommended that you run this command after having sourced the build
 environment script using `source oe-init-build-env`.
 
-Note that the `memfault upload-yocto-symbols` command does not upload the
-`tar.bz2` file directly: it extracts it to a temporary directory and generates
-unstripped copies of the binaries and their symbols.
+:::tip
+
+`IMAGE_GEN_DEBUGFS` will cause Yocto to build an archive with separated debug
+info of all the binaries on the system. Your system image will not get larger
+but a separate `-dbg.tar.gz` file will be saved next to your system image.
+
+This archive is used by the `memfault upload-yocto-symbols` command. It does not
+upload the complete file directly: it extracts it to a temporary directory and
+generates unstripped copies of the binaries and their symbols.
+
+:::
 
 <details>
 <summary>
@@ -221,13 +228,13 @@ Once the end user has given their consent, you can enable data collection like
 so:
 
 ```shell
-$ memfaultd --enable-data-collection
+$ memfaultctl enable-data-collection
 ```
 
 To disable it:
 
 ```shell
-$ memfaultd --disable-data-collection
+$ memfaultctl disable-data-collection
 ```
 
 The `memfaultd` service will restart automatically whenever you run either of
@@ -267,25 +274,19 @@ provide a certain degree of configurability:
 
 ## Test your integration
 
-In order to test your integration, you'll need to make your device produce a
-coredump for a process, for example, by sending `SIGABRT` to it:
+You can test your integration with `memfaultctl`. The `trigger-coredump` command
+will fork itself and crash.
 
-```bash
-$ kill -s SIGABRT $YOUR_PROCESS_PID
+```console
+# memfaultctl trigger-coredump
 ```
 
-Additionally, you might want to check that the `core_pattern` file is being set
-correctly by `memfaultd` when it starts. Check that the output of this command
-includes `memfault-core-handler`:
+If [developer mode][developer-mode] is active, `memfaultctl` will immediately
+push the coredump to Memfault. Otherwise you can force `memfaultd` to sync
+immediately with:
 
-```bash
-$ cat /proc/sys/kernel/core_pattern
-```
-
-To see logs coming from `memfaultd`, run `journalctl`:
-
-```bash
-$ journalctl --unit memfaultd
+```console
+# memfaultctl sync
 ```
 
 <p>
@@ -298,8 +299,29 @@ $ journalctl --unit memfaultd
   .
 </p>
 
+### Debugging Issues
+
+You might want to check that the `core_pattern` file is being set correctly by
+`memfaultd` when it starts. Check that the output of this command includes
+`memfault-core-handler`:
+
+```bash
+$ cat /proc/sys/kernel/core_pattern
+```
+
+To see logs coming from `memfaultd`, run `journalctl`:
+
+```bash
+$ journalctl --unit memfaultd
+Dec 21 10:45:20 qemuarm64 systemd[1]: Started memfaultd daemon.
+Dec 21 10:45:24 qemuarm64 memfaultd[246]: coredump:: Received corefile for PID 268, process 'memfaultctl'
+Dec 21 10:45:24 qemuarm64 memfaultd[246]: coredump:: writing coredump with max size: 98304000
+Dec 21 10:45:24 qemuarm64 memfaultd[246]: coredump:: enqueued corefile for PID 268
+Dec 21 10:45:30 qemuarm64 memfaultd[246]: network:: Successfully transmitted file '/media/memfault/core/corefile-fbf1b4c8-b184-4b6c-87c1-6229bd55afd7.gz'
+```
+
 [docs-linux-control-plugins]:
-  /docs/linux/linux-getting-started-guide#optional-opt-out-of-memfaultd-built-in-plugins
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [source-yocto-example]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example
 [docs-memfault-cli]: /docs/ci/install-memfault-cli
@@ -310,4 +332,5 @@ $ journalctl --unit memfaultd
   https://api-docs.memfault.com/#ba41ad9a-dd22-4dd4-a9c4-35c132afec9d
 [man-core]: https://man7.org/linux/man-pages/man5/core.5.html
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration
-[docs-linux-getting-started]: /docs/linux/linux-getting-started-guide
+[docs-linux-integration]: /docs/linux/integration-guide
+[developer-mode]: /docs/linux/reference-memfaultctl-cli#developer-mode
