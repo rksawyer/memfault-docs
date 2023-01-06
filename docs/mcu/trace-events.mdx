@@ -98,9 +98,9 @@ void ble_le_process_ll_pkt(...) {
 ### Recording Trace Events from Interrupts
 
 It is also safe to use the `MEMFAULT_TRACE_EVENT()` macro from an interrupt.
-When called from an interrupt, the trace event info will just copy the collected
-info to a temporary storage region in RAM to minimize interrupt latency. The
-collected data can then be serialized to event storage by explicitly calling
+When called from an interrupt, the trace event info will be copied to a
+temporary storage region in RAM to minimize interrupt latency. The collected
+data can then be serialized to event storage by explicitly calling
 `memfault_trace_event_try_flush_isr_event()`. The data will also be flushed
 automatically anytime `MEMFAULT_TRACE_EVENT()` is called and the processor is
 **not** in an interrupt.

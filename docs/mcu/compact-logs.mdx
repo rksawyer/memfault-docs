@@ -6,10 +6,10 @@ sidebar_label: Compact Logs
 
 This tutorial will cover how to enable the compact log feature in the
 [Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk). When
-Compact logging is enabled, format strings will be replaced with an integer id
-at compile time. When the log is captured only the arguments and integer id will
-be serialized and sent to the Memfault cloud where the full format string will
-be recovered.
+compact logging is enabled, format strings will be replaced with an integer id
+at compile time. When the log is captured, only the arguments and integer id
+will be serialized and sent to the Memfault cloud where the full format string
+will be recovered.
 
 This has several key benefits:
 
@@ -123,11 +123,11 @@ Here's an example of correct usage:
 // No cast necessary for pointer types that are not strings
 int i = 0;
 uint32_t *int_ptr =  &i;
-MEMFAULT_TRACE_EVENT_WITH_LOG("String Pointer: %p", int_ptr);
+MEMFAULT_TRACE_EVENT_WITH_LOG(trace_reason, "String Pointer: %p", int_ptr);
 
 // Cast necessary when pointer type is a string
 const char *str = "hello world";
-MEMFAULT_TRACE_EVENT_WITH_LOG("String Pointer: %p", (void *)str);
+MEMFAULT_TRACE_EVENT_WITH_LOG(trace_reason, "String Pointer: %p", (void *)str);
 ```
 
 ### For ESP-IDF builds, which symbol file should I upload?
