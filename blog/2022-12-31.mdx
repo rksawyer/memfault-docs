@@ -1,0 +1,123 @@
+---
+title: December 2022
+---
+
+## Fleet Sampling
+
+As your fleet grows, it becomes more costly to send, process and store the data
+from all devices in growing fleets. With the Fleet Sampling feature, Memfault
+helps manage the costs for your device data bandwidth by only collecting
+diagnostics and performance data from a smaller, yet statistically significant,
+subset of a fleet that you can control at any time.
+
+![fleet-sampling-active-devices-chart.png](/img/blog/2022-12-31-Fleet-Sampling-Active-Devices-Chart.png)
+
+Thanks to [Chart Normalization](/docs/platform/charts/#chart-normalization), all
+insights to understand issues occurring across your fleet will still be at your
+disposal even when a only smaller number of devices are reporting from the
+field. For more information, please refer to the
+[Fleet Sampling documentation](/docs/platform/fleet-sampling/).
+
+## Best Practices: Low-Bandwidth Devices
+
+Memfault was built from the ground up to handle devices with limited bandwidth,
+intermittent connectivity, and minimal processing power capabilities. Following
+the guidelines and code examples in the recently published
+[Using Memfault with Low-Bandwidth Devices](/docs/best_practices/low-bandwidth-devices/)
+article, IoT operators can save on network costs and lower the power consumption
+of their devices.
+
+![low-bandwith-devices-best-practices.png](/img/blog/2022-12-31-Low-Bandwith-Devices-Best-Practices.png)
+
+<!-- truncate -->
+
+## General
+
+- Added:
+  [Documentation on best practices when using Memfault with low-bandwidth devices](/docs/best_practices/low-bandwidth-devices)
+- Added:
+  [Documentation of Fleet Sampling feature](/docs/platform/fleet-sampling)
+- Added: UI feedback under Issue Details page in the case of malformed log data
+- Improved: Various UI glitches and improvements (Improved error messages when
+  Fleet Sampling quotas are reached, device serial is invalid or
+  [Symbol File](/docs/mcu/symbol-file-build-ids/) is missing, matching the bar
+  colors of Reboot Reasons chart with the colors of the labels in the legend)
+- Improved: Displaying Trace title instead of the Issue title under Issue
+  Details page as they may differ
+- Improved: Re-processing logic works on viewed trace instead of the most recent
+  trace
+- Fixed: Glitches when processing Qualcomm crash reports (Certain crash reports
+  not getting processed, error when uploading a report with no events, filtering
+  out events containing only a few small memory regions)
+- Fixed: Aborting a staged OTA rollout for large fleets could fail
+- Fixed: Metric search in Device Timeline not returning any results
+- Fixed: Incorrect parsing of negative metric ranges
+- Fixed: Possible timeouts/performance issues when uploading symbol files in
+  projects with a large number of software versions
+- Fixed: Broken formatting of
+  [Slack notifications](/docs/platform/notifications) for
+  [Device Alerts](/docs/platform/alerts) when the alert had a special character
+  in its title
+- Fixed: Normalized
+  [Metric and Issue charts](/docs/platform/charts#metric-charts) showing data
+  only for the past two weeks
+- Changed: Showing Trace title instead of message under Issue Detail → Recent
+  Traces
+- Changed: Top & New Issues Charts no longer take Issues with no recent Traces
+  into account
+- Changed: Received Traces chart under Overview page no longer takes Traces with
+  future dates into account
+- Changed: Received Traces chart now only shows the data received and occurred
+  within the last 14 days or 8 weeks, instead of received within the last 14
+  days and occurred over all time
+
+## MCU
+
+- Fixed: Coredump processing failures due to corrupted log buffers
+- SDK versions
+  [0.36.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0360-and-sdk-0350---dec-6-2022),
+  [0.36.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0361-and-sdk-0360---dec-9-2022)
+  and
+  [0.37.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0370-and-sdk-0361---dec-16-2022)
+  were released. Some highlights:
+  - Added: Support for
+    [just-released ESP-IDF v5](https://github.com/espressif/esp-idf/releases/tag/v5.0)
+    (Thanks [@jlubawy](https://github.com/jlubawy) for the patch)
+  - Added: Auto-OTA (and auto-WiFi-join) feature to the
+    [ESP32 example app](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/esp32)
+  - Added: `MemfaultSdkMetric_UnexpectedRebootDidOccur` metric for tracking
+    crash-free hours
+
+## Android
+
+- Added: Support for [Device and Fleet level alerts](/docs/platform/alerts)
+- Improved: Logcat processing failing when a row with a UTF-8 encoding issue
+  encountered
+- We did not publish a new version of the
+  [Android Bort AOSP SDK](https://github.com/memfault/bort) in December.
+
+## Linux
+
+- Changed: Filtering out Traces with archived software versions under Issues
+  page
+- SDK version
+  [1.2.0](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#120---2022-12-26)
+  was released. Some highlights:
+  - Added:
+    [New `memfaultctl` command](/docs/linux/reference-memfaultctl-cli/#memfaultctl-commands)
+    to interact with `memfaultd`
+  - Added:
+    [Developer Mode](/docs/linux/reference-memfaultctl-cli/#developer-mode) to
+    reduce rate limits applied to coredump uploads during development
+  - Added: Support for running the Docker container on Apple silicon without
+    Rosetta emulation
+  - Improved: Coredump compression with gzip to reduce storage and network usage
+  - Fixed: `swupdate` getting into a bad state after reloading `memfaultd`
+  - Changed: `memfaultd --(enable|disable)-dev-collection` and `memfaultctl -s`
+    are now replaced by equivalent commands on `memfaultctl` and will be removed
+    in a future version
+
+## CLI
+
+- We did not publish a new version of the
+  [memfault-cli](https://pypi.org/project/memfault-cli/) in December.
