@@ -185,7 +185,10 @@ to be applicable.
 To determine if an active Release is applicable to a device, its payload
 attributes are tested against the parameters sent by the device. If they don’t
 match, a Release is considered to be incompatible and treated as if it did not
-exist. Any existing device in a given cohort or new device that joins a cohort (incl. devices first activated and auto-joining the default cohort) will be evaluated against the current set of active releases in the cohort and receive updates accordingly.
+exist. Any existing device in a given cohort or new device that joins a cohort
+(incl. devices first activated and auto-joining the default cohort) will be
+evaluated against the current set of active releases in the cohort and receive
+updates accordingly.
 
 An Release activated as a [staged-rollout](#staged-rollout-of-a-release) will
 only be applicable to the _staged_ portion of the Cohort it targets. In other
