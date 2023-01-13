@@ -130,7 +130,7 @@ function Home() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/nrf/samples/nrf9160/memfault/README.html">
+                                    <a href="https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/samples/nrf9160/memfault/README.html">
                                         <FiCode />
                                         Memfault Module in the nRF Connect SDK
                                     </a>
