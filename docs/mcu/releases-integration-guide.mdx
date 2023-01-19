@@ -164,8 +164,8 @@ To receive an OTA Payload, a device will need to pass these REST API query
 parameters:
 
 - `device_serial` - This is used for determining the `cohort` a Device is in.
-- `hardware_version` - To identify the board revision of the device for
-  situations when the device has not been seen before.
+- `hardware_version` - OTA payloads are specific to each `hardware_version`, so
+  this is a required parameter.
 - `software_type` - The software component on the device responsible for
   performing OTA updates.
 - `current_version` (optional)- The current `software_version` of the
