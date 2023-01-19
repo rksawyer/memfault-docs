@@ -15,8 +15,8 @@ a PSoC™ 6 project using Infineon's ModusToolbox™ Software SDK.
 
 :::note
 
-Note: these instructions were written using ModusToolbox™ release `2.4.0.5972`
-and tested against the
+Note: these instructions were written using ModusToolbox™ release `v3.0` and
+tested against the
 [`CY8CKIT-062S2-43012`](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/)
 evaluation board.
 
@@ -39,15 +39,20 @@ development board. At a high level, this will require the following steps.
 
 1. Download ModusToolbox™ Software SDK from Infineon.
 2. Generate a sample project from that SDK. This can be done from the IDE or
-   using the `project-creator-cli`, i.e
+   using the `project-creator-cli` binary. This can typically be found in the
+   ModusToolbox™ installation directory, such as
+   `/Applications/ModusToolbox/tools_3.0`.
 
-```bash
-project-creator-cli --board-id CY8CKIT-062S2-43012 --app-id  mtb-example-anycloud-udp-server --user-app-name my_example_app
-```
+   ```bash
+   project-creator-cli --board-id CY8CKIT-062S2-43012 \
+       --app-id  mtb-example-anycloud-udp-server      \
+       --user-app-name my_example_app
+   ```
 
 3. Compile and program application on development board, i,e
 
    ```bash
+   $ cd my_example_app
    $ make getlibs
    $ make build -j8
    $ make program
@@ -61,11 +66,11 @@ Infineon's website
 
 ### Add the Memfault Sources and Build Flags
 
-1. The Memfault SDK is implemented as a ModusToolbox™ middleware and can be
-   imported using the "library-manager". To launch the library manager for your
-   project, either type `make modlib` from the command line or click on "Library
-   Manager" under the tools tab in the IDE. From there, search for "Memfault
-   Firmware SDK" and click "Update"
+1. The Memfault SDK is implemented as a ModusToolbox™ middleware library and can
+   be imported using the "library-manager". To launch the library manager for
+   your project, either type `make modlibs` from the command line or click on
+   "Library Manager" under the tools tab in the IDE. From there, search for
+   "Memfault Firmware SDK" and click "Update"
 
    ![](/img/docs/mcu/arm-mtb-library-manager.png)
 
