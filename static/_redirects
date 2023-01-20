@@ -17,6 +17,7 @@
 /docs/platform/device-attributes /docs/platform/metrics#device-attributes
 /docs/mcu/self-serve/* /docs/mcu/embedded-self-serve/:splat
 /docs/best_practices/* /docs/best-practices/:splat
+/docs/mcu/uploading-software-versions /docs/mcu/symbol-file-build-ids
 
 # Renamed some pages for the Linux SDK
 /docs/linux/linux-getting-started-guide /docs/linux/integration-guide
