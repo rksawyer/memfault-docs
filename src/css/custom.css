@@ -136,12 +136,13 @@ section.features_src-pages- {
     }
 }
 
-/** When linking to anchors, sometimes they remain hidden by the header. Offset that. */
-.anchor-offset {
-    display: block;
-    position: relative;
-    top: -120px;
-    visibility: hidden;
+/**
+ * When linking to anchors, sometimes they remain hidden by the header. Offset that.
+ * Chose 70px due to height of top bar (60px) + small amount of additional space
+ * See https://stackoverflow.com/a/55683966/8060691 for more info
+ */
+:target {
+    scroll-margin-top: 70px
 }
 
 [role="tabpanel"] {
