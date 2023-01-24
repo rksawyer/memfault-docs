@@ -145,6 +145,32 @@ you've gained confidence through
 staged-rollout Release is working as expected, you can increase its rollout
 percentage.
 
+## Deleting a Release
+
+Releases can be deleted when they are no longer needed. Before a Release is
+deleted, all Release Activations must be marked as _Pulled_.
+
+Follow the steps below to ensure that all Activations are marked as _Pulled_ and
+to ultimately delete the Release.
+
+1. Navigate to the specific Release that should be deleted.
+2. In the top right, under **Compact Audit Log**, for any entries that are not
+   _Pulled_, click the _Edit_ button and **Abort** them.
+
+   <p align="center">
+     <img
+       width="500"
+       src="/img/docs/platform/ota/release-delete.png"
+       alt="deleting-a-release"
+     />
+   </p>
+
+3. Once all Activations have been marked as _Pulled_, click **Delete** on the
+   Release page and proceed through the confirmation.
+
+Note that if all Activations are not marked as _Pulled_ on a Release, an error
+will occur when trying to delete the Release.
+
 ## Updating Behavior
 
 When a device queries the [Device OTA Endpoint](#device-ota-endpoint), the
