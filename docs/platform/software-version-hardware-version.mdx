@@ -332,3 +332,25 @@ the `versionCode` is used to compare Software Versions.
 
 [device-info-header]:
   https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/platform/device_info.h
+
+## Archiving
+
+Memfault supports archiving Software Types and Versions. This action removes the
+selected **Software Type** or **Software Version**. After clicking the Archive
+button you'll no longer be able to see the selected Software Type/Version in the
+UI. The operation also marks any associated **Events** and **Traces** for
+deletion after 30 days.
+
+:::warning
+
+A Software Type/Version cannot be unarchived so proceed with caution!
+
+:::
+
+<p align="center">
+  <img
+    width="900"
+    src="/img/docs/platform/archive-software-version.png"
+    alt="/img/docs/platform/archive-software-version.png"
+  />
+</p>
