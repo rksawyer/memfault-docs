@@ -101,8 +101,8 @@ Infineon's website
 
 1. Add a unique identifier to project. Memfault will use this to match the
    appropriate symbol files to decode information published by the
-   memfault-firmware-sdk. This requires the following modification to your
-   projects `Makefile`
+   memfault-firmware-sdk. This requires a modification to your project's
+   `Makefile`.
 
    :::important
 
@@ -115,11 +115,26 @@ Infineon's website
 
    :::
 
-   ```diff
-   diff --git a/Makefile b/Makefile
+   Add the following snippet to the bottom of your project's `Makefile`:
 
-   -POSTBUILD=
-   +POSTBUILD=python -m mflt_build_id.__init__ $(CY_OPENOCD_SYMBOL_IMG)
+   ```makefile
+   # Note these must be placed after including the MTB make files as those files define
+   # many variables used to define memfault_post_build
+
+   # Target/symbol file of the app
+   APP_TARGET_FILE=$(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).$(MTB_RECIPE__SUFFIX_TARGET)
+   # Program/hex file of the app
+   APP_PROGRAM_FILE=$(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).$(MTB_RECIPE__SUFFIX_PROGRAM)
+
+   # Add additional dependency to hex file to ensure mflt_build_id runs before it is built
+   $(APP_PROGRAM_FILE): memfault_post_build
+
+   # Custom target to run mflt_build_id after target file is built but before program file
+   # is built to ensure correct build ID is included.
+   memfault_post_build: $(APP_TARGET_FILE)
+   	$(PYTHON_PATH) -m mflt_build_id.__init__ $(APP_TARGET_FILE)
+
+   .PHONY: memfault_post_build
    ```
 
 1. Update Makefile with an additional linker script. Add the following .ld file
