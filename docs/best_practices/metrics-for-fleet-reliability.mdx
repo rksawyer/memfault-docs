@@ -1,0 +1,228 @@
+---
+id: metrics-for-fleet-reliability
+title: Measuring Fleet Reliability With Crash-Free Hours
+sidebar_label: Measuring Fleet Reliability
+---
+
+Device operators commonly struggle to understand the patterns of failures in the
+field, especially those managing thousands of devices. Attributing failures to
+specific changes, such as publishing a new firmware update, releasing a hardware
+revision, or enabling a new feature is even more difficult.
+
+Devices also have a wide range of measurable failures. If the device is a smart
+lock, a failure can be the deadbolt failing to retract, a firmware fault, or a
+Wi-Fi disconnection. All of these failures could be critical to understanding
+the reliability of active devices.
+
+In this guide, we will discuss how to measure device reliability and stability
+by defining a metric called _crash-free hours_ and learn how to collect this
+metric using Memfault. Crash-free hours is a measure of the number of intervals
+with crashes over a span of time. With this metric in place, you can easily
+determine whether a particular firmware update or feature caused a regression in
+device stability.
+
+## Reliability Engineering Background Material
+
+Before explaining how to use Memfault to measure fleet reliability via
+crash-free hours, we will discuss a commonly known metric from reliability
+engineering, _Mean Time Between Failures_.
+
+### Mean Time Between Failures
+
+One frequently used reliability metric is Mean Time Between Failures (MTBF)[^1].
+A simple but imprecise definition of MTBF is the following:
+
+$$
+\textit{MTBF} = \frac{\textit{Total Operating Hours}}{\textit{Number of Failures}}
+$$
+
+Using an exponential distribution to model random component failures yields a
+more precise definition of MTBF. For more information on the probability theory
+behind MTBF, please see the resources linked in the footnotes below. The key
+insight is MTBF is a parameter of the measured _population_. It should not be
+used as a single unit's expected lifetime. Using MTBF as a guide, we can define
+a similar metric for fleet reliability.
+
+## Crash-Free Hours and Memfault
+
+IoT devices do not fit the traditional reliability engineering paradigm. A
+single failure does not render an IoT device non-functional. The failures
+encountered with firmware are generally deterministic, not random. MTBF provides
+a good place to start, but we have found there is a more suitable measure of
+reliability for IoT devices.
+
+Crash-free hours is the metric Memfault uses for this task. Crash-free hours
+provides insight into fleet reliability across any change to the fleet. Mobile
+and web applications use similar metrics like crash-free users[^2] or crash-free
+sessions[^3]. These metrics count crashes across a total number of users or
+sessions. For IoT devices though, reliability changes are best observed over
+intervals of time. We need to define what marks an hour as crash-free before
+completing our definition of crash-free hours.
+
+### Defining Unexpected Reboots
+
+To determine when a crash-free hour occurs, we must classify reboots as either
+unexpected or expected. _Expected reboots_ occur through normal use, such as a
+device resetting before a firmware update, or a user shutting off the device.
+Failures such as assertions, watchdog expirations, power brownouts, and more are
+would be classified as _unexpected reboots_. The SDK's reboot reason tracking
+subsystem[^4]<sup>, </sup>[^5]<sup>, </sup>[^6] provides this capability
+automatically. When tracking crash-free hours, it is very important to classify
+reboot reasons as precisely as possible. Please see the reboot reason subsystem
+page for more details on your platform.
+
+### Defining Crash-Free Hours
+
+To start, we use our configured heartbeat interval, typically one hour, as the
+defined length of time. Next, we collect the total number of intervals received
+from all fleet devices. From these intervals, we count the intervals that
+contained an unexpected reboot. Finally, we can calculate the percentage of
+heartbeat intervals in which no crashes occurred. Here is the formula:
+
+$$
+\textit{\% Crash-Free Intervals} = 100 * (1 - (\frac{\textit{Total Intervals With A Crash}}{\textit{Total Device Intervals}}))
+$$
+
+We use a percentage to normalize this metric for easier comparison across time
+periods and versions.
+
+## Enable Crash-Free Hours on Your Devices
+
+:::info
+
+At this time, only MCU devices are supported. Android and Linux support will be
+added to future SDK releases.
+
+:::
+
+### MCU Devices
+
+The MCU SDK requires version 0.37.0 or higher to collect data for crash-free
+hours. In versions 0.37.0 or higher, the SDK automatically collects the required
+metric called `MemfaultSdkMetric_UnexpectedRebootDidOccur`.
+
+## Viewing Crash-Free Hours On Memfault
+
+The crash-free hours metric is currently not automatically shown in the Memfault
+UI. The recommended approach is to create two charts in the Metrics section to
+display Total Operational Hours and Total Hours With Crashes. With these two
+charts, crash-free hours can be manually calculated.
+
+1. Create a chart to track Total Operational Hours:
+
+<p align="center">
+  <img
+    width="400"
+    src="/img/docs/best-practices/crash-free-hours-total-operational.png"
+    alt="Total operational hours metric chart"
+  />
+</p>
+
+2. Create a chart to track Total Hours With Crashes:
+
+<p align="center">
+  <img
+    width="400"
+    src="/img/docs/best-practices/crash-free-hours-total-w-crash.png"
+    alt="Total hours with a crash metric chart"
+  />
+</p>
+
+Now that we have our charts, we can calculate % of crash-free hours using our
+formula above over each interval.
+
+To simplify things, let's assume our heartbeat intervals are 1 hour in length
+and we're interested in a period over 5 days. We have a fleet of 10,000 devices,
+each operating for 10 hours a day. Over this period, we found that 1500 hours
+had an _Unexpected Reboot_.
+
+$$
+\textit{\% Crash-Free Hours} = 100 * (1 - (\frac{1500}{10000 * 10 * 5}))
+$$
+
+Following this example, the fleet has a percent of crash-free hours equal to
+99.7%.
+
+If a future firmware update is released, and the crash-free hours metric drops
+down to 95%, this would tell us that there is a stability regression in the new
+firmware.
+
+## Crash-Free Hours Example Using Memfault
+
+In this next section, we will walk through some data collected by devices in a
+fleet to show how crash-free hours can work in practice.
+
+In this example we have a small fleet that has two software versions. The first
+version, reliable-fw v1.0.0, has many crashes. Let's calculate the crash-free
+hours for this first release. We'll use our data from 1/23.
+
+<p align="center">
+  <img
+    width="800"
+    src="/img/docs/best-practices/crash-free-hours-chart-1.png"
+    alt="Highlighting total crashes on 1/23"
+  />
+  <img
+    width="800"
+    src="/img/docs/best-practices/crash-free-hours-chart-2.png"
+    alt="Highlighting total hours on 1/23"
+  />
+</p>
+
+$$
+100 * (1 - (\frac{22}{22})) = 0\%
+$$
+
+Our devices are hitting a crash ever hour, about as bad as things can get. We
+use the collected coredumps to determine a fix and release reliable-fw v1.0.1.
+Here's an update to our data.
+
+<p align="center">
+  <img
+    width="800"
+    src="/img/docs/best-practices/crash-free-hours-chart-3.png"
+    alt="Highlighting total crashes on 1/24"
+  />
+  <img
+    width="800"
+    src="/img/docs/best-practices/crash-free-hours-chart-4.png"
+    alt="Highlighting total hours on 1/24"
+  />
+</p>
+
+Using the version comparison feature, we can clearly see that our crash count
+has plummeted and our total hours have remained about the same. For
+completeness, here is the calculation for the day v1.0.1 was released, 1/24.
+
+$$
+100 * (1 - (\frac{4}{20})) = 80\%
+$$
+
+## Not Just Crashes
+
+The techniques discussed in this article can be applied to any type of failure.
+Here are some examples:
+
+- Bluetooth disconnections
+- Failing to open/close a lock
+- Sensor read failures
+- Your device's unique operational condition
+
+The key to measuring these is to measure the number of intervals with a failure,
+and the total number of intervals collected, and run these through the same
+formula.
+
+If you have any questions about how you can calculate a similar metric to
+crash-free hours for your own devices or firmware, feel free to reach out to us
+at [support@memfault.com](mailto:support@memfault.com).
+
+## References and Further Reading
+
+<!-- prettier-ignore-start -->
+[^1]: [Applied Statistics: MTBF](http://www.applied-statistics.org/mtbf.html#3)
+[^2]: [Crash-Free Users](https://firebase.google.com/docs/crashlytics/troubleshooting?platform=ios&authuser=0&hl=en#cfu-calculation)
+[^3]: [Crash-Free Sessions](https://www.instabug.com/blog/benchmarking-crash-free-sessions-for-mobile-apps-whats-a-good-crash-free-rate)
+[^4]: [MCU SDK Reboot Reason Subsystem](/docs/mcu/reboot-reason-tracking)
+[^5]: [Android SDK Reboot Reason Subsystem](/docs/android/android-reboot-events)
+[^6]: [Linux SDK Reboot Reason Subsystem](/docs/linux/reboot-reason-tracking)
+<!-- prettier-ignore-end -->
