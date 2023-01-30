@@ -198,12 +198,21 @@ nRF Connect SDK 1.4 and above include a
 that enables collection of full register state when a crash takes place.
 
 For older SDK versions, you need to apply the patch yourself. For convenience,
-we have included the patch in the memfault-firmware-sdk:
+we have included the patch in the memfault-firmware-sdk, up through `0.31.5` of
+the Memfault Firmware SDK:
 
 ```bash
 $ cd ${ZEPHYR_BASE}
 $ git apply ${MEMFAULT_FIRMWARE_SDK}/ports/zephyr/v2.x/coredump-support.patch
 ```
+
+:::caution
+
+Zephyr 1.14 support was removed in `0.32.0` of the Memfault Firmware SDK;
+projects using nRF Connect SDK < 1.4 will need to stay on version `0.31.5` or
+older of the Memfault Firmware SDK.
+
+:::
 
 ### Implement Platform Dependencies
 
