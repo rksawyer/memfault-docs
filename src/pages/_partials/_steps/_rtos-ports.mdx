@@ -1,6 +1,5 @@
-The Memfault SDK includes pre-canned integrations for many RTOS environments.
-Expand the tab for the one applies to your system below in order to pick them
-up.
+The Memfault SDK includes pre-canned integrations for RTOS environments. Expand
+the tab for the one applies to your system below in order to pick them up.
 
 <details>
 
@@ -8,7 +7,7 @@ up.
 
 #### Add FreeRTOS Specific Sources To Compilation
 
-```
+```plaintext
   ${MEMFAULT_SDK_ROOT}/ports/freertos/src/memfault_core_freertos.c
   ${MEMFAULT_SDK_ROOT}/ports/freertos/src/memfault_freertos_ram_regions.c
   ${MEMFAULT_SDK_ROOT}/ports/freertos/src/memfault_panics_freertos.c
@@ -27,7 +26,7 @@ up.
 
 While in the file, we recommend using the following settings to catch issues:
 
-```
+```c
 #define configCHECK_FOR_STACK_OVERFLOW 2
 void vAssertCalled(const char *file, int line);
 #define configASSERT(x) if ((x) == 0) vAssertCalled( __FILE__, __LINE__ )
@@ -48,5 +47,76 @@ int memfault_platform_boot(void) {
 +
   memfault_build_info_dump();
 ```
+
+#### Optional: Configure FreeRTOS Task Capture Size
+
+If the platform is configured to not capture all of RAM (due to storage or
+bandwidth limitations), it's still possible to capture the active FreeRTOS tasks
+as part of a coredump. See
+[this file](https://github.com/memfault/memfault-firmware-sdk/blob/0.37.1/ports/freertos/src/memfault_freertos_ram_regions.c)
+for details on that implementation.
+
+With that in place, the Memfault SDK will selectively capture the running tasks
+during a coredump by saving both the Task Control Block (TCB) structure as well
+as a limited backtrace for each task.
+
+By default, as of `0.39.0`, the Memfault SDK will capture a truncated copy of
+each TCB, which saves space in the coredump. See below for more details on this.
+
+<details><summary>TCB structure capture size</summary>
+Under some configurations, the TCB structures consume significant amounts of
+coredump space (300-1000 bytes per TCB). To mitigate this problem, as of the
+Memfault Firmware SDK v0.37.1, a configuration option
+[`MEMFAULT_PLATFORM_FREERTOS_TCB_SIZE`](https://github.com/memfault/memfault-firmware-sdk/blob/0.37.1/components/include/memfault/default_config.h#L548-L557)
+is available for fine-tuning the captured FreeRTOS TCB size. This can usually be
+set to 100 bytes, but please confirm for your system by examining the full size
+of the `TCB_t` data structure; for example, using the `pahole` tool as shown
+below. Memfault requires the struct members through `pcTaskName` to decode the
+task.
+
+```bash
+# note- the 'tskTaskControlBlock' is the actual type name for the 'TCB_t' struct
+❯ pahole -C 'tskTaskControlBlock' ./build/memfault-esp32-demo-app.elf.memfault_log_fmt
+```
+
+The unused `xNewLib_reent` member below is 240 bytes out of the total 352 byte
+struct size.
+
+```c
+struct tskTaskControlBlock {
+        volatile StackType_t  *    pxTopOfStack;         /*     0     4 */
+        xMPU_SETTINGS              xMPUSettings;         /*     4     4 */
+        ListItem_t                 xStateListItem;       /*     8    20 */
+        ListItem_t                 xEventListItem;       /*    28    20 */
+        UBaseType_t                uxPriority;           /*    48     4 */
+        StackType_t *              pxStack;              /*    52     4 */
+        char                       pcTaskName[16];       /*    56    16 */
+        /* --- cacheline 1 boundary (64 bytes) was 8 bytes ago --- */
+        BaseType_t                 xCoreID;              /*    72     4 */
+        StackType_t *              pxEndOfStack;         /*    76     4 */
+        UBaseType_t                uxTCBNumber;          /*    80     4 */
+        UBaseType_t                uxTaskNumber;         /*    84     4 */
+        UBaseType_t                uxBasePriority;       /*    88     4 */
+        UBaseType_t                uxMutexesHeld;        /*    92     4 */
+        void *                     pvThreadLocalStoragePointers[1]; /*    96     4 */
+        TlsDeleteCallbackFunction_t pvThreadLocalStoragePointersDelCallback[1]; /*   100     4 */
+        struct _reent              xNewLib_reent;        /*   104   240 */
+        /* --- cacheline 5 boundary (320 bytes) was 24 bytes ago --- */
+        volatile volatile uint32_t   ulNotifiedValue;    /*   344     4 */
+        volatile volatile uint8_t   ucNotifyState;       /*   348     1 */
+        uint8_t                    ucStaticallyAllocated; /*   349     1 */
+        uint8_t                    ucDelayAborted;       /*   350     1 */
+
+        /* size: 352, cachelines: 6, members: 20 */
+        /* padding: 1 */
+        /* last cacheline: 32 bytes */
+};
+```
+
+If the default capture size is too small, it can be adjusted using the
+`MEMFAULT_PLATFORM_FREERTOS_TCB_SIZE` config value in
+`memfault_platform_config.h`.
+
+</details>
 
 </details>

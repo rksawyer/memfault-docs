@@ -17,9 +17,9 @@ thread. The following sections list for each RTOS what needs to be captured. See
 the documentation on [Coredump Collection](/docs/mcu/coredumps) for details on
 how to set up additional coredump capturing regions.
 
-### FreeRTOS
+## FreeRTOS
 
-#### Required
+### Required
 
 These variables must be captured in the coredump. On top of this, the memory of
 all task control blocks (`TCB_t`) must be captured. Because FreeRTOS TCBs double
@@ -48,7 +48,7 @@ and relevant linker flags.
 
 :::
 
-#### Optional
+### Optional
 
 - `xTasksWaitingTermination`
 - `xSuspendedTaskList`
@@ -57,9 +57,9 @@ To enable stack usage high water marking, the `configCHECK_FOR_STACK_OVERFLOW`
 configuration option must be enabled and the _full_ stacks for each thread must
 be captured as well.
 
-### Zephyr
+## Zephyr
 
-#### Required
+### Required
 
 These variables must be captured in the coredump:
 
@@ -69,7 +69,7 @@ These variables must be captured in the coredump:
 
 ### Azure RTOS ThreadX
 
-#### Required
+### Required
 
 These variables must be captured in the coredump:
 
@@ -78,7 +78,7 @@ These variables must be captured in the coredump:
 - `_tx_thread_created_count`
 - `_tx_thread_system_state`
 
-### Other RTOSes
+## Other RTOSes
 
 Memfault also supports these other RTOSes: Argon, ChibiOS, Mynewt, NuttX,
 Quantum Platform, Keil RTX5 / ARM mbedOS, and TI RTOS.
