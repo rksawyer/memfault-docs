@@ -72,10 +72,16 @@ different methods:
 #include "memfault/components.h"
 // [ ...]
 void test_trace_event_cli_cmd(void) {
+    // Examples of the different flavors of Trace Events
+
+    // 1. basic trace event- call site information and Trace Event Reason code
     MEMFAULT_TRACE_EVENT(test);
-    // trace event with status code (i.e error code returned from stack)
+
+    // 2. trace event with status code (i.e error code returned from stack),
+    // providing additional context to the Trace Event
     MEMFAULT_TRACE_EVENT_WITH_STATUS(test, 0xdeadbeef);
-    // trace event with a log of arbitrary data
+
+    // 3. trace event with a log of arbitrary data
     MEMFAULT_TRACE_EVENT_WITH_LOG(test, "A trace event with log %d", 1);
 }
 ```
@@ -94,6 +100,32 @@ void ble_le_process_ll_pkt(...) {
   // ..
 }
 ```
+
+For details on the trace event macros, see the
+[header file](https://github.com/memfault/memfault-firmware-sdk/blob/0.38.0/components/include/memfault/core/trace_event.h).
+
+### Trace Event Variants
+
+As shown above, there are a few different types of Trace Events available.
+
+1. `MEMFAULT_TRACE_EVENT()` - a simple trace event, applying the Custom Trace
+   Reason
+2. `MEMFAULT_TRACE_EVENT_WITH_STATUS()` - a trace event including an arbitrary
+   user data value
+3. `MEMFAULT_TRACE_EVENT_WITH_LOG()` - a trace event including a `printf`-like
+   string (the formatter will use [Compact Logs](/docs/mcu/compact-logs) if
+   enabled and supported on the platform).
+
+Trace Events, like Coredumps, are de-duplicated to assign multiple Trace Events
+to the same Issue. The de-duplication works as follows:
+
+- Trace Events with the same Reason (and same Status code or no Status code) and
+  same call frame (function where the Trace is called) will be de-duplicated
+- Trace Events with the same Reason, Status code, and call frame, but different
+  log message, will be de-duplicated. The log message is available from the
+  individual Trace view.
+- Trace Events with the same Reason and a different Status code will **not** be
+  de-duplicated
 
 ### Recording Trace Events from Interrupts
 
