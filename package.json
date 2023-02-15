@@ -14,9 +14,9 @@
         "lint:prettier": "yarn lint:prettier:base --check"
     },
     "dependencies": {
-        "@docusaurus/core": "^2.0.1",
-        "@docusaurus/plugin-ideal-image": "^2.0.1",
-        "@docusaurus/preset-classic": "^2.0.1",
+        "@docusaurus/core": "^2.3.1",
+        "@docusaurus/plugin-ideal-image": "^2.3.1",
+        "@docusaurus/preset-classic": "^2.3.1",
         "@endiliey/react-ideal-image": "^0.0.11",
         "classnames": "^2.2.6",
         "core-js": "^3.4.1",
@@ -49,6 +49,6 @@
         "netlify-cli": "^2.30.0",
         "prettier": "^2.5.1",
         "react-datocms": "^3.0.15",
-        "sharp": "^0.30.5"
+        "sharp": "^0.31.3"
     }
 }
