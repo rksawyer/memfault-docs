@@ -237,6 +237,32 @@ void memfault_platform_get_device_info(sMemfaultDeviceInfo *info) {
 }
 ```
 
+#### Initializing Memfault
+
+When working with Memfault Firmware SDK version 0.40.0 and above, you will need
+to initialize the SDK from your application. This can be done simply by adding a
+call to `memfault_boot` from `main_app`. We recommend doing this as early as
+possible in your initialization process, so Memfault components can begin
+capturing data. Additionally, you should initialize any dependencies used by
+`memfault_platform_get_device_info` as this is called within `memfault_boot`.
+
+Here's a code example:
+
+```c
+#include "memfault/esp_port/core.h"
+
+void app_main() {
+  // Initialize any components that are dependencies of memfault_platform_get_device_info
+
+  memfault_boot();
+
+  // Remainder of your main task
+}
+```
+
+When using SDK versions prior to 0.40.0, an additional step is required. You
+will need to explicitly set `CONFIG_MEMFAULT_AUTOMATIC_INIT=n` in your project.
+
 #### Configure Memfault Project Key
 
 The project key is set via a Kconfig variable, `MEMFAULT_PROJECT_KEY`.
@@ -343,22 +369,9 @@ int memfault_post_data(void) {
 
 ## Frequently Asked Questions
 
-### Memfault library initialization
+### Automatic Library Initialization
 
-By default, the Memfault library is initialized as part of the ESP-IDF global
-ctors initialization process.
-
-However, if you would like to defer initialization, the Kconfig flag
-`CONFIG_MEMFAULT_AUTOMATIC_INIT` can be set explicitly to `=n`, and then the
-Memfault library can be manually initialized by calling the `memfault_boot()`
-function.
-
-```c
-#include "memfault/esp_port/core.h"
-
-void app_main() {
-#if !CONFIG_MEMFAULT_AUTOMATIC_INIT
-  // Memfault library initialization
-  memfault_boot();
-#endif
-```
+By default in Memfault Firmware SDK versions 0.40.0 and above, the Memfault
+library is not initialized automatically. See the
+[previous section](#initializing-memfault) for more info. For SDK versions prior
+to 0.40.0, a Kconfig exists but is deprecated and not supported for use.
