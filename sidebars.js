@@ -17,6 +17,7 @@ module.exports = {
                 "platform/inspecting-a-device",
                 "platform/software-version-hardware-version",
                 "platform/user-management",
+                "platform/access-control-teams-roles",
                 "platform/organization-auth-tokens",
                 "platform/issue-management",
                 "platform/ota",

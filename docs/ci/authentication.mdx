@@ -22,9 +22,14 @@ The recommended authentication mechanism for automation scripts is
 ### Organization Auth Token
 
 Requests authenticated via an Organization Auth Token can only access the
-resources of their respective organization. Admins can
+resources of their respective organization. [Organization
+Admins][organization-admins] can
 [create and delete](/docs/platform/organization-auth-tokens) Organization Auth
 Tokens.
+
+Organization Auth Tokens have the same access level as [Project
+Managers][project-managers], and this applies to every Project in the
+Organization.
 
 <Tabs
   defaultValue="api"
@@ -103,8 +108,9 @@ used by devices that send data to Memfault and in contrast to the other
 mechanisms listed here not considered secrets. They can also be useful during
 initial development to send up coredumps from a developers machine.
 
-A Project Key is generated automatically upon project creation. Administrators
-can generate and cycle the API key via an
+A Project Key is generated automatically upon project creation. [Organization
+Admins][organization-admins] and [Project Managers][project-managers] can
+generate and cycle the API key via an
 [API endpoint](https://api-docs.memfault.com/#48c6c1eb-ae59-4841-92ee-e61d1d4b5a85).
 Every project member see the project's Project Key.
 
@@ -129,3 +135,5 @@ memfault --project-key "$YOUR_PROJECT_KEY" ...
 
   </TabItem>
 </Tabs>
+
+[organization-admins]: /docs/platform/access-control-teams-roles#admin

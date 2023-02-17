@@ -1,0 +1,258 @@
+---
+id: access-control-teams-roles
+title: "Access Control: Teams and Roles"
+sidebar_label: "Access Control: Teams and Roles"
+---
+
+This document shows how Organization Admins may manage access control in an
+Organization by using Teams and Roles.
+
+## Teams
+
+:::info
+
+Teams are a not generally available yet. Please [contact us] to discuss enabling
+early access.
+
+:::
+
+Teams are a flexible way to manage access to Projects for members of an
+Organization. By using Teams, Organization Admins can control which users should
+be able to:
+
+- [see a Project at all](#revoking-access-to-a-project),
+- [make changes to (among others) charts, devices, or issues](#reader), or
+- [perform OTA-related actions](#manager) that may impact an entire fleet.
+
+To get started using Teams, find the [**Admin -> Teams**][app-teams] view for
+your Organization. Note that only [Organization Admins][organization-admins]
+have access to this view.
+
+### Managing Team Members
+
+To manage Team members, click on a Team in the [**Admin -> Teams**][app-teams]
+view, and select the **Members** tab. Then, find the **Add members** button:
+
+![](/img/docs/platform/teams/team-add-members.png)
+
+Then, simply use the "add" and "remove" buttons:
+
+![](/img/docs/platform/teams/team-adding-members.png)
+
+### Managing Project Access Within a Team
+
+A team adds a [role][project-roles] to its members in a given Project.
+
+A user may be a member of multiple Teams, so they could receive a different role
+in each Project, or multiple roles per Project. In this case, the roles don't
+compete: they behave additively.
+
+The following screenshot shows a Team and the roles it adds to its members in
+each Project. To find this view, click on a Team in the [**Admin ->
+Teams**][app-teams] view, and select the **Projects** tab. Then, select a role
+for each Project:
+
+![](/img/docs/platform/teams/team-roles.png)
+
+#### Revoking Access to a Project
+
+By selecting `None` as a role in a given Project, a Team will no longer grant
+access to that Project. As long as the members of this Team do not have access
+to the Project through other means (for example, by also being members of
+another Team that does grant access to it) they will not be able to see the
+Project anywhere, including the Project selection menu at the top-left of the
+Memfault Web App.
+
+### Team Settings
+
+To manage Team settings, click on a Team in the [**Admin -> Teams**][app-teams]
+view, and select the **Settings** tab. In this view, you'll find the following
+settings:
+
+- Automatically add new users to this Team: when inviting new users to the
+  Organization, automatically add them to this Team. Enabling this will not
+  immediately invite everyone in the Organization to this Team. See [Managing
+  Team members][managing-members].
+- Automatically grant a role to this Team for new Projects: when creating a new
+  Project, grant this Team a specific role, or "none" if you're planning to
+  grant access manually later.
+
+## Organization Roles
+
+Organization Roles represent the access level of a user within an Organization,
+and apply to all Projects. See [User Management][docs-user-management] to learn
+how Organization Roles can be assigned to users as an Organization Admin.
+
+### Organization Member
+
+The Organization Member role is the default for newly-invited users, and
+represents basic access to an Organization. To manage access within Projects,
+see [Project Roles][project-roles].
+
+### Organization Admin
+
+[Organization Admins][organization-admins] can:
+
+- access the **Admin** panel for the Organization,
+- update the Organization Role of other users,
+- invite new users to the Organization,
+- remove users from the Organization,
+- create new Projects for the Organization,
+- create new [Organization Auth Tokens][oats], and
+- delete existing Organization Auth Tokens.
+
+Implicitly, Organization Admins also have all the privileges of
+[Project Managers](#manager) for every Project in the Organization.
+
+## Project Roles
+
+Project Roles represent the access level of a user within a Project. See
+[Managing Project Access Within a Team](#managing-project-access-within-a-team)
+to learn how to use them.
+
+### No Role
+
+Selecting "None" as a role will result in a Team not granting access to a
+Project. See [Revoking Access to a Project](#revoking-access-to-a-project).
+
+### Reader
+
+Readers have read-only access to a Project, with one exception: they may use the
+commenting features on Issues. Additionally, Readers don't have direct access to
+raw files uploaded by devices or manually uploaded into the application. This
+means:
+
+- They can't use the Download button found in certain types of Traces in the
+  Issue view.
+- On MCU, they can't see the Analyzer view or Globals & Statics, because they
+  provide a detailed view into the Trace.
+
+### Member
+
+Members can perform most of the day-to-day actions within a Project, including
+[creating charts][docs-charts], [managing Issues][docs-issues], [creating
+Alerts][docs-alerts] and accessing files otherwise inaccessible by
+[Readers](#reader).
+
+### Manager
+
+Managers have additional privileges on top of those of [Members](#member). At a
+high level, these privileges relate to the ability to manage a fleet using
+[Over-the-Air Updates (OTA)][ota]. Particularly, they can:
+
+- manage Releases and activate them,
+- regenerate Project Keys,
+- manage Cohorts and configure them, and
+- manage Software Types and Software Versions.
+
+## The `everyone` Team
+
+The `everyone` Team is created and maintained automatically by default for an
+Organization. There are some special rules about it:
+
+- It invariably contains everyone in the Organization. That means you cannot add
+  or remove members manually.
+- Its "Automatically add new users to this team" [Team setting][team-settings]
+  is always enabled, and it cannot be changed.
+
+However, you can modify the setting "When creating a new project, grant the
+following role to this team". For example, you may want to set it to "none" in
+order to manually control access to newly-created Projects.
+
+To find your Organization's `everyone` Team, go to [**Admin ->
+Teams**][app-teams] and click on `everyone`, or [use this direct
+link][app-everyone-team].
+
+## Organization Auth Tokens
+
+Organization Auth Tokens can be used for automation and have the same privileges
+as [Project Managers](#manager) for every Project in the Organization, but do
+not have the additional privileges of [Organization
+Admins][organization-admins]. The access level of an Organization Auth Token
+cannot be changed.
+
+Read more about [creating Organization Auth Tokens][oats].
+
+## Configuration Examples
+
+The goal of these examples is to provide some recipes of configurations that
+your Organization may want to use as a starting point for further customization.
+
+### Separate Manager and Reader Teams
+
+In this set-up, newly-invited users get [Manager](#manager) access to all
+Projects, but there's a separate Reader Team consisting of some existing users
+that should have constrained access. These users will only receive read-only
+access to a smaller number of Projects.
+
+1. Open your [`everyone` Team][app-everyone-team]
+   - in the Projects tab, select "None" for every Project
+   - in the Settings tab, set "Automatically grant this role to this Team for
+     new Projects" to "None" so that future Projects are not automatically
+     visible to everyone in the Organization (see documentation on [Team
+     Settings][team-settings])
+2. [Create a Team][app-create-team] called `managers`
+   - open the `managers` Team
+   - in the Members tab, add any new members you need
+   - in the Projects tab, select the "Manager" role for all your Projects
+   - optionally, configure this team to automatically add new users, and to
+     automatically grant its members a role when you create a new Project (see
+     documentation on [Team Settings][team-settings])
+3. [Create a Team][app-create-team] called `readers`
+   - open the `readers` Team and select the Projects tab
+   - select the [Reader role](#reader) for the Projects you need
+   - in the Members tab, add anyone who should be in the `readers` Team
+   - in the Settings tab, set "Automatically grant this role to this Team for
+     new Projects" to "None" or "Reader" in order to constrain access to future
+     Projects for this Team (see documentation on [Team
+     Settings][team-settings])
+
+Remember that when you invite a new user to the Organization, they will
+automatically be added to your `managers` Team, so you'll need to move them to
+the `readers` team if that's what you need. Alternatively, configure `readers`
+(instead of `managers`) to automatically add new users.
+
+### Stealth-mode Project
+
+You can create a Project that's only visible to distinguished users within your
+Organization:
+
+1. Open your [`everyone` Team][app-everyone-team]
+   - in the Settings tab, set "Automatically grant this role to this Team for
+     new Projects" to "None" so that the newly-created Project is only visible
+     to Organization Admins (see documentation on [Team
+     Settings][team-settings])
+2. [Create your new Project][docs-create-project], let's call it
+   `secret-project` for the sake of this example
+3. [Create a Team][app-create-team] called `managers-secret-project`
+   - in the Projects tab, select the [Manager](#manager) role for
+     `secret-project`
+   - in the Members tab, add the users who should become members of this Team,
+     which will give them access to `secret-project`
+
+You may want to set the "Automatically grant this role to this Team for new
+Projects" setting on the `everyone` Team back to your preferred option.
+
+Note that [Organization Admins][organization-admins] will be able to see
+`secret-project` regardless of which Teams they're members of.
+
+[contact us]: mailto:hello@memfault.com
+[oats]: /docs/platform/organization-auth-tokens
+[ota]: /docs/platform/ota
+[project-roles]: /docs/platform/access-control-teams-roles#project-roles
+[organization-admins]:
+  /docs/platform/access-control-teams-roles#organization-admin
+[managing-members]:
+  /docs/platform/access-control-teams-roles#managing-team-members
+[team-settings]: /docs/platform/access-control-teams-roles#team-settings
+[everyone]: /docs/platform/access-control-teams-roles#everyone
+[app-teams]: https://app.memfault.com/organizations/-/settings/teams
+[app-everyone-team]:
+  https://app.memfault.com/organizations/-/settings/teams/everyone
+[app-create-team]: https://app.memfault.com/organizations/-/settings/teams?new
+[docs-charts]: /docs/platform/charts
+[docs-issues]: /docs/platform/issue-management
+[docs-alerts]: /docs/platform/alerts
+[docs-create-project]:
+  /docs/platform/projects-and-fleets/#creating-a-new-project
+[docs-user-management]: /docs/platform/user-management

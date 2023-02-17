@@ -17,7 +17,8 @@ Please [contact us] if you want to use a SAML-based identity provider.
 
 ## Enabling SSO
 
-1. As an administrator, visit [**Admin > SSO**][sso-new] to **Add Connection**.
+1. As an [Organization Admin][organization-admins], visit [**Admin >
+   SSO**][sso-new] to **Add Connection**.
 2. Select the identity provider you want to use:
    - **Google OAuth** and **Microsoft OAuth**: Provide email domain that you use
      (e.g. `example.com` for `alice@example.com`).
@@ -51,7 +52,8 @@ This also means that [User API keys](/docs/ci/authentication#user-api-key) will
 stop working, as they can't be re-authenticated interactively. In that case,
 your users will need to use
 [Organization Auth Tokens](/docs/ci/authentication#organization-auth-token)
-instead. Administrators can and have to revoke them as needed.
+instead. [Organization Admins][organization-admins] can and have to revoke them
+as needed.
 
 Please [contact us] if you want to change that setting.
 
@@ -96,3 +98,4 @@ have to remember this piece of information.
 [sso-new]: https://app.memfault.com/organizations/-/settings/sso?new
 [slug]: https://en.wikipedia.org/wiki/Clean_URL#Slug
 [contact us]: mailto:hello@memfault.com
+[organization-admins]: /docs/platform/access-control-teams-roles#admin

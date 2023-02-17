@@ -4,7 +4,8 @@ title: Organization Auth Tokens
 
 Organization Auth Tokens allow access of the organization's resources
 [for automation](/docs/ci/authentication#organization-auth-token). They can be
-accessed and managed by Administrators at **Admin → Organization Auth Tokens**.
+accessed and managed by [Organization Admins][organization-admins] at **Admin →
+Organization Auth Tokens**.
 
 :::note
 
@@ -20,9 +21,9 @@ import orgAuthTokenList from "../../static/binary-assets/organization-auth-token
 
 ### Creation
 
-Administrators can create new tokens via the **Create Token** button. They will
-be prompted to enter an optional description. After that, they are shown the
-token and should store it somewhere safe.
+[Organization Admins][organization-admins] can create new tokens via the
+**Create Token** button. They will be prompted to enter an optional description.
+After that, they are shown the token and should store it somewhere safe.
 
 import orgAuthTokenNew from "../../static/binary-assets/organization-auth-token-new.png";
 
@@ -30,5 +31,7 @@ import orgAuthTokenNew from "../../static/binary-assets/organization-auth-token-
 
 ### Deletion
 
-Administrators can delete tokens via the **Delete** button. Any automation (or
-user) that uses that token will lose access.
+[Organization Admins][organization-admins] can delete tokens via the **Delete**
+button. Any automation (or user) that uses that token will lose access.
+
+[organization-admins]: /docs/platform/access-control-teams-roles#admin
