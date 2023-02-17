@@ -19,13 +19,40 @@ this guide we describe the different kinds of metric that can be collected.
 
 ## Summary
 
-The `Reporting` API enables logging individual metrics. These are aggregated by
-the Bort SDK, and regularly uploaded to Memfault. These aggregates are:
+The `Reporting` API enables logging individual metrics. These are uploaded in
+high resolution and in aggregate.
+
+### High Resolution Telemetry (HRT)
+
+Individual metric events are uploaded and displayed in high resolution on the
+device timeline. This will appear similar to the existing batterystats metrics.
+
+All metrics are uploaded as part of HRT, even if there are no aggregations
+requested.
+
+:::note
+
+HRT is supported from Bort 4.4.0 onwards. This is part of the **Debugging**
+Fleet Sampling resolution.
+
+:::
+
+### Aggregate Metrics
+
+Bort aggregates each metric at the end of the reporting period (usually 1 hour).
+These aggregates are:
 
 - Shown on the device timeline.
 - Available for use as [Timeseries](/docs/platform/metrics#timeseries) or
   [Attributes](/docs/platform/metrics#attributes) metrics, aggregated across the
   entire fleet.
+
+:::note
+
+Aggregate metrics are supported from Bort 4.0.0 onwards. This is part of the
+**Monitoring** Fleet Sampling resolution.
+
+:::
 
 See [Metrics](/docs/platform/metrics) for more details on how metrics can be
 configured and used in the Memfault dashboard.
@@ -35,7 +62,8 @@ configured and used in the Memfault dashboard.
 Custom Metrics can be recorded from any Java/Kotlin application, by including
 the `reporting-lib` library. This library reports metrics to the
 `memfault_structured` system service (The main Bort application is not required
-to be started for every value recorded).
+to be started for every value recorded). The latest version of the library is
+`1.1`.
 
 To add the library,
 [follow these instructions](/docs/android/custom-events#add-the-reporting-lib-library).
@@ -71,7 +99,7 @@ configuration (naming, defining aggregations) only has to happen in one place
 e.g.
 
 ```
-val distributionMetric = Reporting.report().distribution("my-distribution", NumericAgg.MEAN, NumericAgg.MIN)
+val distributionMetric = Reporting.report().distribution("my-distribution", numericAggs(NumericAgg.MEAN, NumericAgg.MIN))
 ```
 
 Then we can use this metric to record values from elsewhere in our codebase:
@@ -108,7 +136,8 @@ disconnectionCounter.incrementBy(7.9)
 
 This will create a metric in Memfault named `disconnection-events.sum`. In the
 example above, this would have a value of `12.9` for the current reporting
-period.
+period. This metric can be disabled by setting `sumInReport = false` when
+creating the metric (individual events will be shown in HRT on timeline).
 
 :::info
 
@@ -126,7 +155,7 @@ Several aggregations are available to use.
 Create a distribution metric named `rssi`, which tracks `MEAN` and `MIN` values:
 
 ```
-val rssiMetric = Reporting.report().distribution("rssi", NumericAgg.MEAN, NumericAgg.MIN)
+val rssiMetric = Reporting.report().distribution("rssi", numericAggs(NumericAgg.MEAN, NumericAgg.MIN))
 ```
 
 Then record values periodically:
@@ -153,9 +182,8 @@ The available distribution aggregations are defined in the `NumericAgg` enum:
 - `MEAN`: Mean value recorded during the period.
 - `COUNT`: Number of values recorded during the period.
 
-Note that you must request at least one aggregation when creating a
-`distribution` metric (otherwise no entries will be created in the metric
-report).
+All values will be shown in HRT on timeline. Entries will only be created in the
+metric report for each requested aggregation.
 
 :::info
 
@@ -184,7 +212,7 @@ Create a state tracker named `connection-state`, tracking the total time spent
 in each state:
 
 ```
-private val connectionStateMetric = Reporting.report().stateTracker<ConnectionState>("connection-state", StateAgg.TIME_TOTALS)
+private val connectionStateMetric = Reporting.report().stateTracker<ConnectionState>("connection-state", statsAggs(StateAgg.TIME_TOTALS))
 ```
 
 Then record state transitions as they occur:
@@ -206,8 +234,7 @@ This creates one metric for each state:
   the reporting period.
 
 Note that we used `TIME_TOTALS` for this example. There are three available
-aggregation types, defined in `StateAgg`. We must request at least one
-aggregation, otherwise no entries will be generated in metric report:
+aggregation types, defined in `StateAgg`:
 
 - `TIME_TOTALS`: Creates a metric per state, totalling the time (in seconds)
   spent in that state.
@@ -217,6 +244,9 @@ aggregation, otherwise no entries will be generated in metric report:
 - `LATEST_VALUE`: Creates one metric in the report, with the last recorded value
   at the end of the reporting period. This is similar to using a
   `stringProperty` or `numberProperty`.
+
+Even if no aggregation types are requested, all state transitions will be
+displayed on timeline by HRT.
 
 :::info
 
@@ -237,7 +267,7 @@ Create string/numeric property trackers (named
 
 ```
 val deviceColor = Reporting.report().stringProperty("device-color")
-val firstBootTime = Reporting.report().stringProperty("first-boot-time")
+val firstBootTime = Reporting.report().numberProperty("first-boot-time")
 ```
 
 Then record values for these properties:
@@ -253,12 +283,43 @@ reporting period:
 - `device-color.latest`: Latest value of this string property.
 - `first-boot-time.latest`: Latest value of this numeric property.
 
+All values are displayed on timeline as part of HRT. The `.latest` metric can be
+disabled by setting `addLatestToReport = false` when creating the metric.
+
 :::info
 
 Properties are likely to be useful as
 [Device Attributes](/docs/platform/metrics#attributes), so that we can search
 the fleet for devices with specific properties (and create
 [Device Sets](/docs/platform/projects-and-fleets/#device-sets) based on them).
+
+:::
+
+### Event
+
+Tracks individual events. When using HRT, these will be displayed individually
+on the device timeline.
+
+Create a metric event named `failure`:
+
+```
+val failureEvent = Reporting.report().event("failure")
+```
+
+Then record events:
+
+```
+failureEvent.add("timeout")
+failureEvent.add("code 403")
+```
+
+By default, this will not include any metrics in the heartbeat report; values
+will be visible on timeline using HRT. To include an event count in the report,
+set `countInReport = true` when creating the metric.
+
+:::info
+
+This API will replace Custom Events in a future release.
 
 :::
 

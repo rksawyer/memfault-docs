@@ -176,3 +176,18 @@ Each collected property is stored as a metric, prefixed with `sysprop.`:
 These metrics would be good candidates for Attributes, to enable e.g. searching
 for devices with a given system property, or checking the properties for a
 specific device.
+
+### Connectivity Metrics
+
+**Collected Since Bort 4.4.0**
+
+Bort collects metrics describing connectivity changes on the device:
+
+- `connectivity.type`: current primary connectivity: `NONE`, `WIFI`, `CELLULAR`,
+  `ETHERNET`, or `UNKNOWN`. Aggregated metrics for each type e.g.
+  `connectivity.type_CELLULAR.secs/hour`.
+- `airplane_mode`: tracks whether airplane mode is enabled.
+- `connectivity.validated`: tracks whether current connectivity has been
+  validated for internet.
+- `connectivity.captive_portal`: tracks whether device is connected to a captive
+  portal.
