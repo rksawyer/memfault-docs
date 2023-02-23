@@ -25,11 +25,20 @@ This guide assumes the following:
 
 - Zephyr toolchain is setup on the host machine
   - see the
-    [Zephyr getting started guide](https://docs.zephyrproject.org/3.1.0/develop/getting_started/index.html)
+    [Zephyr getting started guide](https://docs.zephyrproject.org/3.3.0/develop/getting_started/index.html)
 - knowledge of building and configuring Zephyr applications
 - a target board with a supported architecture; any **Cortex-M** series device
   should be supported, for other architectures please contact
   support@memfault.com.
+
+## Supported Zephyr Versions
+
+Memfault targets supporting new Zephyr releases as they arrive. If a version is
+not included below, please contact us at support@memfault.com and we'll let you
+know the status!
+
+- ❌ < **v2.0.0** : **not supported** as of Memfault Firmware SDK v0.32.0
+- ✅ \>= **v2.0.0**, <= **v3.3.0** tested and supported
 
 ## Adding the Memfault Module
 
@@ -55,7 +64,7 @@ Depending on your project setup, the `west.yml` file may be in the application
 repository (most common), or in a separate manifest repository. Read more about
 supported development repositories here:
 
-- <https://docs.zephyrproject.org/latest/develop/west/workspaces.html#topologies-supported>
+- <https://docs.zephyrproject.org/3.3.0/develop/west/workspaces.html#topologies-supported>
 
 ## Enabling Memfault
 
@@ -177,14 +186,14 @@ The Memfault SDK is configured in two places:
    the Kconfig file. These options apply to the Memfault Zephyr RTOS port
    contained within the Memfault SDK.
 
-   - < https://docs.zephyrproject.org/2.6.0/guides/kconfig/menuconfig.html>
-   - <https://github.com/memfault/memfault-firmware-sdk/blob/130caec024a724c1a7a82866e03a8756e3908256/ports/zephyr/Kconfig>
+   - <https://docs.zephyrproject.org/2.6.0/guides/kconfig/menuconfig.html>
+   - <https://github.com/memfault/memfault-firmware-sdk/blob/master/ports/zephyr/Kconfig>
 
 2. The Memfault SDK configuration files, which contain configuration options for
-   the SDK that are not Zephyr-specific. See the
+   the SDK that are not Zephyr-specific. See the below files:
 
    - `memfault_platform_config.h` - See the
-     [`default_config.h`](https://github.com/memfault/memfault-firmware-sdk/blob/7d3396b26f1c161f1c288b6bd39676ec16ebda67/components/include/memfault/default_config.h)
+     [`default_config.h`](https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/default_config.h)
      file in the Memfault SDK for documentation
 
    - `memfault_metrics_heartbeat_config.def` - See the
@@ -200,7 +209,7 @@ The Memfault SDK is configured in two places:
 
 Zephyr RTOS has a built-in runtime assert system, see more information here:
 
-- <https://docs.zephyrproject.org/3.1.0/kernel/services/other/fatal.html>
+- <https://docs.zephyrproject.org/3.3.0/kernel/services/other/fatal.html>
 
 Memfault's coredump capture routine will be triggered when the system encounters
 a failing `__ASSERT()`, however, by default, Zephyr asserts are disabled at
@@ -220,8 +229,9 @@ documentation and usage information.
 1. Zephyr example with networking enabled, targeting the
    [STM32L4 Discovery Kit for IoT Node (B-L475E-IOT01A)](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html):
 
-   - [https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/zephyr/README.md](https://github.com/memfault/memfault-firmware-sdk/blob/73fab8656b17bde6efa11bf78fbe155a8dbabf78/examples/zephyr/README.md)
+   - <https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/zephyr/stm32l4_disco>
 
-2. Non-networked example, can be used with any Cortex-M board:
+2. Non-networked example, can be used with any Cortex-M board (default board is
+   `qemu_cortex_m3`):
 
-   - [https://github.com/memfault/zephyr-memfault-example/tree/memfault/README.md](https://github.com/memfault/zephyr-memfault-example/blob/aeb3853851c7f92bc4015d548a246d1a856d1588/README.md)
+   - <https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/zephyr/qemu>
