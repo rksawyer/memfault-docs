@@ -263,7 +263,6 @@ int bar(void) {
   static char s_num_resources = 12;
   [...]
 }
-
 ```
 
 #### Locating Sections at a Specific Location
@@ -292,9 +291,9 @@ of your special sections.
 
 :::
 
-```c {7-8,15-20,22-27}
+```linker-script {7-8,15-20,22-27}
 /* linker-script.ld
-*/]
+*/
 
 MEMORY
 {
@@ -345,7 +344,7 @@ SECTIONS {
 By using the location macro you can allocate DMA buffers and ensure they are in
 the correct memory range.
 
-```c
+```linker-script
 [...]
 MEMFAULT_PUT_IN_SECTION(".dma_buffers")
 static uin8_t s_uart_dma_buffer[NUM_UARTS][256];
