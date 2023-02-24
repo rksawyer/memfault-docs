@@ -172,7 +172,17 @@ Add the appropriate options to your system's `prj.conf`:
 
 CONFIG_MEMFAULT=y
 CONFIG_MEMFAULT_NCS_PROJECT_KEY="YOUR_PROJECT_KEY"
+
+# On nRF52 or nRF53 projects, and nRF-Connect SDK <2.1.0 (Memfault SDK <
+# 0.32.0), this setting is required to build the project (it de-selects the
+# built-in Memfault HTTPS root certificate storage, which is only compatible
+# with the nRF9160):
+CONFIG_MEMFAULT_ROOT_CERT_STORAGE_CUSTOM=y
 ```
+
+If you'd like to update the Memfault SDK without updating the nRF-Connect SDK,
+see the [instructions here](#updating-the-memfault-sdk). Memfault aspires to
+maintain full backwards compatibility with supported nRF-Connect SDK versions.
 
 You can find more details on the available options using `menuconfig`,
 `guiconfig`, and in the Kconfig sources in
