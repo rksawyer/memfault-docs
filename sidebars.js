@@ -185,7 +185,7 @@ module.exports = {
             link: { type: "generated-index" },
             items: [
                 "best_practices/metrics-for-battery-life",
-                "best_practices/metrics-for-fleet-reliability",
+                "best_practices/fleet-reliability-metrics-crash-free-hours",
                 "best_practices/low-bandwidth-devices",
             ],
         },
