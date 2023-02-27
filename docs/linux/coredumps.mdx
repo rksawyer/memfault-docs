@@ -121,6 +121,38 @@ you'll need to add an exception for them, for example in your `local.conf`:
 LICENSE_FLAGS_ACCEPTED:append = " commercial_memfaultd commercial_memfault-core-handler"
 ```
 
+### Make sure prelinking is disabled
+
+[Prelinking][prelinking-wikipedia] is an operation which optimizes applications
+load times by resolving library symbols before launch. However most of the
+benefits of prelinking are lost unless PIE is disabled and both Glibc and Yocto
+are dropping support for it. It is [disabled by default in Yocto since 3.4 -
+Honister][prelinking-disabled-yocto].
+
+To [disable prelinking][prelinking-yocto-doc] on an older version of Yocto where
+it is still enabled by default, you need to override `USER_CLASSES` in
+`local.conf`. On Yocto versions before 3.4 - Honister, `USER_CLASSES` included
+`image-prelink` by default.
+
+If you already have `USER_CLASSES` overridden in `local.conf`, make sure
+`image-prelink` is not included in the list. If not, you can use
+`USER_CLASSES:remove = "image-prelink"` to keep the defaults, except for
+`"image-prelink"`.
+
+This is how [we disable prelinking in our example image][prelinking-example]:
+
+```
+USER_CLASSES = "buildstats"
+```
+
+[prelinking-wikipedia]: https://en.wikipedia.org/wiki/Prelink
+[prelinking-yocto-doc]:
+  https://wiki.yoctoproject.org/wiki/TipsAndTricks/PrelinkSomePointersAndWorkarounds#How_do_I_turn_off_Prelink_if_I_find_this_too_Cumbersome.3F
+[prelinking-disabled-yocto]:
+  https://docs.yoctoproject.org/migration-guides/migration-3.4.html#prelinking-disabled-by-default
+[prelinking-example]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/conf/local.conf.sample#L5
+
 ## Upload debugging symbols
 
 After a coredump was collected on the device, `memfaultd` will upload it to the
