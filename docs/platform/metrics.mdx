@@ -40,6 +40,9 @@ _The Metrics view under Project Settings_
 Metric can have a few properties:
 
 - a `string_key` which devices and APIs can use to identify the Metric
+- a `display_name` (usually same as `string_key`) which will be used as a name across
+  [Charts](/docs/platform/charts), [Alerts](/docs/platform/alerts) and Device
+  Timeline
 - whether the data type is an `INT` (default), `FLOAT`, `BOOL`, or `STRING`
 - whether it is a `favorite` Metric, which will cause it to appear more
   prominently in a few places in the web app
@@ -48,10 +51,10 @@ Metric can have a few properties:
 
 :::info
 
-Please contact us at support@memfault.com if you want to use a custom name that
-is different from the technical id reported by the devices for a metric across
-[Charts](/docs/platform/charts), [Alerts](/docs/platform/alerts) and Device
-Timeline.
+Please contact us at support@memfault.com if you want to use a custom name
+(`display_name`) that is different from the technical id (`string_key`) reported
+by the devices for a metric across [Charts](/docs/platform/charts),
+[Alerts](/docs/platform/alerts) and Device Timeline.
 
 :::
 
