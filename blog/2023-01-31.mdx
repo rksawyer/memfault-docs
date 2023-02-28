@@ -1,0 +1,89 @@
+---
+title: January 2023
+---
+
+## Including Linked Devices in the Search Results
+
+With the introduction of the
+[Linked Device](/docs/platform/inspecting-a-device/#linked-devices) Search
+feature, users can not only list the devices returned by search results, but
+also the devices that are linked to those devices. This is helpful when defining
+a population of devices (both primary and linked) before performing follow-up
+tasks such as assigning them to a specific
+[Cohort](/docs/platform/memfault-terminology/#cohort), describing a new Device
+Set or assigning [Fleet Sampling Resolutions](/docs/platform/fleet-sampling) and
+while doing so preventing any discrepancies (e.g. linked device staying in the
+old [Cohort](/docs/platform/memfault-terminology/#cohort) while the primary
+device is moved to a new one). Improvements to the Device Details page will also
+allow users to easily inspect the configuration states and update the Fleet
+Sampling Resolutions of both devices.
+
+![linked-device-search.png](/img/blog/2023-01-31-Linked-Device-Search.png)
+
+<!-- truncate -->
+
+## General
+
+- Added: Support for searching linked devices under
+  [Device Search](https://app.memfault.com/organizations/-/projects/-/devices)
+- Added: Support for using a
+  [display name for metrics](/docs/platform/metrics#from-the-memfault-app)
+- Added:
+  [Documentation on measuring fleet reliability with crash-free hours](/docs/best_practices/fleet-reliability-metrics-crash-free-hours)
+- Added:
+  [Documentation on deleting a release](/docs/platform/ota#deleting-a-release)
+- Added:
+  [Documentation on archiving software versions](/docs/platform/software-version-hardware-version/#archiving)
+- Improved: Performance of Device Timeline
+- Improved: Validation of software types when uploading an OTA payload
+- Fixed: Errors when downloading ELF files
+- Fixed: Errors when using Memfault during an ongoing deployment of the web
+  application
+- Fixed: [Timeseries metrics](/docs/platform/metrics#timeseries) dropped when
+  they were previously marked as non-time series
+- Fixed: Text typed into Title field of
+  [Issues page](https://app.memfault.com/organizations/-/projects/-/issues) is
+  removed intermittently
+- Fixed:
+  [Issues page](https://app.memfault.com/organizations/-/projects/-/issues)
+  refreshing when accessed through a saved Issue filter
+
+## MCU
+
+- Improved: Trace event processing stopping when log decoding fails
+- SDK versions
+  [0.37.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0371-and-sdk-0370---jan-17-2023)
+  and
+  [0.37.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0372-and-sdk-0371---jan-31-2023)
+  were released. Some highlights:
+  - Added: Support for collecting truncated TCBs in FreeRTOS
+  - Added: Support for ESP32S2/S3 platforms to the
+    [ESP32 example application](https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/esp32)
+  - Improved: Reduced the logging frequency of the
+    [ESP32 example app](https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/esp32)
+  - Improved: Quality of life improvements for
+    [scripts/memfault_gdb.py](https://github.com/memfault/memfault-firmware-sdk/blob/master/scripts/memfault_gdb.py),
+    thanks [@alvarop](https://github.com/alvarop)!
+
+## Android
+
+- Fixed: Metric values ingested twice. This only affected the
+  [metric charts with sum and count aggregations.](/docs/platform/charts/#metric-charts)
+- SDK version
+  [4.4.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v440---january-11th-2022)
+  was released. Some highlights:
+  - Added: Custom Metrics on Device Timeline are now shown in
+    [high resolution](/docs/android/android-custom-metrics/#high-resolution-telemetry-hrt),
+    in addition to aggregated values.
+  - Added:
+    [New built-in connectivity metrics:](/docs/android/android-builtin-metrics/#connectivity-metrics)
+    `connectivity.type`, `airplane_mode`, `connectivity.validated`,
+    `connectivity.captive_portal`
+  - Added: Support Fleet Sampling when using
+    [client/server mode](/docs/android/android-multi-device-support).
+
+## Linux
+
+- We did not publish a new version of the
+  [Memfault Linux SDK](https://github.com/memfault/memfault-linux-sdk) in
+  January.
