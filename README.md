@@ -32,6 +32,13 @@ Code is linted with prettier. To fix up files to match format, run:
 $ ./node_modules/.bin/prettier --write path/to/file.mdx
 ```
 
+There is also a [`.pre-commit-config.yaml`](`.pre-commit-config.yaml) config
+available- install pre-commit with `pip install pre-commit`, then install the
+hooks with `pre-commit install --install-hooks`. Once that's setup, the
+pre-commit hook will run prettier on changes!
+
+See https://pre-commit.com/ for details.
+
 ## Content
 
 Add a new page to the docs:
