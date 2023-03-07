@@ -50,6 +50,7 @@ the following assumptions:
   integrate with OTA).
 - It uses [collectd][collectd-homepage] for metrics (optional if you don't plan
   to integrate with Metrics).
+- It uses [fluent-bit][fluent-bit-homepage] to collect logs (optional).
 
 If your project diverges from these assumptions, please [get in
 touch][get-in-touch]. It will likely still work without major changes.
@@ -58,6 +59,7 @@ touch][get-in-touch]. It will likely still work without major changes.
 [swupdate-homepage]: https://swupdate.org/
 [systemd-homepage]: https://systemd.io/
 [yocto-homepage]: https://www.yoctoproject.org/
+[fluent-bit-homepage]: https://fluentbit.io
 
 ## Getting Started
 
@@ -145,6 +147,26 @@ The [Reboot Reason Tracking][docs-linux-reboot-reason-tracking] feature allows
 one to collect why devices are rebooting in the field (whether it be due to a
 crash, kernel panic or a firmware update). [Summaries and
 aggregates][docs-charts] can then be viewed from the Memfault web application.
+
+### Log Collection
+
+:::caution Technical Preview
+
+Log collection on Linux is available in Memfault SDK 1.3 as a technical preview.
+It is not ready for production deployment at this time.
+
+:::
+
+Memfaultd can integrate with fluent-bit to [collect logs from your embedded
+systems][docs-logging] and regularly upload them to Memfault platform.
+Fluent-bit supports a [wide variety of inputs][fluent-bit-input-plugins],
+including kernel logs and systemd logs.
+
+Collected logs are visible in Memfault dashboard in the details page of your
+devices.
+
+[docs-logging]: /docs/linux/logging
+[fluent-bit-input-plugins]: https://docs.fluentbit.io/manual/pipeline/inputs
 
 These features are fully in the domain of Memfault Linux SDK.
 

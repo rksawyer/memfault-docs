@@ -134,17 +134,14 @@ VIRTUAL-RUNTIME_initscripts = ""
   <TabItem value={SYSTEM_OTHER}>
 
 Grab a copy of [the source code for `memfaultd`][source-memfaultd] and build
-using CMake. The included `builtin.conf` contains built-in defaults for
+using `cargo`. The included `builtin.conf` contains built-in defaults for
 `/etc/memfaultd.conf` and is not meant to be changed. See
 [the section on `/etc/memfaultd.conf`](#add-etcmemfaultdconf-to-your-build) to
 learn how to configure `memfaultd` on the target device.
 
 ```shell
-cd /path/to/source/memfaultd
-mkdir build
-cd build
-cmake ..
-make
+cd /path/to/source
+cargo build
 ```
 
   </TabItem>
@@ -162,34 +159,37 @@ make
 
 The available plugins are:
 
-- `plugin_swupdate`: used for [OTA management][docs-linux-ota].
-- `plugin_reboot`: used for reboot reason tracking.
-- `plugin_collectd`: used for collection of [metrics][docs-linux-metrics].
-- `plugin_coredump`: used for collection of [coredumps][docs-linux-coredumps].
+- `swupdate`: used for [OTA management][docs-linux-ota].
+- `reboot`: used for reboot reason tracking.
+- `collectd`: used for collection of [metrics][docs-linux-metrics].
+- `coredump`: used for collection of [coredumps][docs-linux-coredumps].
+- `logging`: used to [collect and upload][docs-linux-logging] logs.
 
 <LinuxBuildSystemOptionsTabs>
   <TabItem value={SYSTEM_YOCTO}>
 
 Set `PACKAGECONFIG` for the `memfaultd` package to control which plugins are
 included in the `memfaultd` build. For example, you can add a
-`memfaultd.bbappends` recipe with the following contents:
+`memfaultd.bbappend` recipe with the following contents:
 
 ```
-PACKAGECONFIG := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump"
+PACKAGECONFIG := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump plugin_logging"
 ```
 
 Alternatively, in your `local.conf` file:
 
 ```
-PACKAGECONFIG:pn_memfaultd := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump"
+PACKAGECONFIG:pn_memfaultd := "plugin_swupdate plugin_reboot plugin_collectd plugin_coredump plugin_logging"
 ```
 
   </TabItem>
   <TabItem value={SYSTEM_OTHER}>
 
-The included plugins can be configured using the flags `-DENABLE_PLUGINS=1`
-alongside `-DPLUGIN_REBOOT=1`, `-DPLUGIN_SWUPDATE=1`,`-DPLUGIN_COLLECTD=1` and
-`-DPLUGIN_COREDUMP=1`.
+The included plugins can be configured using Cargo features:
+
+```
+  cargo build --no-default-features --feature swupdate reboot collectd coredump logging
+```
 
   </TabItem>
 </LinuxBuildSystemOptionsTabs>
@@ -393,6 +393,7 @@ Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
 [docs-device-id]: /docs/platform/memfault-terminology#device-id
 [docs-linux-metrics]: /docs/linux/metrics
 [docs-linux-coredumps]: /docs/linux/coredumps
+[docs-linux-logging]: /docs/linux/logging
 [systemd-homepage]: https://systemd.io/
 [swupdate-homepage]: https://swupdate.org/
 [u-boot-homepage]: https://www.denx.de/wiki/U-Boot

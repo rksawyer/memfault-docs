@@ -1,0 +1,232 @@
+---
+id: logging
+title: Linux Logging
+sidebar_label: Logging
+---
+
+import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
+
+## Introduction
+
+:::caution Technical Preview
+
+Log collection on Linux is available in Memfault SDK 1.3 as a technical preview.
+It is not ready for production deployment at this time.
+
+:::
+
+`memfaultd` integrates with [`fluent-bit`][fluent-bit-homepage] to collect logs
+from your systems and upload them to Memfault platform.
+
+Logs collected by `memfaultd` will be shown on the [device
+timeline][docs-timeline].
+
+[fluent-bit-homepage]: https://www.fluentbit.io
+
+## Prerequisites
+
+### The `memfaultd` daemon, built with `plugin_logging`
+
+Follow the [integration guide][docs-linux-integration] to learn how to install
+`memfaultd` on your device.
+
+The logging plugin is **NOT** enabled by default in the `meta-memfault` layer.
+Our [meta-memfault-example layer][example-enable-logging] demonstrates how to
+turn it on:
+
+```
+# Enable logging support
+PACKAGECONFIG:append = "plugin_logging"
+```
+
+Read more on [how to configure which plugins `memfaultd` builds with]
+[docs-linux-control-plugins].
+
+[example-enable-logging]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-memfault/memfaultd/memfaultd.bbappend
+
+### fluent-bit
+
+The fluent-bit source code [includes a Yocto recipe][fluent-bit-recipe] to
+compile and install `fluent-bit`.
+
+We include the same recipe (with some minor changes for compatibility with
+recent versions of Yocto) and a sample configuration file [in our
+`meta-memfault-example` layer][fluent-bit-recipe-memfault].
+
+[fluent-bit-recipe]:
+  https://github.com/fluent/fluent-bit/blob/v2.0.9/fluent-bit_2.0.9.bb
+[fluent-bit-recipe-memfault]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-extended/fluent-bit
+
+## Flow of logs
+
+Fluent-bit collects logs from various sources on the system, encodes them in
+[fluent-bit's internal representation][fluent-bit-key-concepts] and forwards
+them to `memfaultd` via a local TCP connection on port 5170. Although it's
+possible to configure fluent-bit to buffer to disk, we do not recommend enabling
+this option as it would cause logs to be written twice to disk.
+
+Memfaultd writes all logs to disk in [a configurable](#logstmp_folder) temporary
+folder. Writes are buffered for performance reason. Memfaultd always maintains a
+single log file for all the log messages provided by fluent-bit. When the file
+reaches a specific [size](#logsrotate_size_kib) or
+[age](#logsrotate_after_seconds), they are moved to the Memfault upload staging
+area (also called MAR staging) where they will be uploaded during the next
+synchronization.
+
+Memfaultd currently does not compress logs on disk (but we intend to change this
+in the future). However, they are compressed before uploading.
+
+[fluent-bit-key-concepts]:
+  https://docs.fluentbit.io/manual/concepts/key-concepts
+
+## Configuring fluent-bit
+
+Fluent-bit provides a rich set of [input][fluent-bit-inputs] and
+[filter][fluent-bit-filters] plugins to control precisely what gets collected.
+Our default configuration for [fluent-bit][fluent-bit-default-conf] sets up
+collection of kernel and systemd log messages.
+
+Unlike other systems (like metrics or OTA), `memfaultd` does not generate the
+`fluent-bit` configuration file. It just expects a connection from `fluent-bit`
+on the default fluent-bit TCP port 5170. Fluent-bit messages are expected to be
+delivered in the fluent-bit native msgpack format.
+
+This is the required output configuration:
+
+```
+[OUTPUT]
+	Name tcp
+	Host 127.0.0.1
+	Port 5170
+	Format msgpack
+	Match *
+	net.keepalive on
+	net.keepalive_idle_timeout 10
+```
+
+[fluent-bit-inputs]: https://docs.fluentbit.io/manual/pipeline/inputs
+[fluent-bit-filters]: https://docs.fluentbit.io/manual/pipeline/filters
+[fluent-bit-default-conf]:
+  https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/recipes-extended/fluent-bit/files/fluent-bit.conf
+
+### Relevant `/etc/memfaultd.conf` settings
+
+You can adjust the behavior of `memfaultd` when it comes to logging using the
+following configuration options.
+
+See [a full configuration reference here][docs-configuration].
+
+#### `fluent-bit.bind_address`
+
+Change the listening address and port of fluent-bit connector.
+
+#### `fluent-bit.max_buffered_lines`
+
+In most cases, `memfaultd` will immediately write to disk new log lines. Some
+buffering is required while rotating log files. This controls how many lines may
+be buffered before back pressure is applied to fluent-bit. The default will be
+safe for most use-cases.
+
+#### `fluent-bit.max_connections`
+
+This limits the number of open connections with fluent-bit. Fluent-bit will
+typically open one question for each input plugin. Connection keep-alive is
+optional but we recommend turning it on.
+
+The default is set to 4. Increase this if you have more input plugins.
+
+#### `fluent-bit.extra_fluentd_attributes`
+
+To reduce the size of the log files, `memfaultd` will only save the keys
+"MESSAGE", "\_PID", "\_SYSTEMD_UNIT" and "PRIORITY" by default.
+
+If your fluent-bit sources generate more keys that you need to save, add them to
+this list. They will be visible in the memfault dashboard and searchable.
+
+#### `logs.rotate_size_kib`
+
+Rotate the log file when they reach this size. Once rotated, the log files will
+be uploaded during the next refresh interval (see [general
+configuration][docs-configuration]).
+
+#### `logs.rotate_after_seconds`
+
+Regardless of size, log files are rotated when they reach a certain age.
+
+#### `logs.tmp_folder`
+
+This setting controls where log files are persisted while they are being
+written. If your device is sensitive to flash wear, we recommend using a tmpfs
+partition but some logs will be lost if the device is not shutdown cleanly.
+
+### Recommended configuration
+
+We recommend starting with our [example configuration
+file][fluent-bit-default-conf]. If some applications are too verbose, you can
+use one of the fluent-bit filter plugins to limit the amount of logs collected.
+
+### Filtering out specific messages
+
+To filter out specific messages, you can use the [fluent-bit grep
+plugin][fluent-bit-grep].
+
+```
+# Exclude all messages containing the string "Connection timeout. Will retry."
+[FILTER]
+    name    grep
+    match   *
+    exclude MESSAGE Connection timeout. Will retry.
+```
+
+[fluent-bit-grep]: https://docs.fluentbit.io/manual/pipeline/filters/grep
+
+## Set `enable_data_collection`
+
+By default, `enable_data_collection` is `false`. This is to enable asking end
+users for consent before collecting or transmitting any data to Memfault
+services.
+
+Once the end user has given their consent, you can enable data collection like
+so:
+
+```shell
+$ memfaultctl enable-data-collection
+```
+
+To disable it:
+
+```shell
+$ memfaultctl disable-data-collection
+```
+
+The `memfaultd` service will restart automatically whenever you run either of
+those commands if called with a value different from the current configuration.
+
+Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
+more information.
+
+## Testing your integration
+
+During development, you can use `memfaultctl sync` to force `memfaultd` to
+rotate the current logfile and upload it.
+
+The log will be visible in Memfault Dashboard as soon as it has been processed
+(usually a few seconds later).
+
+## Viewing Logs in the Web Application
+
+<p>
+  To see detailed reports from a specific device, find the device in{" "}
+  <ProjectMagicLink path="/devices">
+    <b>Fleet -> Devices</b>
+  </ProjectMagicLink>
+  , and then open its <b>Timeline</b> tab.
+</p>
+
+[docs-linux-control-plugins]:
+  /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
+[docs-linux-integration]: /docs/linux/integration-guide
+[docs-configuration]: /docs/linux/reference-memfaultd-configuration
+[docs-timeline]: /docs/platform/introduction/#metrics

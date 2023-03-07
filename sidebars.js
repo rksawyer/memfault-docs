@@ -152,6 +152,7 @@ module.exports = {
                         "linux/metrics",
                         "linux/coredumps",
                         "linux/reboot-reason-tracking",
+                        "linux/logging",
                     ],
                 },
                 {
