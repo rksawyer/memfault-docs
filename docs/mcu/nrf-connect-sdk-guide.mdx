@@ -15,7 +15,7 @@ import TabItem from "@theme/TabItem";
 In this guide we will walk through the steps for integrating the
 [Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
 a project using the nRF Connect SDK. The integration has been tested against the
-releases ranging from v1.4.0 up to v2.2.0. All versions of the nRF Connect SDK
+releases ranging from v1.4.0 up to v2.3.0. All versions of the nRF Connect SDK
 since v1.6.0 include Memfault when downloaded from Nordic's website.
 
 This integration is written for the
@@ -25,12 +25,12 @@ but is similar when targeting other boards with the nRF Connect SDK.
 :::tip
 
 nRF Connect SDK v1.6.0, and all versions since, has built-in support for the
-Memfault Firmware SDK on nRF9160-based targets. Nordic Semiconductor has
-released some
-[excellent documentation](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/libraries/others/memfault_ncs.html)
+Memfault Firmware SDK on nRF9160-based targets. Nordic Semiconductor provides
+some
+[excellent documentation](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/external_comp/memfault.html)
 on how to integrate Memfault in your existing nRF Connect SDK project, together
 with a
-[sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/samples/nrf9160/memfault/README.html).
+[sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/samples/nrf9160/memfault/README.html).
 We recommend following both this documentation page as well as Nordic's.
 
 :::
@@ -73,7 +73,7 @@ your system!
 :::important
 
 This tutorial assumes you have a working
-[nRF Connect SDK Environment](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/getting_started.html)
+[nRF Connect SDK Environment](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/getting_started.html)
 and are able to flash a board supported by the SDK (i.e nRF91, nRF53, nRF52,
 etc)
 
@@ -333,7 +333,7 @@ $ touch config/memfault_metrics_heartbeat_config.def
 ```
 
 See the
-[nRF Connect Docs](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/libraries/others/memfault_ncs.html#configuration-files)
+[nRF Connect Docs](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/external_comp/memfault.html#configuration-files)
 for more information.
 
 ### Generate Some Trace Events
@@ -407,12 +407,12 @@ to enable exporting Memfault data in a standardized way.
 
 Nordic has detailed documentation on the Memfault Diagnostic service here:
 
-<https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/libraries/bluetooth_services/services/mds.html>
+<https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/libraries/bluetooth_services/services/mds.html>
 
 There is also a sample application, "Bluetooth LE: Peripheral Memfault
 Diagnostic Service (MDS)", documented here:
 
-<https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/samples/bluetooth/peripheral_mds/README.html>
+<https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/samples/bluetooth/peripheral_mds/README.html>
 
 Nordic and Memfault provide the following Bluetooth LE gateways for testing the
 MDS implementation:
@@ -542,7 +542,7 @@ See the docs on
 ## Configuring and Invoking an OTA Update
 
 By default, the NRF Connect
-[sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/samples/nrf9160/memfault/README.html)
+[sample integration project](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/samples/nrf9160/memfault/README.html)
 does not come with OTA support enabled by default. To enable this support a few
 things need to be added. The update process is invoked with a CLI command, this
 needs to be enabled. the `memfault_platform_config.h` file, add this line:
@@ -622,8 +622,8 @@ example:
 
 These Kconfig flags control whether those metrics are enabled:
 
-- [`CONFIG_MEMFAULT_NCS_LTE_METRICS`](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/kconfig/#CONFIG_MEMFAULT_NCS_LTE_METRICS)
-- [`CONFIG_MEMFAULT_NCS_STACK_METRICS`](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/kconfig/#CONFIG_MEMFAULT_NCS_STACK_METRICS)
+- [`CONFIG_MEMFAULT_NCS_LTE_METRICS`](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/kconfig/#CONFIG_MEMFAULT_NCS_LTE_METRICS)
+- [`CONFIG_MEMFAULT_NCS_STACK_METRICS`](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/kconfig/#CONFIG_MEMFAULT_NCS_STACK_METRICS)
 
 When setting up a Project in the Memfault app, selecting the `nRF91` MCU will
 pre-populate a few fleet metrics charts matching the optional metrics above:
@@ -638,17 +638,17 @@ See the list in this file in the NCS repo:
 
 Example projects are provided both by Memfault and Nordic:
 
-- [nRF52/nRF53 example Memfault integration](https://github.com/memfault/memfault-firmware-sdk/tree/0.37.0/examples/nrf-connect-sdk/nrf5)
-- [nRF9160 example Memfault integration](https://github.com/memfault/memfault-firmware-sdk/tree/0.37.0/examples/nrf-connect-sdk/nrf9160)
-- [Nordic maintained nRF9160 example Memfault integration](https://github.com/nrfconnect/sdk-nrf/tree/v2.2.0/samples/nrf9160/memfault)
-- [Nordic maintained Asset Tracker v2 Application for nRF9160](https://github.com/nrfconnect/sdk-nrf/tree/v2.2.0/applications/asset_tracker_v2)
+- [nRF52/nRF53 example Memfault integration](https://github.com/memfault/memfault-firmware-sdk/tree/0.41.1/examples/nrf-connect-sdk/nrf5)
+- [nRF9160 example Memfault integration](https://github.com/memfault/memfault-firmware-sdk/tree/0.41.1/examples/nrf-connect-sdk/nrf9160)
+- [Nordic maintained nRF9160 example Memfault integration](https://github.com/nrfconnect/sdk-nrf/tree/v2.3.0/samples/nrf9160/memfault)
+- [Nordic maintained Asset Tracker v2 Application for nRF9160](https://github.com/nrfconnect/sdk-nrf/tree/v2.3.0/applications/asset_tracker_v2)
 
   - see the documentation for
-    [how to build with Memfault enabled](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/applications/asset_tracker_v2/doc/asset_tracker_v2_description.html#configuration-files)
+    [how to build with Memfault enabled](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/applications/asset_tracker_v2/doc/asset_tracker_v2_description.html#configuration-files)
 
 Nordic Memfault Documentation:
 
-- [nRF Connect SDK documentation on built-in Memfault Firmware SDK integration](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.2.0/nrf/libraries/others/memfault_ncs.html)
+- [nRF Connect SDK documentation on built-in Memfault Firmware SDK integration](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.3.0/nrf/libraries/others/memfault_ncs.html)
   (starting from v.1.6.0).
 
 ## Frequently Asked Questions (FAQ)
@@ -657,7 +657,7 @@ Nordic Memfault Documentation:
 
 The nRF Connect SDK embeds the Memfault SDK as a module:
 
-- <https://github.com/nrfconnect/sdk-nrf/blob/v2.2.0/west.yml#L171-L174>
+- <https://github.com/nrfconnect/sdk-nrf/blob/v2.3.0/west.yml#L165-L168>
 
 If you would like to update the Memfault SDK without updating the nRF Connect
 SDK here are some strategies:
@@ -674,13 +674,13 @@ manifest:
     - name: sdk-nrf
       remote: nrf-connect-sdk
       path: nrf
-      revision: v2.2.0
+      revision: v2.3.0
       import: true
     # list the Memfault SDK as a top-level module
     - name: memfault-firmware-sdk
       url: https://github.com/memfault/memfault-firmware-sdk
       path: modules/lib/memfault-firmware-sdk
-      revision: 0.31.5
+      revision: 0.41.1
   self:
     path: my_example_application
 ```
