@@ -32,6 +32,8 @@ Implement `memfault_platform_log()` in
 `third_party/memfault/memfault_platform_port.c`. For example,
 
 ```c
+#include "memfault/components.h"
+
 void memfault_platform_log(eMemfaultPlatformLogLevel level, const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -68,3 +70,10 @@ void memfault_platform_log(eMemfaultPlatformLogLevel level, const char *fmt, ...
 ```
 
 </details>
+
+:::note
+
+If you are using the [Memfault Demo CLI](/docs/mcu/demo-cli) in your project,
+see the information on that page for other dependencies.
+
+:::
