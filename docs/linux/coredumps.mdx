@@ -153,6 +153,12 @@ USER_CLASSES = "buildstats"
 [prelinking-example]:
   https://github.com/memfault/memfault-linux-sdk/blob/-/meta-memfault-example/conf/local.conf.sample#L5
 
+### Link Time Optimization (LTO)
+
+We strongly recommend _against_ using Link Time Optimization (LTO) in the
+programs you want to be able to debug using coredumps. When LTO is enabled, the
+analysis of the coredumps can become lacking or even fail completely.
+
 ## Upload debugging symbols
 
 After a coredump was collected on the device, `memfaultd` will upload it to the
