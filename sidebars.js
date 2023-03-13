@@ -185,9 +185,9 @@ module.exports = {
             type: "category",
             link: { type: "generated-index" },
             items: [
-                "best_practices/metrics-for-battery-life",
-                "best_practices/fleet-reliability-metrics-crash-free-hours",
-                "best_practices/low-bandwidth-devices",
+                "best-practices/metrics-for-battery-life",
+                "best-practices/fleet-reliability-metrics-crash-free-hours",
+                "best-practices/low-bandwidth-devices",
             ],
         },
         {
