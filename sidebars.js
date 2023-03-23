@@ -139,6 +139,7 @@ module.exports = {
             items: [
                 "linux/introduction",
                 "linux/quickstart",
+                "linux/quickstart-raspberrypi",
                 "linux/integration-guide",
                 {
                     type: "category",
