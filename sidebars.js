@@ -70,6 +70,7 @@ module.exports = {
                         "mcu/coredumps",
                         "mcu/compact-logs",
                         "mcu/custom-data-recording",
+                        "mcu/event-timestamps",
                         "mcu/reboot-reason-tracking",
                         "mcu/metrics-api",
                         "mcu/trace-events",
