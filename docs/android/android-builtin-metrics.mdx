@@ -23,6 +23,24 @@ Be sure to configure which metrics you would like to be
 
 ### Battery (and related) Metrics
 
+**Collected via HRT since Bort 4.5.0**
+
+Since Bort 4.5.0, battery metrics on timeline are displayed using
+[High-Resolution Telemetry](/docs/android/android-custom-metrics#high-resolution-telemetry-hrt)
+(note: this is behind a feature flag which is being rolled out progressively to
+devices running 4.5.0 or higher).
+
+Several new metrics were added to timeline as part of this change:
+
+- **Wifi On**
+- **User** (current active user on multi-user devices)
+- **Foreground User** (current foreground user on multi-user devices)
+- **Job** (adds job identifier)
+- **Package Install** (shows all `PackageManager` installs, with package and
+  version)
+- **Package Uninstall** (show all `PackageManager` uninstalls, with package and
+  version)
+
 **Collected Since Bort 3.0**
 
 Bort collects metrics from the
