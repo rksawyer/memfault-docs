@@ -112,6 +112,7 @@ module.exports = {
                         "mcu/demo-cli",
                     ],
                 },
+                "mcu/faq",
             ],
         },
         {
