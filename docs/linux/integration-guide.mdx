@@ -13,21 +13,22 @@ import {
 } from "@site/src/components/LinuxBuildSystemOptionsTabs";
 import TabItem from "@theme/TabItem";
 
-This tutorial will cover integrating the Memfault Linux SDK into your system.
-This getting-started guide is designed with systems in mind that are built using
-[Yocto][yocto-homepage], but generic instructions are included for other setups.
+This guide will cover integrating the Memfault Linux SDK into systems built with
+[Yocto][yocto-homepage].
 
-After you're done, you should have a basic integration setup that can talk to
-the Memfault cloud, enabling one or more of the following features:
+When you're done, you will have a basic integration setup that can talk to the
+Memfault cloud, enabling one or more of the following features:
 
 - Reporting reboot events to Memfault.
 - Reporting [Metrics][docs-linux-metrics].
 - [Over-the-air (OTA) updates][docs-linux-ota].
+- [Uploading systems logs][docs-linux-logging] to Memfault.
 
 ## Useful links
 
-- The [source for the Memfault Linux SDK][source-sdk]. Make sure to use the
-  [branch matching the Yocto release][source-sdk-branches] that you are using.
+- Memfault's Yocto layer [meta-memfault][source-sdk], to add Memfault to your
+  build. Make sure to use the [branch matching the Yocto
+  release][source-sdk-branches] that you are using.
 - A [sample integration using Yocto][source-yocto-example].
 - Reference documentation for:
   - `memfaultd` [Configuration file][docs-configuration].
@@ -44,16 +45,24 @@ the Memfault cloud, enabling one or more of the following features:
 Optionally, as requirements of plugins:
 
 - For [OTA][docs-linux-ota]:
-  - [SWUpdate][swupdate-homepage] as an OTA updates client.
-  - [U-Boot][u-boot-homepage], since SWUpdate depends on it.
+  - An A/B partition scheme (two partitions for root filesystems, one active and
+    one to receive the next update). Systems will typically also have a `data`
+    partition which is persisted accross updates.
+  - [SWUpdate][swupdate-homepage] as an OTA update client.
+  - A bootloader, configured to collaborate with SWUpdate.
+    [U-Boot][u-boot-homepage] is often used. The bootloader selects which root
+    partition to boot from and will switch the active partition after an update.
+    This setup is very system dependent and beyond the scope of this guide but
+    our example layer includes SWUpdate and U-Boot configurations for QEMU and
+    RaspberryPis.
 - For [Custom Metrics][docs-linux-metrics]:
   - [collectd][collectd-homepage] to collect and upload metrics.
-
-## Integration steps
+- For [Log Collection][docs-linux-logging]:
+  - [fluent-bit][fluent-bit-homepage] to collect kernel and system logs.
 
 <ProjectAwareCreateAProject />
 
-### Include `memfaultd` in your build
+## Add `memfaultd` to your system
 
 :::tip
 
@@ -76,15 +85,13 @@ Among its responsibilities are:
 - Controlling whether data is allowed to be collected (e.g. by user consent)
   from a device or not.
 - Interacting with and configuring subsystems such as SWUpdate and collectd.
+- Receiving and uploading logs collected by fluent-bit.
 - Providing configuration access via [memfaultctl][docs-memfaultctl]
   (`memfaultctl` is a symbolic link to `memfaultd`).
 
 `memfaultd` is required for integration.
 
-<LinuxBuildSystemOptionsTabs>
-  <TabItem value={SYSTEM_YOCTO}>
-
-#### Add `memfaultd` and dependencies to your Yocto project
+### Add `meta-memfault` layer and dependencies
 
 Include the [`meta-memfault`][source-meta-memfault] layer in your
 `bblayers.conf` file, alongside dependencies:
@@ -92,35 +99,54 @@ Include the [`meta-memfault`][source-meta-memfault] layer in your
 ```
 # Apart from other layers you may already depend on:
 BBLAYERS ?= " \
+    ${YOCTOROOT}/sources/meta-rust-bin \
     ${YOCTOROOT}/sources/memfault-linux-sdk/meta-memfault \
+    # Provides collectd (recommended) - Also a dependency of the swupdate layer:
     ${YOCTOROOT}/sources/meta-openembedded/meta-oe \
-    ${YOCTOROOT}/sources/meta-swupdate \
 "
 ```
 
-You can grab a copy of `meta-swupdate` from [the source
-repository][source-meta-swupdate]. Note that `meta-oe` is a dependency of
-`meta-swupdate`.
+`meta-memfault` requires a Rust compiler providing the `cargo` class. Version
+`1.65.0` is the oldest version supported at the moment.
 
-Since `memfaultd` has a commercial license, you'll need to add an exception for
-it, for example in your `local.conf`:
+We recommend using the [`meta-rust-bin` layer provided by
+`rust-embedded`][meta-rust-bin] as it will use a pre-built compiler and has a
+minimal impact on your build times.
 
-```
-LICENSE_FLAGS_ACCEPTED:append = " commercial_memfaultd commercial_memfault-core-handler"
-```
+<details>
+<summary>Other options for Rust in Yocto</summary>
 
-Add the necessary dependencies to your image file (note that `collectd` is
-[provided by `meta-oe`][source-collectd-recipe]):
+There are other ways to make the Rust compiler available in your Yocto build
+process:
 
-```
-IMAGE_INSTALL:append = " \
-    u-boot-env \
-    u-boot-fw-utils \
-    collectd \
-"
-```
+- Built-in support for rust included in `oe-core` since since 3.4 Honister.
 
-Finally, to use `systemd` as an init system (using `poky`):
+  This will not work with Memfault as the provided version of Rust in kirkstone
+  is `1.59.0`.
+
+- Up-to-date Rust support via `meta-rust`.
+
+  `meta-rust` was the first layer to provide rust support in Yocto. It has now
+  been replaced by the built-in support. However, it is still maintained and
+  provides more recent versions of Rust for kirkstone.
+
+  This works but requires a slightly different recipe than the one provided with
+  the Memfault SDK. Please contact us if you would like to use this option.
+
+[meta-rust-bin]: https://github.com/rust-embedded/meta-rust-bin
+[meta-rust]: https://github.com/meta-rust/meta-rust
+
+</details>
+
+### Use systemd as your init system
+
+`memfaultd` currently depends on systemd to:
+
+- restart services it cooperates with, for example, collectd and swupdate;
+- detect when a reboot was requested by the user;
+
+To use `systemd` as an init system (using `poky`), add to your `conf/local.conf`
+file:
 
 ```
 DISTRO_FEATURES:append = " systemd"
@@ -130,32 +156,53 @@ DISTRO_FEATURES_BACKFILL_CONSIDERED:append = "sysvinit"
 VIRTUAL-RUNTIME_initscripts = ""
 ```
 
-  </TabItem>
-  <TabItem value={SYSTEM_OTHER}>
+### Authorize Memfault License
 
-Grab a copy of [the source code for `memfaultd`][source-memfaultd] and build
-using `cargo`. The included `builtin.conf` contains built-in defaults for
-`/etc/memfaultd.conf` and is not meant to be changed. See
-[the section on `/etc/memfaultd.conf`](#add-etcmemfaultdconf-to-your-build) to
-learn how to configure `memfaultd` on the target device.
+Since `memfaultd` has a commercial license, you'll need to add an exception for
+it, for example in your `local.conf`:
 
-```shell
-cd /path/to/source
-cargo build
+```
+LICENSE_FLAGS_ACCEPTED:append = " commercial_memfaultd"
 ```
 
-  </TabItem>
-</LinuxBuildSystemOptionsTabs>
+### (Optional) Add meta-swupdate for OTA
 
-#### (Optional) Opt out of `memfaultd` built-in plugins
+If you are planning on using `swupdate` for OTA, you will also need to add the
+`meta-swupdate` layer:
 
-<details>
+```diff
+# Apart from other layers you may already depend on:
+BBLAYERS ?= " \
+    ${YOCTOROOT}/sources/memfault-linux-sdk/meta-memfault \
+    # Provides collectd (recommended) - Also a dependency of the swupdate layer:
+    ${YOCTOROOT}/sources/meta-openembedded/meta-oe \
+// highlight-next-line
+    ${YOCTOROOT}/sources/meta-swupdate \
+"
+```
 
-<summary>
-  The `memfaultd` daemon has a plugin system. All plugins are included by
-  default, so you don't need to do anything if you want them in. However, you
-  can control which plugins are included at build time.
-</summary>
+You can grab a copy of `meta-swupdate` from [the source
+repository][source-meta-swupdate]. Note that `meta-oe` is a dependency of
+`meta-swupdate`.
+
+And add the necessary dependencies to your image file (`swupdate` will be
+required automatically by the `memfaultd` recipe as long as `plugin_swupdate` is
+active):
+
+```
+IMAGE_INSTALL:append = " \
+    u-boot-env \
+    u-boot-fw-utils \
+"
+```
+
+## Minimal Configuration of `memfaultd`
+
+### (Optional) Opt out of `memfaultd` built-in plugins
+
+The `memfaultd` daemon has a plugin system. All plugins are included by default,
+so you don't need to do anything if you want them in. However, you can control
+which plugins are included at build time.
 
 The available plugins are:
 
@@ -163,9 +210,6 @@ The available plugins are:
 - `collectd`: used for collection of [metrics][docs-linux-metrics].
 - `coredump`: used for collection of [coredumps][docs-linux-coredumps].
 - `logging`: used to [collect and upload][docs-linux-logging] logs.
-
-<LinuxBuildSystemOptionsTabs>
-  <TabItem value={SYSTEM_YOCTO}>
 
 Set `PACKAGECONFIG` for the `memfaultd` package to control which plugins are
 included in the `memfaultd` build. For example, you can add a
@@ -180,20 +224,6 @@ Alternatively, in your `local.conf` file:
 ```
 PACKAGECONFIG:pn_memfaultd := "plugin_swupdate plugin_collectd plugin_coredump plugin_logging"
 ```
-
-  </TabItem>
-  <TabItem value={SYSTEM_OTHER}>
-
-The included plugins can be configured using Cargo features:
-
-```
-  cargo build --no-default-features --feature swupdate collectd coredump logging
-```
-
-  </TabItem>
-</LinuxBuildSystemOptionsTabs>
-
-</details>
 
 ### Add a `memfault-device-info` executable to your build
 
@@ -288,7 +318,7 @@ Read more about [Software Versions and Hardware
 Versions][docs-hardware-version-software-version] to better understand these
 core Memfault platform concepts.
 
-#### Configure a persistent storage directory for `memfaultd`
+### Configure a persistent storage directory for `memfaultd`
 
 In `/etc/memfaultd.conf`:
 
@@ -351,7 +381,14 @@ those commands if called with a value different from the current configuration.
 Take a look at the [`/etc/memfaultd.conf` reference][docs-configuration] for
 more information.
 
-### Test the integration
+:::tip
+
+To always enable data collection you can include the key
+`enable_data_collection` with the value `true` in your configuration file.
+
+:::
+
+## Test the integration
 
 <p>
   You can test your integration by rebooting your test device. Then, on the
@@ -363,9 +400,60 @@ more information.
   should be able to find its reboot events under the <b>Reboots</b> tab.
 </p>
 
-### Integrate with our OTA subsystem
+## Integration next-steps
 
-Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
+Congratulations! 🎉 Memfault is running in your product. You will start getting
+useful insights automatically.
+
+To get more value from Memfault, we recommend the following steps.
+
+### Reboot reasons
+
+Memfault will automatically classify some reboots such as kernel panics, user
+triggered reboot and OTA updates.
+
+For other reboot reasons that are specific to your product, you can inform
+`memfaultd` before restarting the system. Memfault Dashboard will then give you
+an accurate picture of why your devices are restarting.
+
+Our [Reboot Reason Tracking Guide][docs-linux-reboot] presents several
+mechanisms to do this.
+
+### Coredumps
+
+`memfaultd` will automatically configure the kernel to capture coredumps and
+upload them to Memfault.
+
+Follow our [Coredumps Guide][docs-linux-coredumps] to upload debug symbols to
+Memfault during your build process. This is required for Memfault coredump
+analysis to work.
+
+### Metrics
+
+By default, `collectd` will capture system metrics and provide an overview of
+how the system is doing.
+
+Our [Metrics Guide][docs-linux-metrics] explains how to collect custom
+application-specific metrics from your system.
+
+### Logging
+
+If you have enabled `plugin_logging`, `fluent-bit` will capture kernel and
+system logs and upload them to Memfault.
+
+You can customize which logs are captured, filter out some lines and capture
+data from other sources (file on disk, serial port, etc). Refer to our [Linux
+Logging Guide][docs-linux-logging].
+
+### OTA
+
+A working OTA setup will require collaboration between the bootloader, the
+updater (for example `swupdate`) and `memfaultd`. You will also need to
+configure your build process to generate update images in a format compatible
+with the updater.
+
+Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota] to configure
+and use OTA.
 
 [source-sdk]: https://github.com/memfault/memfault-linux-sdk
 [source-sdk-branches]: https://github.com/memfault/memfault-linux-sdk/branches
@@ -393,8 +481,10 @@ Follow our [Embedded Linux OTA Integration Guide][docs-linux-ota].
 [docs-linux-metrics]: /docs/linux/metrics
 [docs-linux-coredumps]: /docs/linux/coredumps
 [docs-linux-logging]: /docs/linux/logging
+[docs-linux-reboot]: /docs/linux/reboot-reason-tracking
 [systemd-homepage]: https://systemd.io/
 [swupdate-homepage]: https://swupdate.org/
+[fluent-bit-homepage]: https://fluentbit.io/
 [u-boot-homepage]: https://www.denx.de/wiki/U-Boot
 [collectd-homepage]: https://collectd.org/
 [docs-configuration]: /docs/linux/reference-memfaultd-configuration
