@@ -1,0 +1,72 @@
+---
+id: reference-memfault-device-info
+title: "Reference: memfault-device-info"
+sidebar_label: "memfault-device-info"
+---
+
+Useful links:
+
+- [Reference: `memfaultctl` CLI][docs-memfaultctl].
+- [Integration Guide: add
+  `memfault-device-info`][integration-guide-memfault-device-info].
+
+### Purpose of `memfault-device-info`
+
+`memfault-device-info` is a program that `memfaultd` depends on to retrieve
+static information about the device it is running on. When `memfaultd` (or
+`memfaultctl`) runs, it will execute `memfault-device-info` and parse the output
+to collect this information.
+
+As an integrator, you will need to implement this program and make it available
+on the `PATH` of the `memfaultd` process. (By default on Yocto for systemd
+units, this is `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`).
+
+### Implementing `memfault-device-info`
+
+- When executed, `memfault-device-info` should print out the device's unique
+  identifier (for example, its serial number) and its hardware version in the
+  following format:
+
+```
+  MEMFAULT_DEVICE_ID=<device identifier>
+  MEMFAULT_HARDWARE_VERSION=<hardware version>
+```
+
+For example, an output might look like this:
+
+```
+  MEMFAULT_DEVICE_ID=1234-example-serial
+  MEMFAULT_HARDWARE_VERSION=thingy-evt2
+```
+
+- The `MEMFAULT_DEVICE_ID` value should be unique to the device. It should not
+  change over the lifetime of the device. The value must be between 1 and 128
+  characters long and can only contain the following characters: `a-z`, `A-Z`,
+  `0-9`, `-` and `_`.
+- The `MEMFAULT_HARDWARE_VERSION` value should be a string that identifies the
+  hardware version of the device. It should not change over the lifetime of the
+  device. See [this page for more details and examples][hardware-version].
+
+### Testing
+
+To test whether you have correctly implemented `memfault-device-info`, you can
+run `memfaultctl show-settings` on the device. This will print out the device
+info that `memfaultctl` has parsed and collected from `memfault-device-info`:
+
+```console
+$ memfaultctl show-settings
+
+...
+
+Device configuration from memfault-device-info:
+  MEMFAULT_DEVICE_ID=1234-example-serial
+  MEMFAULT_HARDWARE_VERSION=thingy-evt2
+
+...
+```
+
+[docs-memfaultctl]: /docs/linux/reference-memfaultctl-cli
+[hardware-version]:
+  /docs/platform/software-version-hardware-version/#hardware-version
+[integration-guide-memfault-device-info]:
+  /docs/linux/integration-guide#memfault-device-info

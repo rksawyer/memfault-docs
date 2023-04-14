@@ -4,16 +4,6 @@ title: Software Version & Hardware Version
 sidebar_label: Software Version & Hardware Version
 ---
 
-:::info
-
-This document describes the version identifiers used by Memfault. For
-information on which values are permitted in each of the version specifiers, see
-the documentation here:
-
-https://api-docs.memfault.com/#memfault-resources
-
-:::
-
 ## Hardware Version
 
 The Hardware Version is used to identify the type of hardware on which software
@@ -21,6 +11,13 @@ is running. In Memfault, a device always has exactly one Hardware Version. It
 can be used to identify different device types being tracked in the same Project
 (i.e. `smart-toaster` and `smart-oven`) and different board revisions of the
 same device type (i.e. `smart-toaster-evt`, `smart-toaster-pvt`, etc.).
+
+:::tip Requirements
+
+Hardware Versions must be between 1 and 128 characters long and can only contain
+the following characters: `a-z`, `A-Z`, `0-9` and `-_.+:`.
+
+:::
 
 :::info
 
@@ -45,6 +42,14 @@ Hardware Version by default. From the
 > The board/device layer represents \[...\] the bare schematics of a product.
 > These include the peripherals on the board and their configuration.
 
+### Linux
+
+On Linux, the Hardware Version needs to be reported to `memfaultd` by the
+[`memfault-device-info` program][memfault-device-info], which you need to
+implement as part of the integration.
+
+[memfault-device-info]: /docs/linux/reference-memfault-device-info
+
 ## Software Type
 
 The Software Type is used to identify the separate pieces of software running on
@@ -67,6 +72,13 @@ The **Primary Software Type** is used to populate the Software Version field on
 the individual Device page, as well as when filtering for the device, and how it
 appears in various fleet-level charts.
 
+:::tip Requirements
+
+Software Types must be between 1 and 128 characters long and can only contain
+the following characters: `a-z`, `A-Z`, `0-9` and `-_.+:`.
+
+:::
+
 ### MCU
 
 The software running on your devices will need to report its Software Type
@@ -82,6 +94,11 @@ running on the device.
 Applications have a Software Type equal to their
 [application ID](https://developer.android.com/studio/build/application-id),
 e.g. `com.acme.smartsink`.
+
+### Linux
+
+On Linux, the Software Type is specified in the [`memfaultd.conf`
+file][memfaultd-conf].
 
 ## Software Version
 
@@ -217,6 +234,14 @@ Some potentially useful things to consider:
 
 :::
 
+:::tip Requirements
+
+Aside of the requirements that follow from the chosen versioning scheme,
+Software Versions must be between 1 and 128 characters long and can only contain
+the following characters: `a-z`, `A-Z`, `0-9`, `-_.+:\()[]/` and spaces.
+
+:::
+
 #### Testing
 
 To test version ordering, two approaches are recommended:
@@ -341,6 +366,11 @@ the `versionCode` is used to compare Software Versions.
 [device-info-header]:
   https://github.com/memfault/memfault-firmware-sdk/blob/master/components/include/memfault/core/platform/device_info.h
 
+### Linux
+
+On Linux, the Software Version is specified in the [`memfaultd.conf`
+file][memfaultd-conf].
+
 ## Archiving
 
 Memfault supports archiving Software Types and Versions. This action removes the
@@ -362,3 +392,5 @@ A Software Type/Version cannot be unarchived so proceed with caution!
     alt="/img/docs/platform/archive-software-version.png"
   />
 </p>
+
+[memfaultd-conf]: /docs/linux/reference-memfaultd-configuration#etcmemfaultdconf

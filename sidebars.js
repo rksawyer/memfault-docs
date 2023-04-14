@@ -168,6 +168,7 @@ module.exports = {
                     items: [
                         "linux/reference-memfaultd-configuration",
                         "linux/reference-memfaultctl-cli",
+                        "linux/reference-memfault-device-info",
                     ],
                 },
                 "linux/memfault-hawkbit-comparison",
