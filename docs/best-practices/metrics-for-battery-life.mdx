@@ -4,6 +4,9 @@ title: Tracking Battery Life with Memfault
 sidebar_label: Tracking Battery Life
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 Memfault believes that the expected and the actual battery life of devices are
 two of the most important reliability metrics for devices that are not connected
 directly to power sources. Unfortunately, understanding and predicting battery
@@ -63,6 +66,14 @@ sections to learn how to use these metrics within Memfault.
 
 ### MCU & Linux
 
+:::info
+
+The MCU SDK >= v0.42.0 handles unset metric values differently from prior
+versions. Unset metrics are now dropped automatically by Memfault. We've updated
+this page with instructions on setup with and without these changes.
+
+:::
+
 Two metrics need to be recorded within the MCU or Linux firmware to ensure that
 you can reliably track battery life at a device and fleet level. These two
 metrics are the charge level, or
@@ -76,8 +87,11 @@ of time.
 This value represents the current charge level of the battery in the system.
 This value should be linearly normalized between 0 and 10,000.
 
-A value of -1 should be sent when the battery charge level can not be obtained
-or is known to be invalid.
+**>= SDK v0.42.0**: The value should only be set if valid for the entire
+interval.
+
+**< SDK v0.42.0**: A value of -1 should be sent when the battery charge level
+can not be obtained or is known to be invalid.
 
 :::info
 
@@ -89,7 +103,7 @@ This value should be based on a linear scale. Millivolts should not be sent.
 
 - It is recommended to use the name `Battery_ChargeLevel` for this metric name.
 - **Range** should be set to 0 - 10,000.
-- **Ignore** should be set to -1.
+- **Ignore** should be set to -1 (only required with SDK < v0.42.0).
 - **Attribute** should be enabled, and the **Write Policy** should be set to
   Writeable.
 - **Time Series** should be disabled.
@@ -108,7 +122,9 @@ This value should be based on a linear scale. Millivolts should not be sent.
 - To report a battery charge level of 50 mAh out of a 500 mAh capacity battery,
   record 1,000.
 - If the battery charge level could not be acquired or it is known to be
-  invalid, record -1.
+  invalid, record -1 _(SDK < v0.42.0)_.
+- If the battery charge level could not be acquired or it is known to be
+  invalid, leave the metric unset _(SDK >= v0.42.0)_.
 
 #### Battery Level Drop Over Interval
 
@@ -128,12 +144,18 @@ occurring battery charge level drops during intervals. If anything makes it a
 non-normal event, it should be thrown out so as to not ruin the fleet-level
 aggregation.
 
+:::info
+
+For >= SDK 0.42.0, leave the metric value unset when invalid instead.
+
+:::
+
 ##### Setup Within Memfault
 
 - It is recommended to use the name `Battery_ChargeLevelDrop` for this metric
   name.
 - **Range** should be set to 0 - 10,000.
-- **Ignore** should be set to -1.
+- **Ignore** should be set to -1 (only required for <= SDK v0.42.0).
 - **Attribute** should be disabled.
 - **Time Series** should be enabled.
 
@@ -152,7 +174,9 @@ aggregation.
 - To report a battery charge level drop of 10 mAh out of a 500 mAh capacity
   battery, record 200.
 - If the battery charge level drop could not be acquired or it is known to be
-  invalid or negative, record -1.
+  invalid or negative, record -1 _(SDK < v0.42.0)_.
+- If the battery charge level drop could not be acquired or it is known to be
+  invalid or negative, leave value unset _(SDK >= v0.42.0)_.
 
 #### Implementing Battery Metrics in Code
 
@@ -177,6 +201,14 @@ Note that the value of -1 can be sent even though the range is defined as
 metric within the UI.
 
 ##### Memfault C Instrumentation
+
+<Tabs
+  defaultValue="latest"
+  values={[
+    {label: '>= SDK v0.42.0', value: 'latest'},
+    {label: '< SDK v0.42.0', value: 'prior'},
+  ]}>
+  <TabItem value="latest">
 
 ```c
 // Stores the battery charge level from the start of the heartbeat interval
@@ -205,7 +237,57 @@ static void prv_metrics_heartbeat_record_battery_info(void) {
     // a drop in battery charge level normalized between 0 and 10,000
     const int32_t battery_charge_drop = battery_charge_level - s_battery_charge_level_previous;
 
-    const bool report_battery_drop = (s_charger_connected_during_hour || battery_charge_drop < 0);
+    const bool report_battery_drop = (!s_battery_charger_event_during_interval && battery_charge_drop >= 0);
+
+    if (report_battery_drop) {
+        memfault_metrics_heartbeat_set_signed(
+            MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevelDrop),
+            battery_charge_drop
+        );
+    }
+
+    // Also record the current battery charge level
+    if (battery_charge_level > 0) {
+      memfault_metrics_heartbeat_set_signed(
+          MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevel),
+          battery_charge_level
+      );
+    }
+}
+```
+
+  </TabItem>
+
+  <TabItem value="prior">
+
+```c
+// Stores the battery charge level from the start of the heartbeat interval
+static int32_t s_battery_charge_level_previous;
+
+// Tracks whether a charger was connected during the heartbeat interval
+static bool s_battery_charger_event_during_interval;
+
+// Called at the start of a heartbeat interval
+static void prv_device_metrics_start_heartbeat() {
+    // Sets the battery percentage at the start of the interval
+    s_battery_charge_level_previous = battery_get_current_pct();
+
+    // Determine whether a charger is connected at this exact moment.
+    // If the charger is connected during the hour, this should be
+    // updated by the battery/charging module too.
+    s_battery_charger_event_during_interval = battery_get_charger_connected();
+}
+
+// Calculate and record the drop in battery charge over the heartbeat interval
+static void prv_metrics_heartbeat_record_battery_info(void) {
+    // Charge level normalized between 0 and 10,000
+    const int32_t battery_charge_level = battery_charge_level_get();
+
+    // Subtract current charge level from previous charge level to get
+    // a drop in battery charge level normalized between 0 and 10,000
+    const int32_t battery_charge_drop = battery_charge_level - s_battery_charge_level_previous;
+
+    const bool report_battery_drop = (!s_battery_charger_event_during_interval && battery_charge_drop >= 0);
 
     if (report_battery_drop) {
         memfault_metrics_heartbeat_set_signed(
@@ -228,6 +310,9 @@ static void prv_metrics_heartbeat_record_battery_info(void) {
     );
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Analyzing Battery Life for a Single Device
 
