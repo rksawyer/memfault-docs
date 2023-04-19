@@ -46,8 +46,8 @@ Metric can have a few properties:
 - whether the data type is an `INT` (default), `FLOAT`, `BOOL`, or `STRING`
 - whether it is a `favorite` Metric, which will cause it to appear more
   prominently in a few places in the web app
-- the value `range` which informs charts and other components
-- a set of `ignored_values` (like `-1`) which should be ignored.
+- the value `range` which informs charts and other components, and optionally
+  controls filtering of values.
 
 :::info
 
@@ -192,10 +192,12 @@ The response will be JSON-encoded data, example below:
         "display_name": "",
         "favorite": false,
         "id": "5e8b5af5-c686-43a7-8ba4-7878f7f9105e",
-        "ignored_values": [],
+        "range_violation_behavior": "accept",
         "range": {
-          "max": null,
-          "min": null
+          "max_inclusive":true,
+          "min_inclusive":true,
+          "min":null,
+          "max":null
         },
         "string_key": "TimerTaskCpuUsage",
         "device_write_policy": "writable"
@@ -272,7 +274,7 @@ to the value, enter the new value, and finally **Save** it.
 ![Editing an Attribute via the web application](/img/docs/platform/device-detail-attribute-edit.png)
 _Editing an Attribute via the web application_
 
-## Searching Devices by Attributes and Timeseries
+## Searching Devices by Attributes and Timeseries {#device-search-by-attributes-and-timeseries}
 
 You can search devices by Attributes and Timeseries. Visiting the **Devices**
 page, open the **Filter** panel.
@@ -287,6 +289,51 @@ To filter by Timeseries, add a **Historical Data** filter and select
 
 ![Device search by Timeseries](/img/docs/platform/device-search-by-timeseries.png)
 _Searching devices by Timeseries_
+
+## Float/Integer Range {#range}
+
+For numeric metrics, the valid range can optionally be specified. For example,
+for a floating point metric that represents a percentage, you would specify a
+range of 0 to 100 and make both the start value and end value inclusive:
+
+![Value range for metrics](/img/docs/platform/metric-range.png)
+
+When specifying only the start of the range, only values greater than (or equal
+if inclusive) to the start value will be accepted. Conversely, when specifying
+only the end of the range, only values less than (or equal if inclusive) to the
+end value will be accepted.
+
+### Ingress Filtering {#ingress-filtering}
+
+The effect of the range is controlled with the "Ingress Filtering" setting:
+
+- "Accept all values": all values are accepted, regardless of whether they are
+  within the range or not. This is the default for new metrics. The range may be
+  used for display purposes in the future.
+- "Accept only values within range": only values within the range are accepted.
+  Values outside the range are ignored for _most_ features in Memfault. See the
+  following table for more details.
+
+#### Effect of "Ingress Filtering" on out-of-range values, per feature
+
+| Feature                                                         | Accept all values | Accept only values within range |
+| :-------------------------------------------------------------- | ----------------- | ------------------------------- |
+| [Fleet-wide Metrics charts][metric-charts]                      | 🟢 Included       | ⛔ Ignored                      |
+| [Device Search][device-search]                                  | 🟢 Included       | ⛔ Ignored                      |
+| [Device-Threshold Alerts][device-alerts]                        | 🟢 Included       | ⛔ Ignored                      |
+| [Fleet-Threshold Alerts][fleet-alerts]                          | 🟢 Included       | ⛔ Ignored                      |
+| Device Timeline: Heartbeat data                                 | 🟢 Included       | ⛔ Ignored                      |
+| [Device Timeline: High Resolution Telemetry (HRT)][android-hrt] | 🟢 Included       | 🟢 Included (known issue)       |
+| MCU Device Metrics Charts                                       | 🟢 Included       | 🟢 Included (known issue)       |
+| Raw Data Exports                                                | 🟢 Included       | 🟢 Included                     |
+
+[metric-charts]: /docs/platform/charts#metric-charts
+[device-search]:
+  /docs/platform/metrics/#device-search-by-attributes-and-timeseries
+[device-alerts]: /docs/platform/alerts/#device-threshold-alerts
+[fleet-alerts]: /docs/platform/alerts/#fleet-threshold-alerts
+[android-hrt]:
+  /docs/android/android-custom-metrics/#high-resolution-telemetry-hrt
 
 ## Quotas
 

@@ -102,8 +102,9 @@ This value should be based on a linear scale. Millivolts should not be sent.
 ##### Setup Within Memfault
 
 - It is recommended to use the name `Battery_ChargeLevel` for this metric name.
-- **Range** should be set to 0 - 10,000.
-- **Ignore** should be set to -1 (only required with SDK < v0.42.0).
+- **Range** should be set to 0 - 10,000, both start and end inclusive.
+- **Ingress Filtering** should be set to "Accept only values within range" (only
+  required with SDK < v0.42.0).
 - **Attribute** should be enabled, and the **Write Policy** should be set to
   Writeable.
 - **Time Series** should be disabled.
@@ -155,7 +156,8 @@ For >= SDK 0.42.0, leave the metric value unset when invalid instead.
 - It is recommended to use the name `Battery_ChargeLevelDrop` for this metric
   name.
 - **Range** should be set to 0 - 10,000.
-- **Ignore** should be set to -1 (only required for <= SDK v0.42.0).
+- **Ingress Filtering** should be set to "Accept only values within range" (only
+  required for <= SDK v0.42.0).
 - **Attribute** should be disabled.
 - **Time Series** should be enabled.
 
@@ -197,8 +199,11 @@ MEMFAULT_METRICS_KEY_DEFINE_WITH_RANGE(Battery_ChargeLevelDrop,
 ```
 
 Note that the value of -1 can be sent even though the range is defined as
-0 - 10000. The range is primarily used to improve the experience of viewing the
-metric within the UI.
+0 - 10000. By setting the ["Ingress Filtering" configuration][ingress-filtering]
+to "Accept only values within range", Memfault will automatically filter out the
+-1 values in the web application.
+
+[ingress-filtering]: /docs/platform/metrics/#ingress-filtering
 
 ##### Memfault C Instrumentation
 
@@ -296,7 +301,7 @@ static void prv_metrics_heartbeat_record_battery_info(void) {
         );
     } else {
         // Don't report this metric during hours with charging events
-        // Make sure to set up -1 as the value to ignore in the Memfault service
+        // Make sure to set up the range & ingress filtering to ignore -1 in the Memfault service
         memfault_metrics_heartbeat_set_signed(
             MEMFAULT_METRICS_KEY_DEFINE(Battery_ChargeLevelDrop),
             -1

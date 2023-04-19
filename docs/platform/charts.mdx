@@ -71,18 +71,19 @@ The list of metrics available in your project is automatically created from the
 metrics collected by your devices. For that reason, at least one device must
 upload data for a given metric before a chart for that metric can be created.
 
-| Aggregation  | Description                                         |
-| ------------ | --------------------------------------------------- |
-| Min          | The lowest reading received.                        |
-| Mean         | Arithmetic mean of all readings.                    |
-| Max          | The highest reading received.                       |
-| Min/Mean/Max | All of the above combined into a single chart.      |
-| Count        | Number of times a (non-ignored) value was received. |
-| Sum          | Sum of all readings.                                |
+| Aggregation  | Description                                    |
+| ------------ | ---------------------------------------------- |
+| Min          | The lowest reading received.                   |
+| Mean         | Arithmetic mean of all readings.               |
+| Max          | The highest reading received.                  |
+| Min/Mean/Max | All of the above combined into a single chart. |
+| Count        | Number of times a value was received.          |
+| Sum          | Sum of all readings.                           |
 
 The aggregation of metric data for each day is performed once the day has ended.
 For example, if data is received on January 1st, the metric charts will show
-this data on January 2nd.
+this data on January 2nd. Only values that pass the
+["Ingress Filtering" are included](/docs/platform/metrics#ingress-filtering).
 
 For more information about adding metrics to your devices:
 
