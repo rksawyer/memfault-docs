@@ -165,3 +165,28 @@ Below is a list of the APIs and payloads that may be rate-limited:
     </tr>
   </tbody>
 </table>
+
+### Server-Side Development Mode
+
+Memfault allows you to enable a "Development Mode" for a specific Device in your
+Project. This mode allows you to bypass the rate limits for that Device
+temporarily. This is useful for development and testing purposes. To enable
+Development Mode for a Device, navigate to the Device Details page for that
+Device and click the "Development Mode" tab. In here you will find detailed
+information on how Server-Side Development Mode works and how to enable it for a
+Device.
+
+Server-Side Development Mode is designed to be used in conjunction with the
+accompanying features in the Memfault SDKs:
+
+- [Developer Mode](/docs/linux/reference-memfaultctl-cli/#developer-mode) on
+  Linux
+- [Development Mode](/docs/android/android-getting-started-guide/#development-mode-since-bort-420)
+  on Android
+- There is no equivalent feature for MCU Projects.
+
+The Developer Mode on Linux and the Development Mode on Android are used to
+enable additional features in the Memfault SDKs.
+
+Number of Devices that can be put in Development Mode simultaneously is
+currently limited.
