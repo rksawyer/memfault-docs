@@ -4,6 +4,7 @@ title: Getting Started
 sidebar_label: Getting Started
 ---
 
+import { EnableServerSideDevelopmentMode } from "@site/src/components/EnableServerSideDevelopmentMode";
 import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
 
 This tutorial will cover integrating the [Bort SDK](android-bort.mdx) into a
@@ -298,10 +299,7 @@ To request a Device Configuration update:
 ./bort_cli.py request-update-config --bort-app-id your.app.id
 ```
 
-There will still be some server-side rate limits present even if device is put
-in dev mode through the SDK. Please refer to
-[Server-side Development Mode](/docs/platform/rate-limiting/#server-side-development-mode)
-for more information.
+<EnableServerSideDevelopmentMode />
 
 ## Upload a bug report
 

@@ -4,6 +4,8 @@ title: ARM MDK Getting Started Guide
 sidebar_label: ARM MDK Guide
 ---
 
+import { EnableServerSideDevelopmentMode } from "@site/src/components/EnableServerSideDevelopmentMode";
+
 This tutorial will go over integrating the **panics** component of the
 [Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
 a system using ARM Compiler 5 and the MDK Microcontroller Development Kit.
@@ -116,3 +118,5 @@ void send_memfault_data(void) {
   while (try_send_memfault_data()) { }
 }
 ```
+
+<EnableServerSideDevelopmentMode />

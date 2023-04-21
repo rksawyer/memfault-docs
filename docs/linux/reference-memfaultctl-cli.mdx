@@ -4,6 +4,8 @@ title: "Reference: memfaultctl CLI"
 sidebar_label: "memfaultctl CLI"
 ---
 
+import { EnableServerSideDevelopmentMode } from "@site/src/components/EnableServerSideDevelopmentMode";
+
 Useful links:
 
 - [Reference: `memfaultd` Configuration][docs-configuration].
@@ -51,10 +53,7 @@ To enable developer mode, use `memfaultctl enable-dev-mode`. This setting will
 be persisted across reboots. To disable developer mode, use
 `memfaultctl disable-dev-mode`.
 
-There will still be some server-side rate limits present even if device is put
-in dev mode through the SDK. Please refer to
-[Server-side Development Mode](/docs/platform/rate-limiting/#server-side-development-mode)
-for more information.
+<EnableServerSideDevelopmentMode />
 
 ## `memfaultctl` commands
 

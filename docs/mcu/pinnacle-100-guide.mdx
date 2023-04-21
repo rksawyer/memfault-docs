@@ -7,6 +7,7 @@ description: "Integrate Memfault using Laird's Pinnacle™ 100 Cellular Modem."
 
 import MqttTopic from "@site/src/pages/_partials/_mqtt/_topic.mdx";
 import MqttAws from "@site/src/pages/_partials/_mqtt/_aws.mdx";
+import { EnableServerSideDevelopmentMode } from "@site/src/components/EnableServerSideDevelopmentMode";
 import UploadSymbolFile from "@site/src/pages/_partials/_steps/_upload-symbol-file.mdx";
 
 In this guide we will walk through the steps for integrating the
@@ -64,6 +65,8 @@ CONFIG_MEMFAULT_NCS_FW_TYPE="pinnacle-fw"
 <UploadSymbolFile />
 
 ## Publish data to the Memfault cloud
+
+<EnableServerSideDevelopmentMode />
 
 ### HTTPS
 
