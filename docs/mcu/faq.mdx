@@ -101,3 +101,48 @@ To resolve this warning, be sure to enable debug info in the build system. For
 
 Other IDE's will have a "Debug" checkbox in the C compiler settings that should
 be enabled, which translates to the above option when the IDE builds with `gcc`.
+
+## Merging auxiliary symbol files into an ELF
+
+Memfault allows including additional ELFs (i.e. for ROM code or otherwise)
+inside the "main" ELF file, by embedding each additional ELF in a section
+prefixed with `.mflt_aux_symbols`.
+
+The `objcopy` program from GNU binutils can be used to do this. Note, if you are
+using a GCC based cross compiler, the binary is likely to be named after the
+target platform, for example `arm-none-eabi-objcopy`.
+
+In the following example, we have got a `main.elf` file containing the
+application firmware and 2 ROM ELF files, `rom-a.elf` and `rom-b.elf`. The ROM
+ELFs are merged into the main ELF, producing `merged.elf`.
+
+Note that the name of the section needs to start with `.mflt_aux_symbols`. When
+adding multiple auxiliary ELFs, make sure to add a unique suffixes or else
+`objcopy` will complain.
+
+```bash
+objcopy \
+  --add-section .mflt_aux_symbols.a=rom-a.elf \
+  --add-section .mflt_aux_symbols.b=rom-b.elf \
+  main.elf \
+  merged.elf
+```
+
+If there's only a single ROM elf file, `rom.elf`, this example would apply (note
+that the output section, `.mflt_aux_symbols`, doesn't need a suffix here because
+there's only 1 section of that name):
+
+```bash
+objcopy \
+  --add-section .mflt_aux_symbols=rom.elf \
+  main.elf \
+  merged.elf
+```
+
+:::note
+
+The symbols and debug info in the auxiliary ELFs are currently only loaded to
+produce the backtrace. They are not yet passed into the "Globals & Statics”
+view.
+
+:::
