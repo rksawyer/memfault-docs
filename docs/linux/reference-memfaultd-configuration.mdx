@@ -87,6 +87,11 @@ A [full configuration example can be found in the source directory of
 ```json
 {
   "queue_size_kib": 1024,
+  "persist_dir": "/media/memfault",
+  "tmp_dir": "",
+  "tmp_dir_min_headroom_kib": 10240,
+  "tmp_dir_min_inodes": 100,
+  "tmp_dir_max_usage_kib": 102400,
   "refresh_interval_seconds": 3600,
   "enable_data_collection": false,
   "enable_dev_mode": false,
@@ -94,7 +99,6 @@ A [full configuration example can be found in the source directory of
   "software_type": "<YOUR_SOFTWARE_TYPE>",
   "project_key": "<YOUR_PROJECT_KEY>",
   "base_url": "https://device.memfault.com",
-  "data_dir": "/media/memfaultd",
   "swupdate_plugin": {
     "input_file": "/etc/swupdate.cfg",
     "output_file": "/tmp/swupdate.cfg"
@@ -103,18 +107,17 @@ A [full configuration example can be found in the source directory of
     "last_reboot_reason_file": "/media/last_reboot_reason"
   },
   "collectd_plugin": {
-    "footer_include_output_file": "/tmp/collectd-footer-include.conf",
     "header_include_output_file": "/tmp/collectd-header-include.conf",
-    "interval_seconds": 3600,
+    "footer_include_output_file": "/tmp/collectd-footer-include.conf",
     "non_memfaultd_chain": "",
-    "write_http_buffer_size_kib": 64
+    "write_http_buffer_size_kib": 64,
+    "interval_seconds": 3600
   },
   "coredump_plugin": {
     "coredump_max_size_kib": 96000,
+    "compression": "gzip",
     "rate_limit_count": 5,
-    "rate_limit_duration_seconds": 3600,
-    "storage_max_usage_kib": 0,
-    "storage_min_headroom_kib": 10240
+    "rate_limit_duration_seconds": 3600
   },
   "fluent-bit": {
     "extra_fluentd_attributes": [],
@@ -123,9 +126,13 @@ A [full configuration example can be found in the source directory of
     "max_connections": 4
   },
   "logs": {
+    "compression_level": 1,
+    "max_lines_per_minute": 500,
     "rotate_size_kib": 10240,
-    "rotate_after_seconds": 3600,
-    "tmp_folder": "tmplogs"
+    "rotate_after_seconds": 3600
+  },
+  "mar": {
+    "mar_file_max_size_kib": 10240
   }
 }
 ```
@@ -135,21 +142,25 @@ file.
 
 ### Top-level `/etc/memfaultd.conf` configuration
 
-| Field                      | Description                                                                                                                                                                                        | Recommended value                         |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `queue_size_kib`           | Size of `$data_dir/queue` in kibibytes.                                                                                                                                                            | 1024                                      |
-| `refresh_interval_seconds` | The frequency (in seconds) with which `memfaultd` will attempt to flush its queue and post it to Memfault. Note that a recovery system with exponential back-off is in place for network failures. | 3600                                      |
-| `enable_data_collection`   | Whether `memfaultd` should collect and post data to Memfault by default. Read more [here][docs-enable-data-collection].                                                                            | `false` (ask for user consent first)      |
-| `enable_dev_mode`          | Change memfaultd default settings for development. Read more [here][docs-enable-dev-mode].                                                                                                         | `false` (only use in development)         |
-| `base_url`                 | The base URL to Memfault's device API.                                                                                                                                                             | `https://device.memfault.com`             |
-| `software_version`         | The current version of your software. Read more [here][docs-software-version].                                                                                                                     | _Project-specific_                        |
-| `software_type`            | The current version of your software. Read more [here][docs-software-type].                                                                                                                        | _Project-specific_                        |
-| `project_key`              | A write-only key for your Project. Find yours in <ProjectMagicLink path="/settings" title="Open Project -> Settings in your Project">**Project -> Settings**</ProjectMagicLink> in the app.        | _Project-specific_                        |
-| `data_dir`                 | A directory where `memfaultd` can store application data persistently (needs to survive firmware upgrades). Read more [here][docs-data-dir].                                                       | _Project-specific_                        |
-| `swupdate_plugin`          | Configuration values for `plugin_swupdate` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`swupdate_plugin`](#swupdate_plugin) |
-| `reboot_plugin`            | Configuration values for `plugin_reboot`. [Read more][docs-control-memfaultd-plugins].                                                                                                             | See [`reboot_plugin`](#reboot_plugin)     |
-| `collectd_plugin`          | Configuration values for `plugin_collectd` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`reboot_plugin`](#reboot_plugin)     |
-| `coredump_plugin`          | Configuration values for `plugin_coredump` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`coredump_plugin`](#coredump_plugin) |
+| Field                      | Description                                                                                                                                                                                        | Recommended value                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `queue_size_kib`           | Size of the event queue in kibibytes.                                                                                                                                                              | 1024                                                                                 |
+| `refresh_interval_seconds` | The frequency (in seconds) with which `memfaultd` will attempt to flush its queue and post it to Memfault. Note that a recovery system with exponential back-off is in place for network failures. | 3600                                                                                 |
+| `enable_data_collection`   | Whether `memfaultd` should collect and post data to Memfault by default. Read more [here][docs-enable-data-collection].                                                                            | `false` (ask for user consent first)                                                 |
+| `enable_dev_mode`          | Change memfaultd default settings for development. Read more [here][docs-enable-dev-mode].                                                                                                         | `false` (only use in development)                                                    |
+| `base_url`                 | The base URL to Memfault's device API.                                                                                                                                                             | `https://device.memfault.com`                                                        |
+| `software_version`         | The current version of your software. Read more [here][docs-software-version].                                                                                                                     | _Project-specific_                                                                   |
+| `software_type`            | The current version of your software. Read more [here][docs-software-type].                                                                                                                        | _Project-specific_                                                                   |
+| `project_key`              | A write-only key for your Project. Find yours in <ProjectMagicLink path="/settings" title="Open Project -> Settings in your Project">**Project -> Settings**</ProjectMagicLink> in the app.        | _Project-specific_                                                                   |
+| `persist_dir`              | A directory where `memfaultd` can store application data persistently (needs to survive firmware upgrades). Read more [here][docs-persist-dir].                                                    | _Project-specific_                                                                   |
+| `tmp_dir`                  | A directory where `memfaultd` can store temporary data. This can be a temporary filesystem. Read more [here][docs-tmp-dir].                                                                        | "" (will use `persist_dir`)                                                          |
+| `tmp_dir_min_headroom_kib` | Minimum space to keep available on the `tmp_dir` filesystem. `memfaultd` will stop writing and will delete buffered data when free space goes below this value.                                    | 10% of the filesystem space - or less if your application also uses this filesystem. |
+| `tmp_dir_min_inodes`       | Minimum number of inodes to keep available on the `tmp_dir` filesystem. `memfaultd` will stop writing when free inode count goes below this value.                                                 | 10% of the filesystem inodes.                                                        |
+| `tmp_dir_max_usage_kib`    | Maximum size of memfault data on the `tmp_dir` filesystem. Memfault will start deleting older data and stop writing when this limit is reached.                                                    | _Project-specific._                                                                  |
+| `swupdate_plugin`          | Configuration values for `plugin_swupdate` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`swupdate_plugin`](#swupdate_plugin)                                            |
+| `reboot_plugin`            | Configuration values for `plugin_reboot`. [Read more][docs-control-memfaultd-plugins].                                                                                                             | See [`reboot_plugin`](#reboot_plugin)                                                |
+| `collectd_plugin`          | Configuration values for `plugin_collectd` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`reboot_plugin`](#reboot_plugin)                                                |
+| `coredump_plugin`          | Configuration values for `plugin_coredump` if enabled in `memfaultd` (default). [Read more][docs-control-memfaultd-plugins].                                                                       | See [`coredump_plugin`](#coredump_plugin)                                            |
 
 ### `swupdate_plugin`
 
@@ -211,24 +222,20 @@ file.
     "compression": "gzip",
     "coredump_max_size_kib": 96000,
     "rate_limit_count": 5,
-    "rate_limit_duration_seconds": 3600,
-    "storage_max_usage_kib": 0,
-    "storage_min_headroom_kib": 10240
+    "rate_limit_duration_seconds": 3600
   }
 }
 ```
 
 To configure the location where coredumps are stored during processing, see
-[`data_dir`](#etcmemfaultdconf).
+[`tmp_dir`](#etcmemfaultdconf).
 
-| Field                                      | Description                                                                                    | Recommended value  |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------ |
-| `compression`                              | Compression to use when storing on disk and uploading to Memfault (`none` or `gzip`).          | `gzip`             |
-| `coredump_max_size_kib`                    | The maximum size of a coredump that can be processed.                                          | 96000              |
-| `rate_limit_count`<sup>\*</sup>            | The maximum amount of coredumps to process in a given period of `rate_limit_duration_seconds`. | 5<sup>\*</sup>     |
-| `rate_limit_duration_seconds`<sup>\*</sup> | A window in which a maximum of `rate_limit_count` coredumps can be processed.                  | 3600<sup>\*</sup>  |
-| `storage_max_usage_kib`                    | A maximum of disk space to use for the purposes of coredump processing.                        | _Project-specific_ |
-| `storage_min_headroom_kib`                 | A minimum of disk space to leave unused in disk while processing a coredump.                   | _Project-specific_ |
+| Field                                      | Description                                                                                    | Recommended value |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------- |
+| `compression`                              | Compression to use when storing on disk and uploading to Memfault (`none` or `gzip`).          | `gzip`            |
+| `coredump_max_size_kib`                    | The maximum size of a coredump that can be processed.                                          | 96000             |
+| `rate_limit_count`<sup>\*</sup>            | The maximum amount of coredumps to process in a given period of `rate_limit_duration_seconds`. | 5<sup>\*</sup>    |
+| `rate_limit_duration_seconds`<sup>\*</sup> | A window in which a maximum of `rate_limit_count` coredumps can be processed.                  | 3600<sup>\*</sup> |
 
 <p>
   <sup>*</sup> Please{" "}
@@ -249,7 +256,7 @@ Next, `memfaultd` will determine the maximum size that is allowed, based on the
 configuration values and the amount of available storage space.
 
 Unless there is no available storage, the coredump is written into a temporary
-holding area inside the [`data_dir`][docs-data-dir].
+holding area inside the [`tmp_dir`][docs-tmp-dir].
 
 Finally, the coredump is added to the upload queue. This queue is serviced
 periodically (see the top-level `refresh_interval_seconds`).
@@ -282,38 +289,45 @@ periodically (see the top-level `refresh_interval_seconds`).
 ```json
 {
   "logs": {
+    "compression_level": 1,
+    "max_lines_per_minute": 500,
     "rotate_size_kib": 10240,
-    "rotate_after_seconds": 3600,
-    "tmp_folder": "tmplogs"
+    "rotate_after_seconds": 3600
   }
 }
 ```
 
-| Field                  | Description                                                                                                                          | Recommended value                    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `rotate_after_seconds` | Log files will be rotated when they reach this number of seconds.                                                                    | 3600                                 |
-| `rotate_size_kib`      | Log files will be rotated when they reach this size (in kibibytes).                                                                  | 10240 (10 MiB)                       |
-| `tmp_folder`           | Where to store logfiles while they are being written. If this path does not start with a `/`, it will be relative to the `data_dir`. | `tmplogs` (so `{data_dir}/tmplogs`). |
+| Field                  | Description                                                         | Recommended value |
+| ---------------------- | ------------------------------------------------------------------- | ----------------- |
+| `compression_level`    | Compression level (0 - none, 1 - fast to 9 - best)                  | 1 - Fast          |
+| `max_lines_per_minute` | Maximum number of lines to write per minute.                        | 500               |
+| `rotate_after_seconds` | Log files will be rotated when they reach this number of seconds.   | 3600              |
+| `rotate_size_kib`      | Log files will be rotated when they reach this size (in kibibytes). | 10240 (10 MiB)    |
 
 ### `mar`
 
 ```
 {
   "mar": {
-    "storage_max_usage_kib": 102400
+    "mar_file_max_size_kib": 10240
   }
 }
 ```
 
-| Field                   | Description                                             | Recommended value |
-| ----------------------- | ------------------------------------------------------- | ----------------- |
-| `storage_max_usage_kib` | Maximum disk space used by `memfaultd` for MAR entries. | 102400 (100 MiB)  |
+| Field                   | Description                                  | Recommended value |
+| ----------------------- | -------------------------------------------- | ----------------- |
+| `mar_file_max_size_kib` | Maximum size of one MAR ZIP file for upload. | 10240 (10 MiB)    |
 
-`memfaultd` will transform log files into MAR entries on disk and keep them in
-the MAR staging area until they are uploaded.
+`memfaultd` will transform log files and coredumps into MAR entries on disk and
+keep them in the MAR staging area until they are uploaded.
 
-Older entries will be deleted automatically to keep the total size smaller than
-`storage_max_usage_kib`.
+To upload them, a ZIP file is generated "on the fly", grouping multiple MAR
+entries together. The `mar_file_max_size_kib` controls how large this file is
+allowed to grow. If the individual entries are larger than this setting, they
+will be uploaded one by one.
+
+We recommend lowering this value if your Internet connection is not fast or
+reliable.
 
 [collectd-chains]: https://collectd.org/wiki/index.php/Chains
 [collectd-configuration]: /docs/linux/metrics#configuring-collectd
@@ -336,8 +350,7 @@ Older entries will be deleted automatically to keep the total size smaller than
   /docs/platform/software-version-hardware-version#software-type
 [docs-software-version]:
   /docs/platform/software-version-hardware-version#software-version
-[docs-data-dir]:
-  /docs/linux/integration-guide#configure-a-persistent-storage-directory-for-memfaultd
+[docs-storage]: /docs/linux/integration-guide#configure-memfaultd-storage
 [docs-control-memfaultd-plugins]:
   /docs/linux/integration-guide#optional-opt-out-of-memfaultd-built-in-plugins
 [source-memfaultd]:

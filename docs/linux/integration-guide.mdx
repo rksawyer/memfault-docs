@@ -100,42 +100,30 @@ Include the [`meta-memfault`][source-meta-memfault] layer in your
 ```
 # Apart from other layers you may already depend on:
 BBLAYERS ?= " \
-    ${YOCTOROOT}/sources/meta-rust-bin \
     ${YOCTOROOT}/sources/memfault-linux-sdk/meta-memfault \
+    ${YOCTOROOT}/sources/memfault-linux-sdk/meta-rust-bin \
     # Provides collectd (recommended) - Also a dependency of the swupdate layer:
     ${YOCTOROOT}/sources/meta-openembedded/meta-oe \
 "
 ```
 
-`meta-memfault` requires a Rust compiler providing the `cargo` class. Version
-`1.65.0` is the oldest version supported at the moment.
-
-We recommend using the [`meta-rust-bin` layer provided by
-`rust-embedded`][meta-rust-bin] as it will use a pre-built compiler and has a
-minimal impact on your build times.
-
 <details>
-<summary>Other options for Rust in Yocto</summary>
+<summary>Rust in Yocto for the Memfault SDK</summary>
 
-There are other ways to make the Rust compiler available in your Yocto build
-process:
+`memfaultd` requires the Rust compiler version `1.65.0` or higher. Dunfell does
+not ship with Rust support and Kirkstone ships with `1.59.0` so we provide Rust
+recipes with the SDK.
 
-- Built-in support for rust included in `oe-core` since since 3.4 Honister.
+The `meta-rust-bin` layer included in the `memfault-linux-sdk` is a slightly
+modified version of [`rust-embedded/meta-rust-bin`][meta-rust-bin] . This
+version differs from upstream by providing a new class `cargo_bin` instead of
+overriding the `cargo` class provided by `meta-oe`.
 
-  This will not work with Memfault as the provided version of Rust in kirkstone
-  is `1.59.0`.
-
-- Up-to-date Rust support via `meta-rust`.
-
-  `meta-rust` was the first layer to provide rust support in Yocto. It has now
-  been replaced by the built-in support. However, it is still maintained and
-  provides more recent versions of Rust for kirkstone.
-
-  This works but requires a slightly different recipe than the one provided with
-  the Memfault SDK. Please contact us if you would like to use this option.
+We found that overriding `cargo` often caused problems with some Poky packages,
+notably `python3-cryptography-native`. The modified version that we provide does
+not have this issue.
 
 [meta-rust-bin]: https://github.com/rust-embedded/meta-rust-bin
-[meta-rust]: https://github.com/meta-rust/meta-rust
 
 </details>
 
@@ -319,17 +307,17 @@ Read more about [Software Versions and Hardware
 Versions][docs-hardware-version-software-version] to better understand these
 core Memfault platform concepts.
 
-### Configure a persistent storage directory for `memfaultd`
+### Configure `memfaultd` storage
+
+#### Persistent storage
 
 In `/etc/memfaultd.conf`:
 
 ```json
 {
-  "software_version": "1.0.0",
-  "software_type": "main",
-  "project_key": "<YOUR_PROJECT_KEY>",
+  ...
   // highlight-next-line
-  "data_dir": "<YOUR_PERSISTENT_STORAGE_DIR>"
+  "persist_dir": "<YOUR_PERSISTENT_STORAGE_DIR>"
 }
 ```
 
@@ -340,22 +328,44 @@ Requirements for this directory are:
 - That it is writable to by `memfaultd`.
 - That its data persists after firmware upgrades.
 
-Your `data_dir` will be read from or written to for the following reasons:
+Your `persist_dir` will be written to for the following reasons:
 
-- It will be read every [`refresh_interval_seconds`][docs-configuration], in
-  order to check the status of the queue,
-- written to whenever an event occurs that we track in that queue, such as
-  reboot events and when a coredump is captured (see [Linux
-  Coredumps][docs-linux-coredumps]), and
-- written to whenever configuration is changed at runtime, for example by using
-  `memfaultctl {enable,disable}-data-collection` (see
-  ["Set `enable_data_collection`"](#set-enable_data_collection)).
+- Save persistent configuration options (`enable_data_collection` and
+  `enable_dev_mode`) ;
+- Save the internal reboot reason file when memfaultd restarts.
+
+#### Temporary storage
+
+You can configure `memfaultd` to use a different folder for data that will be
+written more frequently and does not necessarily needs to be persisted across
+reboots. You can even decide to store this temporary storage directory on a
+temporary filesystem in RAM (`tmpfs`), although in this case, the data will be
+lost if a reboot or crash occurs before the data was uploaded.
+
+```json
+{
+  ...
+  // highlight-next-line
+  "tmp_dir": "<YOUR_TEMPORARY_STORAGE_DIR>"
+}
+```
+
+By default the temporary storage directory is the persistent storage directory.
+This is the recommended configuration.
+
+This directory will be used for:
+
+- Coredumps
+- Logs
+- Storing the boot id of the device across memfaultd restarts
+- Storing the Memfault reboot events queue
 
 Note that the [`collectd_plugin.interval_seconds`][docs-configuration] does not
-affect reads or writes to `data_dir`, unless you've configured collectd to write
+affect reads or writes to `tmp_dir`, unless you've configured collectd to write
 there, too. By default, collectd will store metrics in memory.
 
-See our [configuration reference][docs-configuration] for more context.
+You can control how much space `memfaultd` will use as temporary storage. See
+our [configuration reference][docs-configuration] for more context.
 
 ### Set `enable_data_collection`
 

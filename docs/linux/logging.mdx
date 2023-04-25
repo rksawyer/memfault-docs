@@ -8,13 +8,6 @@ import { ProjectMagicLink } from "@site/src/components/ProjectMagicLink";
 
 ## Introduction
 
-:::caution Technical Preview
-
-Log collection on Linux is available in Memfault SDK 1.3 as a technical preview.
-It is not ready for production deployment at this time.
-
-:::
-
 `memfaultd` integrates with [`fluent-bit`][fluent-bit-homepage] to collect logs
 from your systems and upload them to Memfault platform.
 
@@ -30,14 +23,8 @@ timeline][docs-timeline].
 Follow the [integration guide][docs-linux-integration] to learn how to install
 `memfaultd` on your device.
 
-The logging plugin is **NOT** enabled by default in the `meta-memfault` layer.
-Our [meta-memfault-example layer][example-enable-logging] demonstrates how to
-turn it on:
-
-```
-# Enable logging support
-PACKAGECONFIG:append = "plugin_logging"
-```
+The logging plugin is enabled by default in the `meta-memfault` layer as of
+`v1.4.0` of Memfault SDK.
 
 Read more on [how to configure which plugins `memfaultd` builds with]
 [docs-linux-control-plugins].
@@ -145,21 +132,39 @@ To reduce the size of the log files, `memfaultd` will only save the keys
 If your fluent-bit sources generate more keys that you need to save, add them to
 this list. They will be visible in the memfault dashboard and searchable.
 
-#### `logs.rotate_size_kib`
+#### `logs.compression_level`
 
-Rotate the log file when they reach this size. Once rotated, the log files will
-be uploaded during the next refresh interval (see [general
-configuration][docs-configuration]).
+Log files are compressed using the Deflate algorithm before writing to disk.
+This setting controls which compression level to apply.
+
+- 0: No compression.
+- 1: Fastest compression
+- 9: Best compression
+
+The default is 1. After in-house testing, Memfault believes this is the best
+compromise of CPU-cost to space saving for most use-cases.
+
+#### `logs.max_lines_per_minute`
+
+This setting controls how many lines per minute can be saved before discarding
+new logs.
+
+When logging resumes, `memfaultd` will print a message indicating how many lines
+were skipped:
+
+```
+Memfaultd rate limited 42 messages."
+```
 
 #### `logs.rotate_after_seconds`
 
 Regardless of size, log files are rotated when they reach a certain age.
 
-#### `logs.tmp_folder`
+#### `logs.rotate_size_kib`
 
-This setting controls where log files are persisted while they are being
-written. If your device is sensitive to flash wear, we recommend using a tmpfs
-partition but some logs will be lost if the device is not shutdown cleanly.
+Rotate the current log file when it reaches this size. After rotation, it will
+remain in the MAR staging area until the next refresh interval (see [general
+configuration][docs-configuration]).
 
 ### Recommended configuration
 
