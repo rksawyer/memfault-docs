@@ -137,3 +137,26 @@ memfault --org-token $ORG_TOKEN --org acme-inc --project smart-sink \
   --revision 89335ffade90ff7697e2ce5238bd4c68978b6d6e \
   build/symbols.elf
 ```
+
+## Frequently Asked Questions
+
+### When using a Build ID, is it okay if there is not always a 1:1 mapping with Software Version?
+
+Yes, in fact this is one of the benefits of using Build IDs. In this scenario
+there will always be a 1:1 mapping between the **binary running** and a **Build
+ID** so Memfault is guaranteed to recover accurate stack traces while at the
+same time giving you flexibility around how you report software versions
+
+Two common situations where there is not a 1:1 mapping are the following:
+
+- "Dev" builds -- Memfault recommends using semver and for pre-release debug
+  builds using a common software version (i.e 1.1.1-dev). This way all the
+  crashes and issues observed during debug get bucketed under a single version
+  that's easy to track in the UI. In this situation you wind up with many
+  separate Build ID mapping to a single SoftwareVersion
+- In some systems, such as
+  [Nordic NRF5 SDK DFU packaging](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fsdk_nrf5_v17.0.2%2Flib_bootloader_dfu_validation.html&cp=9_5_0_3_5_1_1_1&anchor=lib_bootloader_dfu_init_versions),
+  multiple Software Versions can map to the same Symbol File (via Build ID),
+  because the Software Version in the device is not stored within the
+  application binary, so it does not impact the Symbol File (and corresponding
+  Build ID).
