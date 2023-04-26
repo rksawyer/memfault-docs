@@ -1,0 +1,124 @@
+---
+title: March 2023
+---
+
+## New Access Control Permissions: Teams and Roles
+
+Memfault added new concepts for access control: Teams are a flexible way to
+group members of an organization. They can reflect an actual company structure
+with functions such as “quality assurance” or “firmware engineering.”
+Alternatively, with Roles, administrators can design teams solely to manage
+permissions more conveniently when assigning dedicated roles on a per-project
+level.
+
+![access-control-teams.png](/img/blog/2023-03-31-Access-Control-Teams.png)
+
+[Teams and Roles allow for configuration scenarios](/docs/platform/access-control-teams-roles#configuration-examples)
+such as “read-only access for this department” or “OTA must only ever be
+performed by these four people.” They further allow for sophisticated setups
+such as “these five contractors may only ever see this one project and nothing
+else” or “newly invited members of the organization can do anything with our
+playground project but are otherwise limited to read-only access.”
+
+Using this new system is strictly optional as all members of an organization are
+part of the group “everyone” that grants permission to all of Memfault’s
+features by default.
+
+<!-- truncate -->
+
+## General
+
+- Added: Support for devices to update their
+  [`hardware_version`](/docs/platform/software-version-hardware-version/#hardware-version)
+- Added:
+  [Support for ignoring a “Range” of invalid metric values for fleet-wide aggregations](/docs/platform/metrics/#range),
+  [Alerts](/docs/platform/alerts/) and Device Timeline under _Settings → Metrics
+  → Edit Metric → Range_
+- Fixed: Missing `MemfaultSdkMetric_UnexpectedRebootDidOccur` metric in the
+  [Metric Chart](/docs/platform/charts/#metric-charts) dropdown
+- Fixed: Setting `MemfaultSdkMetric_UnexpectedRebootDidOccur` as
+  [Timeseries](/docs/platform/metrics/#timeseries) not possible
+- Fixed: [Issue Charts](/docs/platform/charts/#issue-charts) Filters using the
+  first software version available in the dropdown instead of the selected value
+- Fixed: UI glitches (not possible to dismiss Edit Metric modal, Edit Metric
+  modal sometimes showing up empty, opening docs on loading coredumps into GDB
+  in a new tab)
+- Changed: Number of use invites via
+  [Admin → Invites](https://app.memfault.com/organizations/-/settings/invites)
+  that can be sent at once is limited to 50
+
+## MCU
+
+SDK versions
+[0.41.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0411-and-sdk-0410---mar-1-2023),
+[0.41.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0412-and-sdk-0411---mar-10-2023),
+[0.42.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0420-and-0412---mar-22-2023)
+were released. Some highlights:
+
+- Added: Capturing all of RAM in a coredump as an option to the
+  [examples/nrf-connect/nrf5](https://github.com/memfault/memfault-firmware-sdk/tree/master/examples/nrf-connect-sdk/nrf5)
+- Added: Option to capture full thread stacks for classifying stack overflows
+  and determining stack high watermarks.
+- Improved: Quality of life improvements for
+  [scripts/memfault_gdb.py](https://github.com/memfault/memfault-firmware-sdk/blob/master/scripts/memfault_gdb.py)
+  (Support for exporting data from GCC 12 compiled symbol files and arguments to
+  override device serial ID, software type, software version, and hardware
+  revision)
+- Fixed: Issue in Memfault Logging backend causing coredump saving to fail when
+  building with Zephyr versions before 3.0 (nRF-Connect SDK < 2.0)
+- Fixed: Compilation error in the
+  [ESP32 example app](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/esp32)
+  when targeting ESP-IDF >=4.4,<4.4.3
+- Changed: Integer-type metrics (signed/unsigned) will reset to NULL when not
+  set during a heartbeat interval. See
+  [SDK documentation](/docs/mcu/metrics-api/#setting-metric-values) for further
+  information.
+
+## Android
+
+- Added: Support for updating `hardware_version` with the value in the MAR files
+- SDK version
+  [4.5.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v450---march-27th-2023)
+  of the Android Bort SDK was released. Some highlights:
+  - Added: Metric for [Fleet Sampling](/docs/platform/fleet-sampling/)
+    resolutions
+  - Added: Support for changing the project key at runtime via
+    [intent broadcast](/docs/android/android-bort/#setting-project-key-at-runtime)
+  - Improved: All on-device rate limits can now be bypassed via
+    [Dev Mode](/docs/android/android-getting-started-guide/#development-mode-since-bort-420)
+    (previously only WTF rate limits)
+  - Fixed: Socket error when running in
+    [Client/Server mode](/docs/android/android-multi-device-support#client-server-mode)
+  - Fixed: MemfaultDumpster crash when
+    [Continuous Logging Mode](/docs/android/android-logging/#continuous) enabled
+  - Changed: Limit max storage age of MAR files to 7 days (down from 30)
+
+## Linux
+
+- Added: [Documentation on logging](/docs/linux/logging)
+- Added:
+  [Documentation on pre-linking](/docs/linux/coredumps/#make-sure-prelinking-is-disabled)
+- SDK versions
+  [1.3.0](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#130---2023-03-06)
+  and
+  [1.3.1](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#131---2023-03-22)
+  were released. Some highlights:
+  - Added: Support for MAR files,
+    [also used in Bort SDK](/docs/android/uploading-android-diagnostics/#uploading-a-mar-file).
+  - Added: [Preview version of log collection](/docs/linux/logging/)
+  - Added: Log collection example in
+    [`meta-memfault-example`](https://github.com/memfault/memfault-linux-sdk/tree/kirkstone/meta-memfault-example)
+  - Added: Configuration in
+    [`meta-memfault-example`](https://github.com/memfault/memfault-linux-sdk/tree/kirkstone/meta-memfault-example)
+    to run on Raspberry Pi 2/3/4
+  - Added: Collection of coredumps of `memfaultd`
+  - Fixed: Crash in coredump capturing code in case more than 16 warnings got
+    emitted during the capture process. Thanks to
+    [@attilaszia](https://github.com/attilaszia) for reporting this issue!
+  - Changed: Yocto layer now requires Cargo and Rust 1.65.0 as the SDK is
+    partially written in Rust
+
+## CLI
+
+- We did not publish a new version of the
+  [memfault-cli](https://pypi.org/project/memfault-cli/) in March.
