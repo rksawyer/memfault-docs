@@ -209,3 +209,31 @@ Bort collects metrics describing connectivity changes on the device:
   validated for internet.
 - `connectivity.captive_portal`: tracks whether device is connected to a captive
   portal.
+
+### Fleet Sampling Aspect Metrics
+
+**Collected Since Bort 4.5.0**
+
+:::info
+
+These are only collected for customers using
+[Fleet Sampling](/docs/platform/fleet-sampling).
+
+:::
+
+[HRT](/docs/android/android-custom-metrics#high-resolution-telemetry-hrt)
+metrics show the active Fleet Sampling resolution for each aspect, over time.
+These can be seen on the device timeline for devices with the debugging aspect
+enabled:
+
+- `debugging.resolution`: `OFF` / `NORMAL`.
+- `monitoring.resolution`: `OFF` / `NORMAL`.
+- `debugging.resolution`: `OFF` / `NORMAL`.
+
+These are also reported as heartbeat metrics, which can be used as device
+attributes or timeseries metrics (and seen with hourly resolution on timeline
+for devices with the monitoring aspect enabled):
+
+- `debugging.resolution.latest`: `OFF` / `NORMAL`.
+- `monitoring.resolution.latest`: `OFF` / `NORMAL`.
+- `debugging.resolution.latest`: `OFF` / `NORMAL`.
