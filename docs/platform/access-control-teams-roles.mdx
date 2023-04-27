@@ -7,6 +7,18 @@ sidebar_label: "Access Control: Teams and Roles"
 This document shows how Organization Admins may manage access control in an
 Organization by using Teams and Roles.
 
+## Summary of Roles
+
+| Role Type         | Role           | Access Level                                                                                                          |
+| ----------------- | -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Team              | n/a            | A group of users; grants a specific Project Role in each Project                                                      |
+| Organization Role | 🙆 **Member**  | Basic access to the Organization                                                                                      |
+| Organization Role | 🛠️ **Admin**   | Full access to **everything** (including Project Manager-level access to all Projects)                                |
+| Project Role      | 🚫 **No Role** | Team membership grants **no access** to a Project (users may still have access due to membership of a different Team) |
+| Project Role      | 📖 **Reader**  | Team membership grants **read access** to a Project                                                                   |
+| Project Role      | 📝 **Member**  | Team membership grants **write access** to a Project, but not for OTA                                                 |
+| Project Role      | 🧑‍🔧 **Manager** | Team membership grants **write access** to a Project, including OTA                                                   |
+
 ## Teams
 
 Teams are a flexible way to manage access to Projects for members of an
