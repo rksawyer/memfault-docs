@@ -4,7 +4,7 @@ title: Getting Started
 sidebar_label: Getting Started
 ---
 
-import { EnableServerSideDevelopmentMode } from "@site/src/components/EnableServerSideDevelopmentMode";
+import { EnableServerSideDeveloperMode } from "@site/src/components/EnableServerSideDeveloperMode";
 import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
 
 This tutorial will cover integrating the [Bort SDK](android-bort.mdx) into a
@@ -260,13 +260,13 @@ adb shell am broadcast --receiver-include-background \
   --ez com.memfault.intent.extra.BORT_ENABLED true
 ```
 
-## Development Mode (since Bort 4.2.0)
+## Developer Mode (since Bort 4.2.0)
 
-On local development/test devices, Bort can be placed into development mode.
-This can be useful for validating the Bort integration, or testing new Custom
+On local development/test devices, Bort can be placed into developer mode. This
+can be useful for validating the Bort integration, or testing new Custom
 Metrics.
 
-Once in development mode:
+Once in developer mode:
 
 - Random upload jitter is removed (this is helpful to see diagnostic information
   in the Memfault dashboard immediately).
@@ -281,7 +281,7 @@ Once in development mode:
 - From Bort 4.5.0 onwards: All client-side rate limits are bypassed. Server-side
   rate-limits may still be in effect.
 
-To enable development mode (change `true` to `false` to disable):
+To enable developer mode (change `true` to `false` to disable):
 
 ```bash
 ./bort_cli.py dev-mode --bort-app-id your.app.id --enabled true
@@ -299,7 +299,7 @@ To request a Device Configuration update:
 ./bort_cli.py request-update-config --bort-app-id your.app.id
 ```
 
-<EnableServerSideDevelopmentMode />
+<EnableServerSideDeveloperMode />
 
 ## Upload a bug report
 
