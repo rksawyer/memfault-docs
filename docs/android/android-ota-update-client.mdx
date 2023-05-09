@@ -73,7 +73,8 @@ Using the Bort CLI (since Bort 4.2.0):
 bort_cli.py ota-check --bort-ota-app-id your.bort.ota.app.id
 ```
 
-Using `adb`:
+Using `adb` (by default this requires `adb root` to gain the
+`com.memfault.bort.permission.CONTROL` permission):
 
 ```
 adb shell am broadcast -a com.memfault.intent.action.OTA_CHECK_FOR_UPDATES -n your.bort.ota.app.id/com.memfault.bort.ota.lib.CheckForUpdatesReceiver
