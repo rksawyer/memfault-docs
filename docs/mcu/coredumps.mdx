@@ -462,19 +462,20 @@ Memfault's coredump format is detailed below. The format is not necessary to
 understand, but it's documented here to help debug issues with invalid coredump
 files.
 
-| Section    | Field         | Size (bytes) | Description                                                                                                                     | Example (Little endian) |
-| ---------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Header     | Magic         | 4            | Hard-coded magic bytes in header                                                                                                | `0x45524F43` (CORE)     |
-|            | Version       | 4            | Version of Memfault coredump                                                                                                    | `0x00000002` (2)        |
-|            | Coredump Size | 4            | The size of the coredump including header and footer                                                                            | `0x000008FC` (2300)     |
-| Block 1    | Type          | 1            | Signifies the type of the block                                                                                                 | `0x01` (Memory Region)  |
-|            | Reserved      | 3            | Reserved for future use                                                                                                         | All zeroes              |
-|            | Address       | 4            | - If the block is a memory region, this is the starting address in RAM. <br />- All other block types, this will be all zeroes. | `0x80000000`            |
-|            | Length        | 4            | Length of block                                                                                                                 | 1280                    |
-| Block 2..N | ...           | ...          | ...                                                                                                                             | ...                     |
-| Footer     | Magic         | 4            | Hard-coded magic bytes in footer                                                                                                | `0x504D5544` (DUMP)     |
-|            | Flags         | 4            | Miscellaneous flags of the coredump                                                                                             | All zeroes              |
-|            | Reserved      | 8            | Reserved for future use                                                                                                         | All zeroes              |
+| Section    | Field         | Size (bytes) | Description                                                                                                                     | Example (Little endian)          |
+| ---------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Header     | Magic         | 4            | Hard-coded magic bytes in header                                                                                                | `0x45524F43` (CORE)              |
+|            | Version       | 4            | Version of Memfault coredump                                                                                                    | `0x00000002` (2)                 |
+|            | Coredump Size | 4            | The size of the coredump including header and footer                                                                            | `0x000008FC` (2300)              |
+| Block 1    | Type          | 1            | Signifies the type of the block                                                                                                 | `0x01` (Memory Region)           |
+|            | Reserved      | 3            | Reserved for future use                                                                                                         | All zeroes                       |
+|            | Address       | 4            | - If the block is a memory region, this is the starting address in RAM. <br />- All other block types, this will be all zeroes. | `0x80000000`                     |
+|            | Length        | 4            | Length of block                                                                                                                 | 1280                             |
+|            | Data          | variable     | Block data                                                                                                                      | 1280 bytes of memory region data |
+| Block 2..N | ...           | ...          | ...                                                                                                                             | ...                              |
+| Footer     | Magic         | 4            | Hard-coded magic bytes in footer                                                                                                | `0x504D5544` (DUMP)              |
+|            | Flags         | 4            | Miscellaneous flags of the coredump                                                                                             | All zeroes                       |
+|            | Reserved      | 8            | Reserved for future use                                                                                                         | All zeroes                       |
 
 Blocks can have the following types:
 
