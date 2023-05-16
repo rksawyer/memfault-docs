@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check_memfault_help:
+  auto_checks:
     runs-on: ubuntu-latest
     container:
       image: python:3.10
@@ -23,24 +23,43 @@ jobs:
 
       - name: Verify Memfault CLI Help
         run: |
-          echo '```text
-          $ memfault --help' > help.txt
+          printf '```text
+          $ memfault --help
+          %s
+          ```
+          ' "$(CI=1 memfault --help)" > help.txt
 
-          CI=1 memfault --help >> help.txt
+          diff -u src/pages/_partials/_memfault-cli-help.mdx help.txt
 
-          echo '
-          ```' >> help.txt
+      - name: Verify Zephyr instructions use latest Memfault SDK release
+        run: |
+          # get latest SDK tag from github
+          SDK_TAG=$(curl -s https://api.github.com/repos/memfault/memfault-firmware-sdk/releases/latest | grep tag_name | cut -d '"' -f 4)
+          printf '```yaml
+          manifest:
+            remotes:
+              # Add the Memfault GitHub repo
+              - name: memfault
+                url-base: https://github.com/memfault
 
-          diff -duw help.txt src/pages/_partials/_memfault-cli-help.mdx
+            projects:
+              # The Memfault SDK
+              - name: memfault-firmware-sdk
+                path: modules/lib/memfault-firmware-sdk
+                revision: %s
+                remote: memfault
+          ```
+          ' ${SDK_TAG} > zephyr.west
+
+          diff -u src/pages/_partials/_zephyr-manifest.mdx zephyr.west
 
   run-if-failed:
     runs-on: ubuntu-latest
-    needs: [check_memfault_help]
-    if: |
-      always() && (
-      needs.check_memfault_help.result == 'failure'
-      )
+    needs: [auto_checks]
 
+    # run if any job failed, only on the scheduled runs
+    if: |
+      always() && contains(needs.*.result, 'failure') && github.event_name == 'schedule'
     steps:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
@@ -51,4 +70,4 @@ jobs:
           SLACK_ICON_EMOJI: ":boom:"
           MSG_MINIMAL: "actions url"
           SLACK_MESSAGE:
-            "Memfault CLI help is out of date for memfault/memfault-docs!"
+            "Auto checks failed for memfault/memfault-docs!"

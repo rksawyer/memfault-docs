@@ -1,0 +1,14 @@
+```yaml
+manifest:
+  remotes:
+    # Add the Memfault GitHub repo
+    - name: memfault
+      url-base: https://github.com/memfault
+
+  projects:
+    # The Memfault SDK
+    - name: memfault-firmware-sdk
+      path: modules/lib/memfault-firmware-sdk
+      revision: 0.43.2
+      remote: memfault
+```

@@ -7,6 +7,7 @@ description: Integrate Memfault on Zephyr RTOS.
 
 import ProjectAwareCreateAProject from "@site/src/components/ProjectAwareCreateAProject";
 import { EnableServerSideDeveloperMode } from "@site/src/components/EnableServerSideDeveloperMode";
+import ZephyrManifest from "@site/src/pages/_partials/_zephyr-manifest.mdx";
 
 This tutorial will go over integrating the
 [Memfault Firmware SDK](https://github.com/memfault/memfault-firmware-sdk) into
@@ -46,20 +47,7 @@ know the status!
 Adding the Memfault SDK to your project is normally as simple as adding this
 snippet to your `west.yml`:
 
-```yaml
-manifest:
-  remotes:
-    # Add the Memfault GitHub repo
-    - name: memfault
-      url-base: https://github.com/memfault
-
-  projects:
-    # The Memfault SDK
-    - name: memfault-firmware-sdk
-      path: modules/lib/memfault-firmware-sdk
-      revision: 0.31.5
-      remote: memfault
-```
+<ZephyrManifest />
 
 Depending on your project setup, the `west.yml` file may be in the application
 repository (most common), or in a separate manifest repository. Read more about
