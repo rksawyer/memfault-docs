@@ -19,18 +19,7 @@ module.exports = {
                 "platform/user-management",
                 "platform/access-control-teams-roles",
                 "platform/organization-auth-tokens",
-                {
-                    type: "category",
-                    link: {
-                        type: "generated-index",
-                        slug: "plaform/issues-traces",
-                    },
-                    label: "Issues & Traces",
-                    items: [
-                        "platform/issue-management",
-                        "platform/trace-details",
-                    ],
-                },
+                "platform/issue-management",
                 "platform/ota",
                 "platform/metrics",
                 "platform/charts",
