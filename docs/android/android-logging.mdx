@@ -76,3 +76,9 @@ there is not an event of interest, such as a crash. In addition to continuous
 retrieval of logs, when combined with
 [Fleet Sampling](/docs/platform/fleet-sampling#log-collection), it's possible to
 fetch past logs that haven't been sent to Memfault from devices.
+
+When logs are captured, the timezone of the logs are set to UTC rather than
+device timezone. You will notice this when downloading the raw logs from a
+device's logfiles tab. If you view the logs via the Memfault Log Viewer, they
+will be displayed in the timezone currently selected in the Timezone Selector
+(default: browser timezone).
