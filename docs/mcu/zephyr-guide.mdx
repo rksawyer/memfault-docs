@@ -57,13 +57,11 @@ supported development repositories here:
 
 ## Enabling Memfault
 
-To enable Memfault, there are a few required Kconfig options that should be set:
+To enable Memfault, set the required Kconfig options:
 
 ```bash
 # Memfault configuration
 CONFIG_MEMFAULT=y
-CONFIG_MEMFAULT_HTTP_ENABLE=n
-CONFIG_MEMFAULT_ROOT_CERT_STORAGE_CUSTOM=y
 ```
 
 And the minimal dependency function, which should be added to your project
