@@ -195,8 +195,8 @@ index a49446d..83a81a8 100644
 ### Create a Coredump Flash Partition
 
 You will need to allocate an internal flash partition to store panic data. Edit
-your `partition.csv` file to add a _coredump_ partion. If you do not have a
-`partions.csv` file you can create one from the template below and place it in
+your `partitions.csv` file to add a _coredump_ partion. If you do not have a
+`partitions.csv` file you can create one from the template below and place it in
 your top-level project directory where the `sdkconfig` file is located.
 Depending on your chip's Flash size you may need to modify the _storage_
 partition size in order to fit the _coredump_ partition. Check the Flash chip
