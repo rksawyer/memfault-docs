@@ -73,6 +73,7 @@ module.exports = {
                     label: "Getting Started Guides",
                     items: [
                         "mcu/arm-cortex-m-guide",
+                        "mcu/arm-cortex-r-guide",
                         "mcu/nrf-connect-sdk-guide",
                         "mcu/pinnacle-100-guide",
                         "mcu/esp32-guide",

@@ -1,0 +1,96 @@
+---
+id: arm-cortex-r-guide
+title: ARM Cortex-R Integration Guide
+sidebar_label: ARM Cortex-R
+description: "Integrate Memfault for a Cortex-R device."
+---
+
+# Getting started
+
+Integrating on an ARM Cortex-R device follows the same workflow as on a Cortex-M
+device. Complete the steps in the guide linked below, then return here to
+implement any Cortex-R specific integration steps.
+
+[ARM Cortex-M integration guide](/docs/mcu/arm-cortex-m-guide)
+
+# ARM Cortex-R specific steps
+
+The ARMv7-R architecture has a different exception/interrupt handler dispatching
+mechanism as compared to Cortex-M devices (exerpt below is from the
+[ARM Architecture Reference Manual ARMv7-A and ARMv7-R edition](https://developer.arm.com/documentation/ddi0406/latest/)):
+
+![ARMv7-A/R exceptions](/img/docs/mcu/armv7ar-exceptions.png)
+
+To integrate the Memfault fault handlers into the exception handlers, install
+the following functions into the program’s vector table:
+
+- `UndefinedInstruction_Handler`
+- `DataAbort_Handler`
+- `PrefetchAbort_Handler`
+
+These functions are defined in the Memfault Firmware SDK
+[here](https://github.com/memfault/memfault-firmware-sdk/blob/0.43.2/components/panics/src/memfault_fault_handling_armv7_a_r.c#L28-L38).
+
+An example vector table is show below:
+
+<!-- Using linker-script code fence id, prismjs's support for nasm is weak -->
+
+```linker-script
+/*-------------------------------------------------------------------------------*/
+@ import reference for interrupt routines
+
+    .extern _c_int00
+    .extern phantomInterrupt
+    .weak resetEntry
+
+    @ Memfault Fault Handlers used in the interrupt vector table below
+    .extern UndefinedInstruction_Handler
+    .extern DataAbort_Handler
+    .extern PrefetchAbort_Handler
+
+/*-------------------------------------------------------------------------------*/
+@ interrupt vectors
+
+resetEntry:
+        ldr pc, =_c_int00
+        ldr pc, =UndefinedInstruction_Handler  /* Memfault handler */
+svcEntry:
+        b   svcEntry
+        ldr pc, =PrefetchAbort_Handler  /* Memfault handler */
+        ldr pc, =DataAbort_Handler  /* Memfault handler */
+        b   phantomInterrupt
+        ldr pc,[pc,#-0x1b0]
+        ldr pc,[pc,#-0x1b0]
+```
+
+You should be able to see the correct addresses when dumping the `.intvecs`
+section (or whatever it’s called in your program).
+
+```bash
+❯ arm-none-eabi-objdump --disassemble -j .intvecs ./build/memfault.elf
+
+./build/memfault.elf:     file format elf32-littlearm
+
+
+Disassembly of section .intvecs:
+
+00000000 <resetEntry>:
+   0:   18 f0 9f e5 18 f0 9f e5                             ........
+
+00000008 <svcEntry>:
+   8:   eafffffe        b       8 <svcEntry>
+   c:   e59ff014        ldr     pc, [pc, #20]   ; 28 <svcEntry+0x20>
+  10:   e59ff014        ldr     pc, [pc, #20]   ; 2c <svcEntry+0x24>
+  14:   ea00246f        b       91d8 <phantomInterrupt>
+  18:   e51ff1b0        ldr     pc, [pc, #-432] ; fffffe70 <_estack+0xf7fbfe70>
+  1c:   e51ff1b0        ldr     pc, [pc, #-432] ; fffffe74 <_estack+0xf7fbfe74>
+  20:   0000b598        .word   0x0000b598
+  24:   00012cf4        .word   0x00012cf4
+  28:   00012d70        .word   0x00012d70
+  2c:   00012d3c        .word   0x00012d3c
+
+❯ arm-none-eabi-addr2line --exe ./build/memfault.elf 0x00012cf4 0x00012d70 0x00012d3c
+./third-party/memfault-firmware-sdk/components/panics/src/memfault_fault_handling_armv7_a_r.c:315
+./third-party/memfault-firmware-sdk/components/panics/src/memfault_fault_handling_armv7_a_r.c:339
+./third-party/memfault-firmware-sdk/components/panics/src/memfault_fault_handling_armv7_a_r.c:332
+```
