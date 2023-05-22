@@ -16,14 +16,24 @@ module.exports = {
                 "platform/projects-and-fleets",
                 "platform/inspecting-a-device",
                 "platform/software-version-hardware-version",
-                "platform/user-management",
-                "platform/access-control-teams-roles",
+                {
+                    label: "Users & Teams",
+                    type: "category",
+                    link: {
+                        type: "generated-index",
+                        slug: "platform/users-teams",
+                    },
+                    items: [
+                        "platform/user-management",
+                        "platform/access-control-teams-roles",
+                    ],
+                },
                 "platform/organization-auth-tokens",
                 {
                     type: "category",
                     link: {
                         type: "generated-index",
-                        slug: "plaform/issues-traces",
+                        slug: "platform/issues-traces",
                     },
                     label: "Issues & Traces",
                     items: [
