@@ -179,6 +179,10 @@ will need to update `sdkconfig` (either via `idf.py menuconfig` or manually) to
 `CONFIG_ESP32_ENABLE_COREDUMP_TO_FLASH=y`. The change you will see in the
 `sdkconfig` file will look something like:
 
+Note: The remainder of the `COREDUMP` settings, including
+`CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF`, do not affect the Memfault coredump. They
+are specific to the ESP-IDF coredump features.
+
 ```diff
 diff --git a/sdkconfig b/sdkconfig
 index a49446d..83a81a8 100644
@@ -203,6 +207,20 @@ partition size in order to fit the _coredump_ partition. Check the Flash chip
 size in `menuconfig`, see `(Top) -> Serial flasher config` and check the "Flash
 Size" entry. Be sure to specify a custom partition file in the sdkconfig (see
 note below).
+
+Depending on what data is included in the coredump, the size of the coredump
+partition might also need to be increased to a larger size, like 512K. The
+[`memfault_coredump_storage_compute_size_required()`](https://github.com/memfault/memfault-firmware-sdk/blob/4d94d856c6108aba36b45864592f7abec39aaf87/components/include/memfault/panics/coredump.h#L70)
+function in the Memfault SDK can be used to compute the maximum coredump size,
+which can vary depending on user configuration.
+
+Note that the default Memfault coredump regions are defined by the
+`memfault_platform_coredump_get_regions()` function in the Memfault SDK's
+ESP-IDF port:
+[`ports/esp_idf/memfault/common/memfault_platform_coredump.c`](https://github.com/memfault/memfault-firmware-sdk/blob/dbdeb48eb09f35523707fdeaa3f106f0dbb1a611/ports/esp_idf/memfault/common/memfault_platform_coredump.c#L179),
+but can be adjusted to suit the user's needs, either via Kconfig options or by
+implementing a separate `memfault_platform_coredump_get_regions()` to override
+the built-in weakly defined one.
 
 ```bash
 # Name,   Type, SubType, Offset,  Size,  Flags
@@ -263,6 +281,20 @@ void memfault_platform_get_device_info(sMemfaultDeviceInfo *info) {
   };
 }
 ```
+
+For ESP32 devices, the base MAC address is an option for generating device
+serial numbers for test purposes. It is accessible from the `esp_read_mac()`
+function included from `esp_mac.h`. Do not use the other MAC address loading
+functions until `esp_read_mac` has been called at least once, as they only
+return the in memory copy of the MAC address while `esp_read_mac` properly
+fetches it from flash if it has not been loaded yet.
+
+See an example in the Memfault SDK
+[esp32 example](https://github.com/memfault/memfault-firmware-sdk/blob/d85d4b2694c4174f3338708c1b693fc70a7b6d95/examples/esp32/apps/memfault_demo_app/main/memfault/memfault_platform_device_info.c#L37).
+
+Note: there is a non-zero chance of overlapping addresses from Espressif, so it
+is not recommended for large production fleets of devices. As many as 20
+duplicates in a set of 4000 chips have been reported in ESP-IDF user forums.
 
 #### Initializing Memfault
 
