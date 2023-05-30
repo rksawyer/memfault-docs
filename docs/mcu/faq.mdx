@@ -146,3 +146,19 @@ produce the backtrace. They are not yet passed into the "Globals & Statics”
 view.
 
 :::
+
+## Recommended Compiler and Linker Flags
+
+For a general list of recommended and not-recommended compiler flags, see this
+article:
+
+<https://interrupt.memfault.com/blog/best-and-worst-gcc-clang-compiler-flags>
+
+Flags that specifically impact Memfault compatibility are listed in the sections
+below.
+
+### Link Time Optimization (LTO) `-flto`
+
+We strongly recommend _against_ using Link Time Optimization (LTO) in the
+programs you want to be able to debug using coredumps. When LTO is enabled, the
+analysis of the coredumps can become lacking or even fail completely.
