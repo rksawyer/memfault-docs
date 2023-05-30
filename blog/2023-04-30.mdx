@@ -1,0 +1,135 @@
+---
+title: April 2023
+---
+
+## Server-Side Support for Developer Mode
+
+Developer Mode now allows you to temporarily remove any server-side rate
+limiting on devices from within the device view. This new functionality gives
+you full control over your integration/testing process with no imposed
+requirement to pause or prematurely switch between devices because a rate limit
+has been hit.
+
+This will make it easier to integrate, configure and test new Memfault features
+and accelerate the testing, debugging and feature development processes of your
+own products using Memfault.
+
+![server-side-developer-mode.png](/img/blog/2023-04-30-Server-Side-Developer-Mode.png)
+
+Developer Mode is activated on a per-device basis and will remove all rate
+limiting for uploads from the device to Memfault of coredumps, bug reports,
+heartbeats and other data. This
+[Server-Side Developer Mode](/docs/platform/rate-limiting/#server-side-developer-mode)
+functionality is an extension of the existing device-side Developer Mode
+([Android](/docs/android/android-getting-started-guide/#developer-mode-since-bort-420),
+[Linux](/docs/linux/reference-memfaultctl-cli/#developer-mode)) and they can be
+used in tandem or independently.
+
+## Memfault Support for Cortex-R
+
+Memfault has expanded its coverage of Arm-based devices adding support for
+coredumps on Arm Cortex-R. This allows customers to realize the full value of
+the Memfault monitoring, debugging and update capabilities on more of their
+Arm-based devices.
+
+![arm-cortex-r-support.png](/img/blog/2023-04-30-Arm-Cortex-R-Support.png)
+
+For customers already familiar with integrating the Memfault Firmware SDK on
+Cortex-M devices, the process for Cortex-R-based devices is very similar, with
+the only minor difference in the integration of the exception/interrupt handlers
+on Cortex-R. For more information on how to complete the integration, please
+review our [Arm Cortex-R integration guide](/docs/mcu/arm-cortex-r-guide).
+
+<!-- truncate -->
+
+## General
+
+- Added:
+  [Server-Side support for Developer Mode](/docs/platform/rate-limiting/#server-side-developer-mode)
+  to bypass rate limits during integration
+- Improved: First/Last seen values in
+  [Device Search](https://app.memfault.com/organizations/-/projects/-/devices)
+  page links to Device Timeline
+- Improved: Performance of
+  [Issue Search](https://app.memfault.com/organizations/-/projects/-/issues)
+  page and Issue Distribution Charts under Issue Details
+- Fixed: Problems accessing project’s resources when a user is assigned multiple
+  roles via
+  [Memfault’s Access Control](/docs/platform/access-control-teams-roles/)
+- Fixed: Users of projects created by Memfault support staff can’t access
+  project resources
+- Fixed: Missing “Download” option for some Qualcomm traces
+
+## MCU
+
+- Added:
+  [Support for casting to pointer types](/docs/platform/trace-details#type-casting)
+  under Trace Details → Globals/Statics
+- SDK versions
+  [0.42.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0421-and-0420---april-4-2023),
+  [0.43.0](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0430-and-0421---april-18-2023)
+  and
+  [0.43.1](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0431-and-0430---april-26-2023)
+  were released. Some highlights:
+  - Added:
+    [Coredump support for Cortex-R chips (ARMv7-R)](/docs/mcu/arm-cortex-r-guide)
+  - Added:
+    [A QEMU-based FreeRTOS example project](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/freertos)
+  - Added: (Zephyr port) Support for showing high watermark information in the
+    Memfault coredump analysis view without capturing the full stack for a
+    thread
+  - Changed: The `z_NmiHandlerSet` function is renamed for the upcoming Zephyr
+    3.4. Thanks [@mbolivar-nordic](https://github.com/mbolivar-nordic) for the
+    patch!
+
+## Android
+
+- Fixed:
+  [HRT storage metrics](/docs/android/android-custom-metrics/#high-resolution-telemetry-hrt)
+  not displayed correctly on Device Timeline
+- SDK versions
+  [4.5.1](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v451---april-5th-2023)
+  and
+  [4.6.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v460---april-26th-2023)
+  were released. Some highlights:
+  - Added: Support for remote configuration of storage limits for
+    UsageReporter/Bort cache folders.
+  - Added:
+    [Support for resetting a project key that’s changed at runtime](/docs/android/android-bort/#setting-project-key-at-runtime).
+  - Improved: Sending Config State again when it’s not synced with backend.
+  - Fixed: A potential issue when SDK settings change, they are not applied
+    immediately, and fleet sampling configuration may not be updated.
+  - Changed: Removed (previously deprecated) individual file upload support:
+    [MAR](https://mflt.io/android-mar) is now the only supported upload
+    mechanism.
+  - Changed: When using
+    [Client-Server mode](/docs/android/android-multi-device-support/#client-server-mode),
+    limit the age and retry count of files waiting to be transferred to the
+    Server device in UsageReporter.
+
+## Linux
+
+- SDK versions
+  [1.3.2](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#132---2023-04-06)
+  and
+  [1.4.0](https://github.com/memfault/memfault-linux-sdk/blob/kirkstone/CHANGELOG.md#140---2023-04-25)
+  were released. Some highlights:
+  - Added: `logs.compression_level` option to set the logs compression level
+  - Improved: [Log collection](/docs/linux/logging) is now production ready
+  - Improved: Taking system limits into consideration (amount of disk space and
+    inodes remaining on disk) when writing logs, storing coredumps and when
+    cleaning the MAR staging area
+  - Fixed: Bug causing coredump-handler to not capture coredumps in
+    [Developer Mode](/docs/linux/reference-memfaultctl-cli/#developer-mode)
+  - Fixed: Build error when logging is disabled
+  - Fixed: `memfaultd` and `memfaultctl` not reporting their version number
+  - Changed: On device rate limit for logging (defaults to 500 lines per
+    minute - see
+    [max_lines_per_minute](/docs/linux/reference-memfaultd-configuration#logs))
+  - Changed: Dependencies to swupdate, collectd and fluent-bit are added by the
+    `memfaultd` recipe and only when the corresponding plugins are enabled
+
+## CLI
+
+- We did not publish a new version of the
+  [memfault-cli](https://pypi.org/project/memfault-cli/) in April.
