@@ -38,9 +38,15 @@ happens every 12 hours. When an update is found, a notification is displayed.
 
 This regular, periodic check will only happen when:
 
-- Storage is not low.
-- Battery is not low.
-- An unmetered network connection (e.g. wifi) is available.
+- Storage is not low (using
+  [this WorkManager API](<https://developer.android.com/reference/androidx/work/Constraints.Builder#setRequiresStorageNotLow(kotlin.Boolean)>)).
+- Battery is not low (using
+  [this WorkManager API](<https://developer.android.com/reference/androidx/work/Constraints.Builder#setRequiresBatteryNotLow(kotlin.Boolean)>)).
+- An
+  [unmetered network connection](https://developer.android.com/reference/androidx/work/NetworkType#UNMETERED)
+  (e.g. wifi) is available. This can be configured to enable metered connections
+  in the dashboard: **Settings** / **Data Sources** / **Allow OTA downloads on
+  Metered Networks**
 
 :::
 
