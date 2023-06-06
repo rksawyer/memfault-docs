@@ -8,7 +8,6 @@
         "swizzle": "docusaurus swizzle",
         "deploy": "docusaurus deploy",
         "serve": "docusaurus serve",
-        "optimize-images": "node ./optimize-images.js",
         "lint:prettier:base": "prettier '**/*.{js,jsx,ts,tsx,md,mdx}' --ignore-path=.gitignore",
         "lint:prettier:fix": "yarn lint:prettier:base --write",
         "lint:prettier": "yarn lint:prettier:base --check"
@@ -17,10 +16,8 @@
         "@docusaurus/core": "^2.3.1",
         "@docusaurus/plugin-ideal-image": "^2.3.1",
         "@docusaurus/preset-classic": "^2.3.1",
-        "@endiliey/react-ideal-image": "^0.0.11",
         "classnames": "^2.2.6",
         "core-js": "^3.4.1",
-        "hast-util-is-element": "1.1.0",
         "mobx": "^4.2.0",
         "prismjs": "^1.28.0",
         "query-string": "^7.0.0",
@@ -44,8 +41,6 @@
         ]
     },
     "devDependencies": {
-        "filesize": "^8.0.6",
-        "glob": "^7.2.0",
         "netlify-cli": "^2.30.0",
         "prettier": "^2.5.1",
         "react-datocms": "^3.0.15",
