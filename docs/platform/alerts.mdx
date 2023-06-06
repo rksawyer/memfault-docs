@@ -26,16 +26,21 @@ of values for a Metric.
 Let's create an alert when the `battery_perc` (battery percentage) is below 5%,
 for devices with serial numbers starting with `MFLT`.
 
-- Click **Alerts** in the sidebar.
-- Click **New Alert** in the top right.
-- Provide a **Title** and optional **Description** (but highly advised)!
-- Choose **Notification targets** to which Alert events will be sent
-- Next, the **Condition** value is the Metric string key within a heartbeat.
-- We set the condition value to **is less than** **5**.
-- We also wanted to make sure that the **Device Serial** values start with
-  `MFLT`.
-- To do this we click **Add**, and specify these values. To add multiple
-  filters, click **add "and" condition** and repeat the process.
+- Click **Alerts** in the sidebar, and **Create Alert** in the top right.
+- Provide a **Title** and optional **Description** (highly advised)!
+- Set a **Condition** value from a list of heartbeat metrics, or type the string
+  key to find it.
+  - We set the condition value to **is less than** **5**.
+  - We also wanted to make sure that the **Device Serial** values start with
+    `MFLT`.
+  - To do this we click **(+) and condition**, and specify these values.
+- Next choose which targets should receive these Alerts. Click the Settings
+  (cog) icon to manage your targets.
+- Finally, specify when to receive these alerts.
+  - The timezone is prefilled according to your browser or custom timezone, but
+    you can modify it as you need.
+  - You can have a minimum of 1 and maximum of 4 summary schedules configured
+    per alert.
 
 ![Creating an Alert in the Memfault app](/img/docs/platform/alerts-create.png)
 
@@ -54,11 +59,6 @@ clicking on the Alert entry in the Alerts table.
     alt="/img/docs/platform/alerts-incidents.png"
   />
 </p>
-
-On top of the entries in this view, Memfault will send an email every **5
-minutes** summarizing the number of devices that meet this threshold. Given this
-fact, it is best to set up the Alerts so that they are hit rarely to prevent
-abuse of the email inbox.
 
 ## Notification Frequency
 
