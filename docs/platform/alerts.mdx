@@ -18,6 +18,9 @@ hour.
 Only [Metrics marked as Timeseries](/docs/platform/metrics#timeseries) can be
 used as a condition for Fleet-threshold Alerts.
 
+Fleet threshold alerts are evaluated every hour. You will receive a notification
+if the aggregate meets the condition for data points in the preceding hour.
+
 ## Device-threshold Alerts
 
 Device-threshold Alerts trigger when any Device reports a certain value or range
@@ -46,7 +49,7 @@ for devices with serial numbers starting with `MFLT`.
 
 - Above, we have created our Alert! Click **OK**
 
-## Results
+### Results
 
 Once the Alert is set up, Memfault will watch for Events matching the criteria
 specified. If it finds any, it will create Incidents, which can be found by
@@ -60,13 +63,14 @@ clicking on the Alert entry in the Alerts table.
   />
 </p>
 
-## Notification Frequency
+### Notification Frequency
 
-Expect alerts will be delivered in the UI almost immediately under Incidents.
+Expect alerts to be delivered in the UI almost immediately under Incidents.
 Navigate to
 [**Alerts**](https://app.memfault.com/organizations/-/projects/-/alerts) and
-select the Alert you want. Incidents are listed per device. An email will also
-get sent once every 12 hours.
+select the Alert you want. Incidents are listed per device. A notification will
+also get sent out at the times configured under the schedule summary, to the
+specified targets.
 
 At most 1 incident is generated in a 24 hour period per device. This is to
 minimize the number of incidents created and avoid alert fatigue. Devices can
