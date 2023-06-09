@@ -160,5 +160,8 @@ below.
 ### Link Time Optimization (LTO) `-flto`
 
 We strongly recommend _against_ using Link Time Optimization (LTO) in the
-programs you want to be able to debug using coredumps. When LTO is enabled, the
-analysis of the coredumps can become lacking or even fail completely.
+programs you want to be able to debug. See this
+[Interrupt post](https://interrupt.memfault.com/blog/best-and-worst-gcc-clang-compiler-flags#-flto)
+for more info.
+
+<https://interrupt.memfault.com/blog/best-and-worst-gcc-clang-compiler-flags#-flto>
