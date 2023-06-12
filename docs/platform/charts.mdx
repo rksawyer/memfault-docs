@@ -85,6 +85,21 @@ For example, if data is received on January 1st, the metric charts will show
 this data on January 2nd. Only values that pass the
 ["Ingress Filtering" are included](/docs/platform/metrics#ingress-filtering).
 
+In addition to creating metric charts based on time, it's also possible to base
+them on aggregations by Software Version or Cohort. This flexibility allows for
+comparison of metrics between specific population groups, making it an important
+tool for targeted analysis. Note that this type of chart only supports the
+Min/Mean/Max aggregation method. With this type of chart you can look at a
+particular metric for a certain population across all time. This holistic view
+can provide crucial insights into long-term trends and patterns.
+
+<ImageFigure
+  src="/img/docs/platform/sv-metric-charts.png"
+  alt="Creating a metrics chart by population"
+  title="Creating a metrics chart by population"
+  style={{ maxWidth: "900px" }}
+/>
+
 For more information about adding metrics to your devices:
 
 - Bare Metal/RTOS: see the [Metrics Guide](https://mflt.io/embedded-metrics)
