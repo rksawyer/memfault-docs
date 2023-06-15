@@ -4,7 +4,7 @@ title: Metric Alerts
 sidebar_label: Metric Alerts
 ---
 
-The Alerts feature will send a team an alert when heartbeat events satisfy a
+The Alerts feature will send a notification when heartbeat events satisfy a
 given threshold for a specific set of filters. To find the feature, click the
 **Alerts** item in the sidebar.
 
@@ -16,7 +16,7 @@ Cohort surpasses a mean count of 5 connection failures in a time window of one
 hour.
 
 Only [Metrics marked as Timeseries](/docs/platform/metrics#timeseries) can be
-used as a condition for Fleet-threshold Alerts.
+used in the condition for Fleet-threshold Alerts.
 
 Fleet threshold alerts are evaluated every hour. You will receive a notification
 if the aggregate meets the condition for data points in the preceding hour.
@@ -26,51 +26,17 @@ if the aggregate meets the condition for data points in the preceding hour.
 Device-threshold Alerts trigger when any Device reports a certain value or range
 of values for a Metric.
 
-Let's create an alert when the `battery_perc` (battery percentage) is below 5%,
-for devices with serial numbers starting with `MFLT`.
+Any [type of Metrics](/docs/platform/metrics#timeseries) can be used in the
+condition for Device-threshold Alerts.
 
-- Click **Alerts** in the sidebar, and **Create Alert** in the top right.
-- Provide a **Title** and optional **Description** (highly advised)!
-- Set a **Condition** value from a list of heartbeat metrics, or type the string
-  key to find it.
-  - We set the condition value to **is less than** **5**.
-  - We also wanted to make sure that the **Device Serial** values start with
-    `MFLT`.
-  - To do this we click **(+) and condition**, and specify these values.
-- Next choose which targets should receive these Alerts. Click the Settings
-  (cog) icon to manage your targets.
-- Finally, specify when to receive these alerts.
-  - The timezone is prefilled according to your browser or custom timezone, but
-    you can modify it as you need.
-  - You can have a minimum of 1 and maximum of 4 summary schedules configured
-    per alert.
+Whenever the Memfault cloud receives a
+[heartbeat event with metrics](/docs/platform/metrics) from a device, it will
+evaluate the applicable Device-threshold Alerts and create Incidents, if
+triggered. Depending on the configuration of the Alert, notifications can be
+sent immediately as an Incident starts, or as a scheduled summary of new
+Incidents.
 
-![Creating an Alert in the Memfault app](/img/docs/platform/alerts-create.png)
-
-- Above, we have created our Alert! Click **OK**
-
-### Results
-
-Once the Alert is set up, Memfault will watch for Events matching the criteria
-specified. If it finds any, it will create Incidents, which can be found by
-clicking on the Alert entry in the Alerts table.
-
-<p align="center">
-  <img
-    width="600"
-    src="/img/docs/platform/alerts-incidents.png"
-    alt="/img/docs/platform/alerts-incidents.png"
-  />
-</p>
-
-### Notification Frequency
-
-Expect alerts to be delivered in the UI almost immediately under Incidents.
-Navigate to
-[**Alerts**](https://app.memfault.com/organizations/-/projects/-/alerts) and
-select the Alert you want. Incidents are listed per device. A notification will
-also get sent out at the times configured under the schedule summary, to the
-specified targets.
+### Incidents
 
 At most 1 incident is generated in a 24 hour period per device. This is to
 minimize the number of incidents created and avoid alert fatigue. Devices can
@@ -86,3 +52,51 @@ hour period, the captured date timestamp will be updated when the new alert is
 emitted.
 
 :::
+
+### Creating a Device-threshold Alert
+
+Let's create an alert when the `battery_perc` (battery percentage) is below 5%,
+for devices with serial numbers starting with `MFLT`.
+
+- Click **Alerts** in the sidebar, and **Create Alert** in the top right.
+- Provide a **Title** and optional **Description** (highly advised)!
+- Set a **Condition** value from a list of heartbeat metrics, or type the string
+  key to find it.
+  - We set the condition value to **is less than** **5**.
+  - We also wanted to make sure that the **Device Serial** values start with
+    `MFLT`.
+  - To do this we click **(+) and condition**, and specify these values.
+- Next choose which targets should receive these Alerts. Optionally, click
+  "Manage targets" to navigate to the settings page to manage your targets.
+- Finally, specify when to receive notifications for these alerts.
+  - To be notified immediately when the alert is triggered and an incident is
+    started, select "when a new incident starts".
+  - To receive a summary of new incidents, select "a scheduled summary of
+    incidents..." and set up your preferred schedule.
+    - The timezone is prefilled according to your browser or custom timezone,
+      but you can modify it as you need.
+    - You can have a minimum of 1 and maximum of 4 summary schedules configured
+      per alert.
+
+![Creating an Alert in the Memfault app](/img/docs/platform/alerts-create.png)
+
+- Above, we have created our Alert! Click **OK**
+
+### Incident Details UI
+
+Once the Alert is set up, Memfault will watch for Events matching the criteria
+specified. If it finds any, it will create Incidents, which can be found by
+clicking on the Alert entry in the Alerts table.
+
+Expect alerts to be delivered in the UI almost immediately under Incidents.
+Navigate to
+[**Alerts**](https://app.memfault.com/organizations/-/projects/-/alerts) and
+select the Alert you want. Incidents are listed per device.
+
+<p align="center">
+  <img
+    width="600"
+    src="/img/docs/platform/alerts-incidents.png"
+    alt="/img/docs/platform/alerts-incidents.png"
+  />
+</p>
