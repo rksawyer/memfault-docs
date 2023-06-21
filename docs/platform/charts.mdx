@@ -85,26 +85,33 @@ For example, if data is received on January 1st, the metric charts will show
 this data on January 2nd. Only values that pass the
 ["Ingress Filtering" are included](/docs/platform/metrics#ingress-filtering).
 
-In addition to creating metric charts based on time, it's also possible to base
-them on aggregations by Software Version or Cohort. This flexibility allows for
-comparison of metrics between specific population groups, making it an important
-tool for targeted analysis. Note that this type of chart only supports the
-Min/Mean/Max aggregation method. With this type of chart you can look at a
-particular metric for a certain population across all time. This holistic view
-can provide crucial insights into long-term trends and patterns.
-
-<ImageFigure
-  src="/img/docs/platform/sv-metric-charts.png"
-  alt="Creating a metrics chart by population"
-  title="Creating a metrics chart by population"
-  style={{ maxWidth: "900px" }}
-/>
-
 For more information about adding metrics to your devices:
 
 - Bare Metal/RTOS: see the [Metrics Guide](https://mflt.io/embedded-metrics)
 - Android: update to the 3.0+ version of the
   [Bort SDK](https://mflt.io/android-bort-sdk)
+
+### Metric Charts by Cohort or Software Version
+
+The metric charts in our system offer more than just time-based analysis; they
+can also be created based on aggregations by Software Version or Cohort. This
+added flexibility enables the comparison of metrics among specific population
+groups, making it a powerful tool for targeted analysis. By utilizing this
+chart, you gain the ability to examine a specific metric for a particular
+population across all time, providing a comprehensive view that uncovers
+valuable insights into long-term trends and patterns.
+
+Please note that this particular type of chart supports only the Min/Mean/Max
+aggregation method.
+
+To create a Metric Chart by Population, select **Rollup -> By Cohort or Software
+Version** while creating the chart.
+
+<ImageFigure
+  src="/img/docs/platform/sv-metric-charts.png"
+  alt="Creating a Metric Chart by Population"
+  title="Creating a Metric Chart by Population"
+/>
 
 ### Issue Charts
 
@@ -131,6 +138,15 @@ evolution over time of a group of Issues of particular interest to your team.
     Metrics
   </ProjectMagicLink> page, where the new chart will be displayed.
 </p>
+
+### Issue Charts by Cohort or Software Version
+
+Similarly to
+[Metric Charts by Population](#metric-charts-by-software-version-or-cohort),
+Issue Charts can be created using the "By Cohort or Software Version" rollup.
+
+To create an Issue Chart by population, select **Rollup -> By Cohort or Software
+Version** in the creation dialog.
 
 ### Filtering Charts
 
@@ -211,6 +227,17 @@ $$
 ### Examples of Chart Normalization
 
 #### Comparing Values Between Cohorts
+
+:::info
+
+If you're interested in seeing an _all-time_ comparison between multiple Cohorts
+or multiple Software Versions, use
+[Metric Charts by Software Version or Cohort](#metric-charts-by-software-version-or-cohort)
+or
+[Issue Charts by Software Version or Cohort](#issue-charts-by-software-version-or-cohort)
+instead.
+
+:::
 
 ![Using normalized charts when comparing cohorts](/img/docs/platform/charts-normalized-cohort-comparison.png)
 
