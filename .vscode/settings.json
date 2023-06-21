@@ -1,0 +1,7 @@
+{
+    "editor.formatOnSave": true,
+    "files.associations": {
+        // enable "> Markdown: Open Preview to the side" on .mdx files
+        "*.mdx": "markdown"
+    }
+}
