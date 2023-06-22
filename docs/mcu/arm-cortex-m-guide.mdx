@@ -77,6 +77,29 @@ or TI ARM Compiler.
 
 <RegisterAssert />
 
+### Check Exception Handler Implementations
+
+Memfault provides exception handler implementations that need to be invoked via
+the system's vector table. The SDK by default provides implementations for these
+handlers using the CMSIS standard names:
+
+- HardFault_Handler
+- MemoryManagement_Handler
+- BusFault_Handler
+- UsageFault_Handler
+- NMI_Handler
+- MemfaultWatchdog_Handler
+
+Typically the default implementations will be weakly defined, so the Memfault
+implementations will automatically be used. It may be necessary to mark the
+default implementation with the appropriate `weak` annotation, or delete the
+default implementations altogether so the Memfault implementations can be used.
+
+If the entries in the vector table for those handlers are named differently,
+either change the names to match the CMSIS standard ones, or set the necessary
+[config options](https://github.com/memfault/memfault-firmware-sdk/blob/920a1ee607963206901615ac2f395e3124e7c3a6/components/include/memfault/default_config.h#L366-L388)
+in `memfault_platform_config.h` to override the names.
+
 ### Implement Coredump Storage Dependency
 
 <CoredumpDependency />
