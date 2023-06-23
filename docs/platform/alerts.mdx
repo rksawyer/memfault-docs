@@ -36,7 +36,7 @@ triggered. Depending on the configuration of the Alert, notifications can be
 sent immediately as an Incident starts, or as a scheduled summary of new
 Incidents.
 
-### Incidents Creation and Resolution
+### Incident creation and resolution
 
 The creation and resolution of an incident is controlled by the creation
 (incident start) and resolution (incident end) delays in the alert
@@ -79,7 +79,7 @@ hour period. Please set this to a reasonable value for your specific alerts.
 
 :::
 
-### Start and end delays illustrated
+### Incident start and end delays illustrated {#incident-start-end-illustrated}
 
 #### Basic example
 
@@ -111,7 +111,7 @@ delay of 30 minutes**. The metric threshold is set to `battery_discharge > 50`.
   If you enable "notify: when an incident is resolved", the configured targets
   will be notified when this value is received by Memfault.
 
-#### When no data is received
+#### When no data is received {#incident-delay-no-data-received}
 
 In this next example, we illustrate what happens when no data is received by
 Memfault.
@@ -142,8 +142,9 @@ incident start and end delays are calculated based on the capture timestamp and
 not the received timestamp, except in the following cases:
 
 - If no data is received after a value that crosses the threshold (like in the
-  second example above), the start delay is evaluated based on the last received
-  timestamp, and an incident is automatically created once it has passed.
+  [example](#incident-delay-no-data-received) above), the start delay is
+  evaluated based on the last received timestamp, and an incident is
+  automatically created once it has passed.
 
 - If devices send timestamps in the future, they are treated as if they were
   captured at the time of receipt.
@@ -173,8 +174,8 @@ for devices with serial numbers starting with `MFLT`.
   - To do this we click **(+) and condition**, and specify these values.
 - Next choose which targets should receive these Alerts. Optionally, click
   "Manage targets" to navigate to the settings page to manage your targets.
-- Next, optionally set up incident start and end delays. Look at the incident
-  section above for more details.
+- Next, optionally set up incident start and end delays. Look at the
+  [section above](#incident-start-end-illustrated) above for more details.
 - Finally, specify when to receive notifications for these alerts.
   - To be notified as soon as an incident is created, select "when a new
     incident starts". Please note that the incident creation depends on the
@@ -191,7 +192,7 @@ for devices with serial numbers starting with `MFLT`.
 
 ![Creating an Alert in the Memfault app](/img/docs/platform/alerts-create.png)
 
-- Above, we have created our Alert! Click **OK**
+- Above, we have set up our Alert! Click **OK** to create it.
 
 ### Incident Details UI
 
@@ -208,6 +209,6 @@ select the Alert you want. Incidents are listed per device.
   <img
     width="600"
     src="/img/docs/platform/alerts-incidents.png"
-    alt="Screenshot of the Memfault web app showing the details of a specific incident and the metric payload that lasttriggered it"
+    alt="Screenshot of the Memfault web app showing the details of a specific incident and the metric payload that last triggered it"
   />
 </p>
