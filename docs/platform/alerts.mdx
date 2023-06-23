@@ -36,22 +36,127 @@ triggered. Depending on the configuration of the Alert, notifications can be
 sent immediately as an Incident starts, or as a scheduled summary of new
 Incidents.
 
-### Incidents
+### Incidents Creation and Resolution
 
-At most 1 incident is generated in a 24 hour period per device. This is to
-minimize the number of incidents created and avoid alert fatigue. Devices can
-hit a metric threshold multiple times in 24 hours without creating duplicate
-incidents.
+The creation and resolution of an incident is controlled by the creation
+(incident start) and resolution (incident end) delays in the alert
+configuration. You can use these values to reduce incident noise.
+
+- The **incident start delay** is the time that must pass before an incident is
+  declared after the metric condition is met.
+
+  For example, if a value sometimes briefly goes above the threshold but goes
+  back to normal within an hour, you can set the alerting delay to 1 hour 30
+  minutes to avoid creating an incident for a brief spike.
+
+  An incident will only be created if either another matching value comes in
+  _after_ the start delay has passed, or if no data is received for at least the
+  start delay period.
+
+  When an incident is created, it will appear as **ALERTING** in the incident
+  list.
+
+- The **incident end delay** is the time that must pass before an incident is
+  resolved after the metric condition is no longer met.
+
+  For example, if you see that your alert frequently gets resolved and then
+  starts firing again shortly after, you can set an end delay to keep the
+  incident in the "ALERTING" state unless a new value comes in _after_ the end
+  delay has passed.
+
+  Unlike in the case of the start delay, if a device reports no new data, the
+  incident will stay in the ALERTING state until a new value comes in.
+
+  Once the incident is resolved, it will appear as **RESOLVED** in the incident
+  list.
 
 :::info
 
-When only 1 device hits a metric threshold within the last 24 hours and reports
-an alert incident, the captured date timestamp is updated once within 24 hours.
-When multiple devices begin hitting the threshold for a given metric within a 24
-hour period, the captured date timestamp will be updated when the new alert is
-emitted.
+For alerts that were created before the availability of the delay feature, you
+should see "No delay" for the start delay, and an end delay of 1 day. This is to
+match previous behaviour where all alerts had a maximum of 1 incident per 24
+hour period. Please set this to a reasonable value for your specific alerts.
 
 :::
+
+### Start and end delays illustrated
+
+#### Basic example
+
+Here's an example of an alert with a **start delay of 15 minutes** and an **end
+delay of 30 minutes**. The metric threshold is set to `battery_discharge > 50`.
+
+![Graph of a metric with the incident start and end illustrated](/img/docs/platform/alerts-incident-start-end-delay.svg)
+
+- At **(a) 0:30 h**, a value above the threshold is captured, but the incident
+  is not created yet. A new value below the threshold is captured at **0:45 h**,
+  so this momentary spike is ignored.
+
+- At **(b) 2:15 h**, another value above the threshold is captured. Another
+  above-threshold value comes in at **2:30 h**, which is when the incident is
+  created. This is because the start delay of 15 minutes has passed.
+
+  If you enable "notify: when an incident starts", the configured targets will
+  be notified when this value is received by Memfault.
+
+- At **(c) 3:00 h**, a value below the threshold is captured. The incident is
+  not resolved yet, because the end delay of 30 minutes has not passed, and a
+  new value above the threshold is captured shortly after, keeping the incident
+  in the **ALERTING** state.
+
+- At **(d) 3:30 h**, another value below the threshold is captured. The incident
+  is resolved when an additional below-threshold value is captured at **4:00
+  h**, because the end delay of 30 minutes has passed.
+
+  If you enable "notify: when an incident is resolved", the configured targets
+  will be notified when this value is received by Memfault.
+
+#### When no data is received
+
+In this next example, we illustrate what happens when no data is received by
+Memfault.
+
+![Graph of a incomplete data capture with the incident start and end illustrated](/img/docs/platform/alerts-incident-delay-no-data.svg)
+
+- This is similar to the previous example at first, but after the event at **(b)
+  2:15 h** is captured, the device stops sending data for a while (for example,
+  because it was shut down for a while).
+
+- In this case, an incident is automatically created after the start delay has
+  passed since the _receipt_ of the last value, i.e. 15 minutes for this alert
+  (the difference between capture and receive time is explained below).
+
+- Note that the incident is _not_ automatically resolved after the end delay of
+  30 minutes has passed. This is because no new data has been received
+  confirming that the device was behaving as expected.
+
+- When the device is seen again at **(c) 4:15 h** with a value below the
+  threshold, the incident is resolved as it has been more than 30 minutes since
+  the **(b) 2:15 h** value.
+
+### Capture vs. Receive Time
+
+Your devices may report data in realtime or near-realtime, in batches, or with
+significant latency. To handle a diverse set of device heartbeat intervals,
+incident start and end delays are calculated based on the capture timestamp and
+not the received timestamp, except in the following cases:
+
+- If no data is received after a value that crosses the threshold (like in the
+  second example above), the start delay is evaluated based on the last received
+  timestamp, and an incident is automatically created once it has passed.
+
+- If devices send timestamps in the future, they are treated as if they were
+  captured at the time of receipt.
+
+- If no capture timestamp is set, the received timestamp is used instead.
+
+- Additionally, if data is received out of order, any values that are received
+  with a capture timestamp before the last received timestamp are ignored.
+
+In any case, setting a start or end delay shorter than the heartbeat or batch
+interval of the device would behave similarly to setting no delay at all. A good
+rule of thumb to prevent noise is to use a delay, at minimum, slightly longer
+than the heartbeat interval.
 
 ### Creating a Device-threshold Alert
 
@@ -68,11 +173,17 @@ for devices with serial numbers starting with `MFLT`.
   - To do this we click **(+) and condition**, and specify these values.
 - Next choose which targets should receive these Alerts. Optionally, click
   "Manage targets" to navigate to the settings page to manage your targets.
+- Next, optionally set up incident start and end delays. Look at the incident
+  section above for more details.
 - Finally, specify when to receive notifications for these alerts.
-  - To be notified immediately when the alert is triggered and an incident is
-    started, select "when a new incident starts".
-  - To receive a summary of new incidents, select "a scheduled summary of
-    incidents..." and set up your preferred schedule.
+  - To be notified as soon as an incident is created, select "when a new
+    incident starts". Please note that the incident creation depends on the
+    alerting delay.
+  - To be notified immediately when the alert is resolved, select "when an
+    incident is resolved". Please note that the incident resolution depends on
+    the resolution delay.
+  - To receive a summary of new & active incidents, select "a scheduled summary
+    of incidents..." and set up your preferred schedule.
     - The timezone is prefilled according to your browser or custom timezone,
       but you can modify it as you need.
     - You can have a minimum of 1 and maximum of 4 summary schedules configured
@@ -97,6 +208,6 @@ select the Alert you want. Incidents are listed per device.
   <img
     width="600"
     src="/img/docs/platform/alerts-incidents.png"
-    alt="/img/docs/platform/alerts-incidents.png"
+    alt="Screenshot of the Memfault web app showing the details of a specific incident and the metric payload that lasttriggered it"
   />
 </p>
