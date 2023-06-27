@@ -159,6 +159,21 @@ interval of the device would behave similarly to setting no delay at all. A good
 rule of thumb to prevent noise is to use a delay, at minimum, slightly longer
 than the heartbeat interval.
 
+:::info
+
+By default, events captured by the MCU SDK are timestamped when they're uploaded
+to Memfault (on Linux and AOSP, events are always timestamped on-device using
+the device's RTC clock). This works well for frequently-connected devices, but
+for devices that batch-upload many heartbeats at once, this would result in all
+of the events in a batch being timestamped with the same timestamp. You can set
+an [**event timestamp**](../mcu/event-timestamps.mdx) using the MCU SDK.
+
+The default MCU heartbeat interval is 3600 seconds (1 hour). Look at the
+[**MCU metrics docs**](../mcu/metrics-api.mdx#initial-setup-and-debug-apis) for
+more context.
+
+:::
+
 ### Creating a Device-threshold Alert
 
 Let's create an alert when the `battery_perc` (battery percentage) is below 5%,
