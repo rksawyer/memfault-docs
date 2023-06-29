@@ -58,6 +58,10 @@ HTTP API is the only integration work which needs to be done to get the data.
     [pipelined](https://en.wikipedia.org/wiki/HTTP_pipelining). That is, the
     HTTP response for a POST must be received before the next HTTP request can
     be sent.
+  - In case the Memfault server responds with HTTP status code `503` (Service
+    Unavailable ) or `429` (Too Many Requests), the client must back off and
+    retry the request after the delay specified in the `Retry-After` response
+    header.
 - To minimize overhead and optimize throughput, batch-upload chunks to the
   [chunks HTTP API](https://api-docs.memfault.com/) using `multipart/mixed`
   requests and re-use HTTP connections to Memfault's servers.
