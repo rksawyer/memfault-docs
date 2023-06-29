@@ -74,10 +74,10 @@ module.exports = {
                     items: [
                         "mcu/arm-cortex-m-guide",
                         "mcu/arm-cortex-r-guide",
-                        "mcu/nrf-connect-sdk-guide",
+                        "mcu/nordic-nrf-connect-sdk-guide",
                         "mcu/pinnacle-100-guide",
-                        "mcu/esp32-guide",
-                        "mcu/esp8266-rtos-sdk-guide",
+                        "mcu/espressif-esp32-guide",
+                        "mcu/espressif-esp8266-rtos-sdk-guide",
                         "mcu/da1469x-sdk-guide",
                         "mcu/arm-nxp-mcuxpresso-guide",
                         "mcu/zephyr-guide",

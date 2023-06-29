@@ -17,6 +17,10 @@
 /docs/platform/device-attributes /docs/platform/metrics#device-attributes
 /docs/mcu/self-serve/* /docs/mcu/embedded-self-serve/:splat
 /docs/mcu/uploading-software-versions /docs/mcu/symbol-file-build-ids
+/docs/mcu/esp32-guide /docs/mcu/espressif-esp32-guide
+/docs/mcu/esp8266-rtos-sdk-guide /docs/mcu/espressif-esp8266-rtos-sdk-guide
+/docs/mcu/nrf-connect-sdk-guide /docs/mcu/nordic-nrf-connect-sdk-guide
+
 # Specific rules should go first before splat rules
 /docs/best-practices/metrics-for-fleet-reliability /docs/best-practices/fleet-reliability-metrics-crash-free-hours
 /docs/best_practices/* /docs/best-practices/:splat
