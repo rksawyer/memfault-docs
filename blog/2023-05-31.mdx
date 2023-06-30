@@ -1,0 +1,112 @@
+---
+title: May 2023
+---
+
+## Simplified Debugging with Device Timezone in Memfault
+
+The Timezone selector allow users to adjust the timezone within which all
+information viewed in Memfault is contextualized for that session. Currently,
+the timezone selections available include “Browser” (browser default),
+“Universal” (UTC), “Device” (configurable) and “Custom” (region selection).
+
+Timezone selection within Memfault is designed to make it easier for
+international teams working with globally deployed devices to contextualize,
+coordinate and collaborate. Whether you want to standardize working within the
+“Universal” timezone across your team, or you want to use the “Custom” or
+“Device” options to adjust your session to the specific local timezone of a
+device you are debugging, having this type of control over context can be
+powerful.
+
+![timezone.gif](/img/blog/2023-05-31-Timezone.gif)
+
+To provide a specific example, let’s say you receive a report of a customer
+having an issue with a device via your support team. The end user has reported a
+problem at 11am this morning. Rather than the developer needing to do the
+calculation manually they can just adjust to the correct “Custom” timezone
+assuming they know where that device was located. This process is even quicker
+if “Device” timezone is configured and takes a single click with no additional
+information required.
+
+This month we made some improvements to the function of the “Device” timezone
+selection for Android devices. This selection is now available by default for
+Android devices using the
+[`persist.sys.timezone`](/docs/android/android-builtin-metrics/#system-properties)
+system property.
+
+You can read more about timezones here and about the Android specific “Device”
+timezone metric collection
+[here](/docs/android/android-builtin-metrics/#system-properties).
+
+<!-- truncate -->
+
+## General
+
+- Added: Support for testing
+  [External Notification Targets](https://app.memfault.com/organizations/-/projects/-/settings/notifications/externals?new)
+- Added:
+  [Documentation around type casting variables in Globals/Statics view](/docs/platform/trace-details/#type-casting)
+- Improved: Various UI glitches and improvements (Trace log message is added to
+  Recent Traces list, text wrapping issue under
+  [Quotas page](https://app.memfault.com/organizations/-/projects/-/settings/quotas),
+  expanding the Device Timeline tooltip to show metrics name fully, problem
+  showing content of
+  [Admin → Users](https://app.memfault.com/organizations/-/settings/users) and
+  [Admin → Teams](https://app.memfault.com/organizations/-/settings/teams)
+  pages)
+- Fixed: Device Config revision is not updated when device is moved from one
+  cohort to another
+- Fixed: Organization Role is not filtered correctly under
+  [Admin → Users](https://app.memfault.com/organizations/-/settings/users)
+
+## MCU
+
+- SDK versions
+  [0.43.2](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0432-and-0431---may-3-2023)
+  and
+  [0.43.3](https://github.com/memfault/memfault-firmware-sdk/blob/master/CHANGES.md#changes-between-memfault-sdk-0433-and-0432---may-22-2023)
+  were released. Some highlights:
+  - Added: Support for upcoming v5.1 release of the ESP-IDF SDK
+  - Added: Support in the
+    [ESP32 example app](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/esp32)
+    for the ESP32-C6 chip
+  - Added: More granular Kconfig settings to control what's collected in
+    [`memfault_zephyr_coredump_get_regions()`](https://github.com/memfault/memfault-firmware-sdk/blob/master/ports/zephyr/common/memfault_platform_coredump_regions.c)
+  - Fixed: Metrics accumulated with `memfault_metrics_heartbeat_add()` would no
+    longer be included in the serialized heartbeat data.
+  - Fixed: Build error when building the
+    [nRF9160 example](https://github.com/memfault/memfault-firmware-sdk/blob/master/examples/nrf-connect-sdk/nrf9160)
+    on nRF-Connect SDK v2.3.0.
+
+## Android
+
+- Added:
+  [New software version variants to be used for Device Search, Issue Search and filtering Metrics view.](/docs/platform/software-version-hardware-version/#android-2)
+- Improved: Browsing the web-app using the timezone of the Device, based on
+  [`persist.sys.timezone`](/docs/android/android-builtin-metrics/#system-properties)
+- Fixed: Gaps in HRT metrics on Device Timeline
+- SDK version
+  [4.7.0](https://github.com/memfault/bort/blob/master/CHANGELOG.md#v470) was
+  released. Some highlights:
+  - Improved: Missing deprecation annotations are added to the
+    [CustomEvent API.](/docs/android/custom-events/)
+  - Changed: UsageReporter’s Receiver classes are disabled when
+    [Bort SDK is disabled](/docs/android/android-bort/#enabling-the-sdk-at-runtime)
+
+## Linux
+
+- Changed: [Fleet Sampling](/docs/platform/fleet-sampling/) is enabled by
+  default for new Linux projects
+- We did not publish a new version of the
+  [Memfault Linux SDK](https://github.com/memfault/memfault-linux-sdk) in May.
+
+## CLI
+
+- CLI versions [0.16.0](https://pypi.org/project/memfault-cli/0.16.0/) and
+  [0.17.0](https://pypi.org/project/memfault-cli/0.17.0/) were released. Some
+  highlights:
+  - Added: Support for uploading Android debug symbols from alternative build
+    systems.
+  - Added:
+    [New `console` command](/docs/ci/install-memfault-cli/#installing-the-memfault-cli-tool)
+    to read SDK exported chunks via a serial port and automatically upload to
+    Memfault.
