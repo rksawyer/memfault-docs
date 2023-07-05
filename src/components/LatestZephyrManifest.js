@@ -9,14 +9,14 @@ export function ZephyrManifest() {
         const fetchLatestTag = async () => {
             try {
                 const response = await fetch(
-                    "https://api.github.com/repos/memfault/memfault-firmware-sdk/releases/latest"
+                    "https://api.github.com/repos/memfault/memfault-firmware-sdk/releases/latest",
                 );
                 const data = await response.json();
                 const tag = data.tag_name;
                 setLatestTag(tag);
             } catch (error) {
                 setLatestTag(
-                    `${FALLBACK_LATEST_TAG} # Or look up the latest tag`
+                    `${FALLBACK_LATEST_TAG} # Or look up the latest tag`,
                 );
             }
         };

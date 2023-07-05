@@ -4,7 +4,7 @@ import React, { useContext, useMemo } from "react";
 
 function replaceSafe(
     source /** unknown */,
-    replacements /** [search, target][] */
+    replacements /** [search, target][] */,
 ) {
     if (typeof source !== "string") return source;
     return replace(source, replacements);

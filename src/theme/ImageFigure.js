@@ -16,7 +16,7 @@ export default function ImageFigure(props) {
         pixelRatio = 1,
     } = props;
     const [bgColor, setBgColor] = useState(
-        typeof data === "string" ? "transparent" : "#B8D8DA"
+        typeof data === "string" ? "transparent" : "#B8D8DA",
     );
     const image = useMemo(() => {
         /*
@@ -42,7 +42,7 @@ export default function ImageFigure(props) {
         */
         const { src, srcSet, images } = data.src;
         const { width, height, path } = images.sort(
-            (a, b) => a.width - b.width
+            (a, b) => a.width - b.width,
         )[images.length - 1];
         return (
             <a href={path} target="_blank" className={css.link}>
@@ -76,10 +76,10 @@ export default function ImageFigure(props) {
                         srcSet,
                         sizes: `(max-width: ${Math.min(
                             960,
-                            width
+                            width,
                         )}px) 100vw, ${Math.min(
                             960,
-                            width
+                            width,
                         )}px` /* SEE max-size of 960 in `docusaurus.config.js`! */,
                         src,
                         aspectRatio: width / height,

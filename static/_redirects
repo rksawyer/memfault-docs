@@ -20,6 +20,9 @@
 /docs/mcu/esp32-guide /docs/mcu/espressif-esp32-guide
 /docs/mcu/esp8266-rtos-sdk-guide /docs/mcu/espressif-esp8266-rtos-sdk-guide
 /docs/mcu/nrf-connect-sdk-guide /docs/mcu/nordic-nrf-connect-sdk-guide
+/embed/mcu/esp32-guide /embed/mcu/espressif-esp32-guide
+/embed/mcu/esp8266-rtos-sdk-guide /embed/mcu/espressif-esp8266-rtos-sdk-guide
+/embed/mcu/nrf-connect-sdk-guide /embed/mcu/nordic-nrf-connect-sdk-guide
 
 # Specific rules should go first before splat rules
 /docs/best-practices/metrics-for-fleet-reliability /docs/best-practices/fleet-reliability-metrics-crash-free-hours

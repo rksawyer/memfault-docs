@@ -50,7 +50,7 @@ function Home() {
                 <header
                     className={classNames(
                         styles["hero-content"],
-                        styles["hero-text"]
+                        styles["hero-text"],
                     )}
                 >
                     <a href="https://memfault.com" title="memfault.com">
