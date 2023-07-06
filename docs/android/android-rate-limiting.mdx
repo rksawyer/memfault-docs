@@ -1,0 +1,50 @@
+---
+id: android-rate-limiting
+title: Client-Side Rate Limiting
+sidebar_label: Rate Limiting
+---
+
+In addition to rate limits on the [server-side](/docs/platform/rate-limiting),
+the Bort SDK also employs client-side rate limiting.
+
+Client-side rate limits in addition to server-side rate limits helps limit a
+device's overall network usage and bandwidth consumption, by not sending data in
+the first place. They also further reduce the traffic to Memfault from any
+single malfunctioning device, and which helps provide fairer pricing.
+
+In general, when any particular error event is detected, Bort will check whether
+that _type_ of error event has been rate limited, before recording the event to
+be uploaded. For some types of error events, Bort will additionally consider an
+error event's _signature_, so events with the same signature don't contribute to
+the rate limit.
+
+For example, we can use the stacktrace from Java Exceptions as the _signature_
+to uniquely identify exceptions from one another. Java Exceptions are rate
+limited at a rate of 100 unique Exceptions every 15 minutes. If we receive 5
+Java Exceptions with the same stacktrace, and thus the same signature, in the
+same 15 minute period, those 5 Java Exceptions will only count as 1 towards the
+100 allowed.
+
+This granularity helps mitigates situations where a single crash in a crashloop
+prevents all other exceptions from being seen.
+
+Note that events with the same signature are rate limited by a secondary rate
+limit, which has been excluded for simplicity.
+
+| Event Type                      | Default Rate Limit                               |
+| :------------------------------ | :----------------------------------------------- |
+| Bug Report (on device requests) | 3 bug report requests every 30 minutes           |
+| Bug Report (periodic)           | 3 periodic bug reports every collection interval |
+| DropBoxManager ANRs             | 10 unique ANRs every 15 minutes                  |
+| DropBoxManager Java Exceptions  | 100 unique Exceptions every 15 minutes           |
+| DropBoxManager WTFs             | 10 unique WTFs every day                         |
+| DropBoxManager Kmsgs            | 10 unique Kmsgs every 15 minutes                 |
+| DropBoxManager Custom Events    | 2 Custom Events every hour                       |
+| DropBoxManager Tombstones       | 10 unique Tombstones every 15 minutes            |
+| Kernel Oops                     | 3 Kernel Oops every 6 hours                      |
+| Reboot Events                   | 5 Reboot Events every 15 minutes                 |
+
+:::note
+
+To bypass client-side rate limits for development, Bort can be placed in
+[Developer Mode](/docs/android/android-getting-started-guide/#developer-mode-since-bort-420).

@@ -155,6 +155,7 @@ module.exports = {
                 "android/android-ota-update-client",
                 "android/android-data-scrubbing",
                 "android/android-multi-device-support",
+                "android/android-rate-limiting",
             ],
         },
         {
