@@ -89,10 +89,11 @@ The `memfaultd` daemon generates two configuration files, by default in
 `/tmp/collectd-header-include.conf` and `/tmp/collectd-footer-include.conf`,
 with information about the device provided by
 [`memfault-device-info`][docs-memfault-device-info] (see the [getting-started
-guide][docs-linux-getting-started] for more information). Note that the path
-where this configuration file is generated [can be configured in
+guide][docs-linux-integration] for more information). Note that the paths where
+these configuration files are generated [can be configured in
 `/etc/memfaultd.conf`][docs-configuration] using the
-`collectd_plugin.output_file` configuration key.
+`collectd_plugin.header_include_output_file` and
+`collectd_plugin.footer_include_output_file` configuration keys.
 
 A minimal configuration file to configure collectd to post to Memfault looks
 like this:
@@ -172,9 +173,10 @@ makes use of standard plugins that enjoy special support on the Memfault
 platform. Copying this configuration over to your project will guarantee a good
 first experience.
 
-Note that as long as the generated configuration file `/tmp/collectd.conf` is
-included at the very bottom of your collectd configuration, you're free to add
-your own directives before it, and in addition to the recommended settings.
+Note that as long as the generated configuration files
+`/tmp/collectd-header-include.conf` and `/tmp/collectd-footer-include.conf` are
+included, you're free to add your own directives between them in addition to the
+recommended settings.
 
 ### Configuring additional chains
 
